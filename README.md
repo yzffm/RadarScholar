@@ -161,7 +161,7 @@ Copy `backend/.env.example` to `backend/.env` and fill in values:
 | Milestone | Description | Status |
 |-----------|-------------|--------|
 | M0 | Product Contract & Repository Foundation | ✅ |
-| M1 | Design System & App Shell | 🔄 |
+| M1 | Design System & App Shell | ✅ |
 | M2 | Authentication & Profile | ⬜ |
 | M3 | Scholarship Data Foundation | ⬜ |
 | M4 | Scholarship Discovery | ⬜ |

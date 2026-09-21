@@ -23,3 +23,20 @@ DeviceType getDeviceType(double width) {
   if (width < Breakpoints.tablet) return DeviceType.tablet;
   return DeviceType.desktop;
 }
+
+/// Helper class for responsive checks across widgets.
+class Responsive {
+  Responsive._();
+
+  static DeviceType getDeviceType(double width) {
+    if (width < Breakpoints.mobile) return DeviceType.mobile;
+    if (width < Breakpoints.tablet) return DeviceType.tablet;
+    return DeviceType.desktop;
+  }
+
+  static bool isMobile(double width) => width < Breakpoints.mobile;
+  static bool isTablet(double width) =>
+      width >= Breakpoints.mobile && width < Breakpoints.tablet;
+  static bool isDesktop(double width) => width >= Breakpoints.tablet;
+}
+

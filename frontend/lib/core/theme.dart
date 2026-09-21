@@ -12,15 +12,43 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // ─── Brand Colors ──────────────────────────────────────────────────
-  /// Primary brand color — a scholarly deep blue conveying trust.
-  static const Color brandPrimary = Color(0xFF1A56DB);
+  // ─── Brand Colors (aligned with official logo) ─────────────────────
+  /// Primary brand color — scholarly deep blue from official logo.
+  static const Color brandPrimary = Color(0xFF0D3B98);
 
-  /// Secondary accent — warm amber for highlights and CTAs.
+  /// Vibrant sky blue — from the graduation cap in the logo.
+  static const Color brandSkyBlue = Color(0xFF29A9FF);
+
+  /// Secondary accent — warm amber/gold from the logo tassel button.
   static const Color brandSecondary = Color(0xFFF59E0B);
 
-  /// Tertiary — teal for success/match states.
+  /// Tertiary — teal for verified/matched states.
   static const Color brandTertiary = Color(0xFF0D9488);
+
+  /// Neutral dark background.
+  static const Color darkBackground = Color(0xFF0B1329);
+
+  /// Hero background gradient matching official logo depth.
+  static const LinearGradient heroGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF0A266E),
+      Color(0xFF0D3B98),
+      Color(0xFF1A56DB),
+    ],
+  );
+
+  /// Accent sky blue gradient for highlights and badge accents.
+  static const LinearGradient accentGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF0284C7),
+      Color(0xFF29A9FF),
+      Color(0xFF38BDF8),
+    ],
+  );
 
   // ─── Light Theme ───────────────────────────────────────────────────
   static final ThemeData lightTheme = ThemeData(

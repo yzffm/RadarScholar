@@ -32,10 +32,11 @@ class Settings(BaseSettings):
     # --- Database (future milestones) ---
     DATABASE_URL: str = ""
 
-    # --- Supabase (future milestones) ---
+    # --- Supabase ---
     SUPABASE_URL: str = ""
     SUPABASE_ANON_KEY: str = ""
     SUPABASE_SERVICE_ROLE_KEY: str = ""
+    SUPABASE_JWT_SECRET: str = ""
 
     # --- AI Providers (future milestones) ---
     GEMINI_API_KEY: str = ""

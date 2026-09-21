@@ -1,11 +1,15 @@
 import 'package:dio/dio.dart';
 
 import '../core/app_config.dart';
+import 'auth_interceptor.dart';
 
 /// Central API service using Dio for HTTP communication with FastAPI backend.
 ///
 /// Part of the Service layer in the MVC architecture.
 /// All API calls to the backend should go through this service.
+///
+/// The [AuthInterceptor] automatically attaches the Supabase JWT
+/// to every request for authenticated API calls (CPMK 1).
 class ApiService {
   ApiService({Dio? dio})
       : _dio = dio ??
@@ -19,7 +23,12 @@ class ApiService {
                   'Accept': 'application/json',
                 },
               ),
-            );
+            ) {
+    // Add auth interceptor for JWT token attachment
+    if (dio == null) {
+      _dio.interceptors.add(AuthInterceptor());
+    }
+  }
 
   final Dio _dio;
 

@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
 from app.core.config import settings
+from app.users.router import router as users_router
 
 
 def create_app() -> FastAPI:
@@ -33,6 +34,7 @@ def create_app() -> FastAPI:
 
     # Register routers
     application.include_router(health_router, tags=["Health"])
+    application.include_router(users_router)
 
     return application
 
