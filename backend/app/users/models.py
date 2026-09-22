@@ -18,6 +18,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    JSON,
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
@@ -71,17 +72,17 @@ class UserProfile(Base):
     # === Experience (Technical Docs §4 — Experience) ===
     # Stored as PostgreSQL arrays for MVP simplicity.
     # Can be normalized to separate tables if needed later.
-    organizations = Column(ARRAY(Text), nullable=True, default=list)
-    achievements = Column(ARRAY(Text), nullable=True, default=list)
-    competitions = Column(ARRAY(Text), nullable=True, default=list)
-    volunteering = Column(ARRAY(Text), nullable=True, default=list)
-    internships = Column(ARRAY(Text), nullable=True, default=list)
-    certifications = Column(ARRAY(Text), nullable=True, default=list)
-    skills = Column(ARRAY(Text), nullable=True, default=list)
+    organizations = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
+    achievements = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
+    competitions = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
+    volunteering = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
+    internships = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
+    certifications = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
+    skills = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
 
     # === Interests (Technical Docs §4 — Interests) ===
-    career_interests = Column(ARRAY(Text), nullable=True, default=list)
-    fields_of_interest = Column(ARRAY(Text), nullable=True, default=list)
+    career_interests = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
+    fields_of_interest = Column(JSON().with_variant(ARRAY(Text), 'postgresql'), nullable=True, default=list)
     goals = Column(Text, nullable=True)
 
     # === Timestamps ===

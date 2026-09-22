@@ -29,8 +29,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8080",
     ]
 
-    # --- Database (future milestones) ---
-    DATABASE_URL: str = ""
+    # --- Database ---
+    DATABASE_URL: str = "sqlite:///./radarscholar.db"
 
     # --- Supabase ---
     SUPABASE_URL: str = ""

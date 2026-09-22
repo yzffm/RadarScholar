@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,17 +14,36 @@ import '../views/applications/applications_page.dart';
 import '../views/assistant/assistant_page.dart';
 import '../views/profile/profile_page.dart';
 
+/// A Listenable that notifies when the auth state changes.
+/// This is used to trigger GoRouter redirects without rebuilding the whole router.
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    _ref.listen<AppAuthState>(
+      authControllerProvider,
+      (_, __) => notifyListeners(),
+    );
+  }
+}
+
+final routerNotifierProvider = Provider<RouterNotifier>((ref) {
+  return RouterNotifier(ref);
+});
+
 /// RadarScholar Application Router using GoRouter.
 ///
 /// Implements ShellRoute for persistent adaptive navigation across
 /// destinations while keeping Landing and Login as standalone full-page routes.
 /// Auth state changes trigger routing re-evaluation.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authControllerProvider);
+  final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: notifier,
     redirect: (context, state) {
+      final authState = ref.read(authControllerProvider);
       final isAuth = authState is AuthAuthenticated;
       
       // Determine if we are on a public auth route

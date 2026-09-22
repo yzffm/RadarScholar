@@ -601,11 +601,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Pendaftaran akun mahasiswa akan aktif pada M2.'),
-                          ),
-                        );
+                        context.go('/register');
                       },
                       child: const Text(
                         'Daftar Sekarang',
