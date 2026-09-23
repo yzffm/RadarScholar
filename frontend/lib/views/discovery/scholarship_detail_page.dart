@@ -10,6 +10,7 @@ import '../../repositories/scholarship_repository.dart';
 import '../../controllers/matching_controller.dart';
 import '../../controllers/application_controller.dart';
 import '../../widgets/empty_state.dart';
+import 'widgets/ai_explanation_card.dart';
 
 // Provider for fetching single scholarship detail
 final scholarshipDetailProvider = FutureProvider.family<Scholarship, String>((
@@ -101,7 +102,11 @@ class ScholarshipDetailPage extends ConsumerWidget {
                   if (matchData == null) {
                     return _buildLoginPrompt(context);
                   }
-                  return _buildMatchBox(context, matchData.match);
+                  return _buildMatchBox(
+                    context,
+                    matchData.match,
+                    scholarship.id,
+                  );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, st) => const SizedBox.shrink(),
@@ -428,7 +433,11 @@ class ScholarshipDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildMatchBox(BuildContext context, MatchResult match) {
+  Widget _buildMatchBox(
+    BuildContext context,
+    MatchResult match,
+    String scholarshipId,
+  ) {
     return Container(
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
@@ -477,6 +486,8 @@ class ScholarshipDetailPage extends ConsumerWidget {
           ...match.criterionEvaluations.map(
             (eval) => _buildCriterionRow(context, eval),
           ),
+          const SizedBox(height: Spacing.md),
+          AiExplanationCard(scholarshipId: scholarshipId),
         ],
       ),
     );

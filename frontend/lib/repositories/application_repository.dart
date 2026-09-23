@@ -4,7 +4,8 @@ import 'package:radarscholar/models/application.dart';
 import '../services/api_service.dart';
 
 final applicationRepositoryProvider = Provider<ApplicationRepository>((ref) {
-  final apiService = ApiService(); // or fetch from a provider if it exists globally
+  final apiService =
+      ApiService(); // or fetch from a provider if it exists globally
   return ApplicationRepository(apiService);
 });
 
@@ -16,7 +17,9 @@ class ApplicationRepository {
   // --- Saved Scholarships ---
 
   Future<List<SavedScholarship>> getSavedScholarships() async {
-    final response = await _apiService.get('/api/v1/applications/saved-scholarships');
+    final response = await _apiService.get(
+      '/api/v1/applications/saved-scholarships',
+    );
     return (response.data as List)
         .map((e) => SavedScholarship.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -30,7 +33,9 @@ class ApplicationRepository {
   }
 
   Future<void> unsaveScholarship(String scholarshipId) async {
-    await _apiService.delete('/api/v1/applications/scholarships/$scholarshipId/save');
+    await _apiService.delete(
+      '/api/v1/applications/scholarships/$scholarshipId/save',
+    );
   }
 
   // --- Applications ---
@@ -60,7 +65,9 @@ class ApplicationRepository {
   }
 
   Future<Application> getApplication(String applicationId) async {
-    final response = await _apiService.get('/api/v1/applications/$applicationId');
+    final response = await _apiService.get(
+      '/api/v1/applications/$applicationId',
+    );
     return Application.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -136,6 +143,8 @@ class ApplicationRepository {
     required String applicationId,
     required String taskId,
   }) async {
-    await _apiService.delete('/api/v1/applications/$applicationId/tasks/$taskId');
+    await _apiService.delete(
+      '/api/v1/applications/$applicationId/tasks/$taskId',
+    );
   }
 }

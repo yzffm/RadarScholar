@@ -149,7 +149,9 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                     icon: const Icon(Icons.auto_awesome),
                     label: const Text('Lihat Rekomendasi Cerdas'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.brandPrimary.withValues(alpha: 0.1),
+                      backgroundColor: AppTheme.brandPrimary.withValues(
+                        alpha: 0.1,
+                      ),
                       foregroundColor: AppTheme.brandPrimary,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),

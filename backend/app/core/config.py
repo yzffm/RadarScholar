@@ -40,7 +40,13 @@ class Settings(BaseSettings):
 
     # --- AI Providers (future milestones) ---
     GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.5-flash"
+    
     GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama3-8b-8192"
+    
+    AI_ENABLED: bool = True
+    AI_PRIMARY_PROVIDER: str = "gemini"
 
     model_config = {
         "env_file": ".env",
