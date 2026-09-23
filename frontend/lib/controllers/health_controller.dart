@@ -28,8 +28,9 @@ final healthRepositoryProvider = Provider<HealthRepository>((ref) {
 ///   error: (err, stack) => Text('Error: $err'),
 /// );
 /// ```
-final healthControllerProvider =
-    FutureProvider.autoDispose<HealthResponse>((ref) async {
+final healthControllerProvider = FutureProvider.autoDispose<HealthResponse>((
+  ref,
+) async {
   final repository = ref.watch(healthRepositoryProvider);
   return repository.checkHealth();
 });

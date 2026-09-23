@@ -41,7 +41,10 @@ void main() {
       final notifier = container.read(loginControllerProvider.notifier);
 
       expect(notifier.validatePassword(''), 'Kata sandi wajib diisi');
-      expect(notifier.validatePassword('12345'), 'Kata sandi minimal 6 karakter');
+      expect(
+        notifier.validatePassword('12345'),
+        'Kata sandi minimal 6 karakter',
+      );
       expect(notifier.validatePassword('secret123'), isNull);
     });
 
@@ -60,9 +63,11 @@ void main() {
 
     test('Successful submission updates success state', () async {
       final mockAuthRepository = MockAuthRepository();
-      
+
       when(mockAuthRepository.currentUser).thenReturn(null);
-      when(mockAuthRepository.onAuthStateChange).thenAnswer((_) => const Stream.empty());
+      when(
+        mockAuthRepository.onAuthStateChange,
+      ).thenAnswer((_) => const Stream.empty());
 
       final mockUser = User(
         id: '123',
@@ -74,10 +79,12 @@ void main() {
 
       final mockResponse = AuthResponse(user: mockUser);
 
-      when(mockAuthRepository.signInWithEmail(
-        email: 'student@university.ac.id',
-        password: 'validpassword',
-      )).thenAnswer((_) async => mockResponse);
+      when(
+        mockAuthRepository.signInWithEmail(
+          email: 'student@university.ac.id',
+          password: 'validpassword',
+        ),
+      ).thenAnswer((_) async => mockResponse);
 
       final container = ProviderContainer(
         overrides: [

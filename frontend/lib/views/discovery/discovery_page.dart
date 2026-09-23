@@ -24,7 +24,9 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     super.initState();
     // Fetch initially
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(scholarshipControllerProvider.notifier).fetchScholarships(refresh: true);
+      ref
+          .read(scholarshipControllerProvider.notifier)
+          .fetchScholarships(refresh: true);
     });
   }
 
@@ -42,11 +44,11 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     setState(() {
       _currentStatus = status;
     });
-    
+
     String? apiStatus;
     if (status == 'Aktif') apiStatus = 'active';
     if (status == 'Tidak Aktif') apiStatus = 'inactive';
-    
+
     ref.read(scholarshipControllerProvider.notifier).setStatusFilter(apiStatus);
   }
 
@@ -64,22 +66,25 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
               Text(
                 'Eksplorasi Beasiswa',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.brandPrimary,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.brandPrimary,
+                ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
                 'Jelajahi peluang beasiswa dari sumber resmi yang terverifikasi.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
               ),
               const SizedBox(height: Spacing.lg),
-              
+
               // Search bar
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(AppRadius.md),
@@ -95,10 +100,15 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                         onSubmitted: _onSearchSubmit,
                         decoration: InputDecoration(
                           hintText: 'Cari beasiswa atau penyedia...',
-                          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 14,
+                          ),
                           border: InputBorder.none,
                           isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -114,7 +124,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                 ),
               ),
               const SizedBox(height: Spacing.md),
-              
+
               // Filter chips
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -129,7 +139,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                 ),
               ),
               const SizedBox(height: Spacing.md),
-              
+
               if (ref.watch(isAuthenticatedProvider)) ...[
                 Container(
                   width: double.infinity,
@@ -139,7 +149,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                     icon: const Icon(Icons.auto_awesome),
                     label: const Text('Lihat Rekomendasi Cerdas'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.brandPrimary.withOpacity(0.1),
+                      backgroundColor: AppTheme.brandPrimary.withValues(alpha: 0.1),
                       foregroundColor: AppTheme.brandPrimary,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -147,11 +157,9 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                   ),
                 ),
               ],
-              
+
               // Main content area
-              Expanded(
-                child: _buildContent(state),
-              ),
+              Expanded(child: _buildContent(state)),
             ],
           ),
         ),
@@ -165,7 +173,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
       selected: isSelected,
       label: Text(label),
       onSelected: (_) => _onFilterSelected(label),
-      selectedColor: AppTheme.brandPrimary.withOpacity(0.12),
+      selectedColor: AppTheme.brandPrimary.withValues(alpha: 0.12),
       checkmarkColor: AppTheme.brandPrimary,
       labelStyle: TextStyle(
         color: isSelected ? AppTheme.brandPrimary : Colors.grey.shade700,
@@ -176,10 +184,11 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
   }
 
   Widget _buildContent(ScholarshipDiscoveryState state) {
-    if (state is ScholarshipDiscoveryLoading || state is ScholarshipDiscoveryInitial) {
+    if (state is ScholarshipDiscoveryLoading ||
+        state is ScholarshipDiscoveryInitial) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (state is ScholarshipDiscoveryError) {
       return Center(
         child: Column(
@@ -190,36 +199,44 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
             Text(state.message, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => ref.read(scholarshipControllerProvider.notifier).fetchScholarships(refresh: true),
+              onPressed: () => ref
+                  .read(scholarshipControllerProvider.notifier)
+                  .fetchScholarships(refresh: true),
               child: const Text('Coba Lagi'),
             ),
           ],
         ),
       );
     }
-    
+
     if (state is ScholarshipDiscoveryEmpty) {
       return Center(
         child: EmptyState(
           icon: Icons.search_off_rounded,
-          title: state.isSearch ? 'Tidak menemukan beasiswa' : 'Belum ada beasiswa',
+          title: state.isSearch
+              ? 'Tidak menemukan beasiswa'
+              : 'Belum ada beasiswa',
           message: state.isSearch
               ? 'Tidak ada beasiswa yang sesuai dengan pencarian atau filter Anda.'
               : 'Belum ada beasiswa yang tersedia saat ini.',
         ),
       );
     }
-    
+
     if (state is ScholarshipDiscoverySuccess) {
       return RefreshIndicator(
-        onRefresh: () => ref.read(scholarshipControllerProvider.notifier).fetchScholarships(refresh: true),
+        onRefresh: () => ref
+            .read(scholarshipControllerProvider.notifier)
+            .fetchScholarships(refresh: true),
         child: ListView.builder(
           itemCount: state.scholarships.length + (state.hasMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == state.scholarships.length) {
               // Reached the end, trigger load more
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                ref.read(scholarshipControllerProvider.notifier).fetchScholarships();
+                ref
+                    .read(scholarshipControllerProvider.notifier)
+                    .fetchScholarships();
               });
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -231,7 +248,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
         ),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 }

@@ -18,9 +18,7 @@ void main() {
 
   ProviderContainer makeContainer() {
     final container = ProviderContainer(
-      overrides: [
-        authRepositoryProvider.overrideWithValue(mockAuthRepository),
-      ],
+      overrides: [authRepositoryProvider.overrideWithValue(mockAuthRepository)],
     );
     addTearDown(container.dispose);
     return container;
@@ -29,7 +27,9 @@ void main() {
   group('AuthController', () {
     test('initial state is AuthUnauthenticated when no user', () {
       when(mockAuthRepository.currentUser).thenReturn(null);
-      when(mockAuthRepository.onAuthStateChange).thenAnswer((_) => const Stream.empty());
+      when(
+        mockAuthRepository.onAuthStateChange,
+      ).thenAnswer((_) => const Stream.empty());
 
       final container = makeContainer();
       final state = container.read(authControllerProvider);
@@ -47,7 +47,9 @@ void main() {
       );
 
       when(mockAuthRepository.currentUser).thenReturn(mockUser);
-      when(mockAuthRepository.onAuthStateChange).thenAnswer((_) => const Stream.empty());
+      when(
+        mockAuthRepository.onAuthStateChange,
+      ).thenAnswer((_) => const Stream.empty());
 
       final container = makeContainer();
       final state = container.read(authControllerProvider);
@@ -58,8 +60,10 @@ void main() {
 
     test('signInWithEmail success', () async {
       when(mockAuthRepository.currentUser).thenReturn(null);
-      when(mockAuthRepository.onAuthStateChange).thenAnswer((_) => const Stream.empty());
-      
+      when(
+        mockAuthRepository.onAuthStateChange,
+      ).thenAnswer((_) => const Stream.empty());
+
       final mockUser = User(
         id: '123',
         appMetadata: {},
@@ -67,18 +71,23 @@ void main() {
         aud: 'authenticated',
         createdAt: DateTime.now().toIso8601String(),
       );
-      
-      final mockResponse = AuthResponse(
-        user: mockUser,
-      );
 
-      when(mockAuthRepository.signInWithEmail(email: 'test@ui.ac.id', password: 'password123'))
-          .thenAnswer((_) async => mockResponse);
+      final mockResponse = AuthResponse(user: mockUser);
+
+      when(
+        mockAuthRepository.signInWithEmail(
+          email: 'test@ui.ac.id',
+          password: 'password123',
+        ),
+      ).thenAnswer((_) async => mockResponse);
 
       final container = makeContainer();
       final controller = container.read(authControllerProvider.notifier);
 
-      final result = await controller.signInWithEmail('test@ui.ac.id', 'password123');
+      final result = await controller.signInWithEmail(
+        'test@ui.ac.id',
+        'password123',
+      );
 
       expect(result, true);
       expect(container.read(authControllerProvider), isA<AuthAuthenticated>());
@@ -86,10 +95,16 @@ void main() {
 
     test('signInWithEmail failure', () async {
       when(mockAuthRepository.currentUser).thenReturn(null);
-      when(mockAuthRepository.onAuthStateChange).thenAnswer((_) => const Stream.empty());
-      
-      when(mockAuthRepository.signInWithEmail(email: 'test@ui.ac.id', password: 'wrong'))
-          .thenThrow(const AuthException('Invalid login credentials'));
+      when(
+        mockAuthRepository.onAuthStateChange,
+      ).thenAnswer((_) => const Stream.empty());
+
+      when(
+        mockAuthRepository.signInWithEmail(
+          email: 'test@ui.ac.id',
+          password: 'wrong',
+        ),
+      ).thenThrow(const AuthException('Invalid login credentials'));
 
       final container = makeContainer();
       final controller = container.read(authControllerProvider.notifier);

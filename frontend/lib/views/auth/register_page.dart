@@ -35,8 +35,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   void _handleRegister() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final success =
-          await ref.read(registerControllerProvider.notifier).submitRegister();
+      final success = await ref
+          .read(registerControllerProvider.notifier)
+          .submitRegister();
       if (success && mounted) {
         final state = ref.read(registerControllerProvider);
         if (state.needsEmailConfirmation) {
@@ -64,8 +65,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         ),
         title: const Row(
           children: [
-            Icon(Icons.mail_outline_rounded,
-                color: AppTheme.brandPrimary, size: 28),
+            Icon(
+              Icons.mail_outline_rounded,
+              color: AppTheme.brandPrimary,
+              size: 28,
+            ),
             SizedBox(width: 12),
             Text('Verifikasi Email'),
           ],
@@ -86,7 +90,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -113,9 +116,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           flex: 5,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 48),
-            decoration: const BoxDecoration(
-              gradient: AppTheme.heroGradient,
-            ),
+            decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,12 +127,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     const SizedBox(width: 14),
                     Text(
                       'RadarScholar',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
                     ),
                   ],
                 ),
@@ -140,18 +141,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(AppRadius.xxl),
                         border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2)),
+                          color: Colors.white.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.school_rounded,
-                              color: AppTheme.brandSecondary, size: 16),
+                          Icon(
+                            Icons.school_rounded,
+                            color: AppTheme.brandSecondary,
+                            size: 16,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'Mulai Perjalanan Beasiswamu',
@@ -167,21 +174,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     const SizedBox(height: Spacing.xl),
                     Text(
                       'Daftar dan Temukan\nBeasiswa yang Tepat.',
-                      style:
-                          Theme.of(context).textTheme.displaySmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                height: 1.2,
-                              ),
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
                     ),
                     const SizedBox(height: Spacing.md),
                     Text(
                       'Buat profil akademikmu, dan biarkan RadarScholar '
                       'mencocokanmu dengan beasiswa dari sumber terkurasi resmi.',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            height: 1.6,
-                          ),
+                        color: Colors.white.withValues(alpha: 0.85),
+                        height: 1.6,
+                      ),
                     ),
                     const SizedBox(height: Spacing.xxl),
                     _buildPillarItem(
@@ -236,7 +242,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   // ─── Mobile / Tablet Layout ──────────────────────────────────────────
   Widget _buildMobileTabletLayout(
-      BuildContext context, RegisterFormState state) {
+    BuildContext context,
+    RegisterFormState state,
+  ) {
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -287,8 +295,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.arrow_back_rounded,
-                          size: 16, color: Colors.grey.shade600),
+                      Icon(
+                        Icons.arrow_back_rounded,
+                        size: 16,
+                        color: Colors.grey.shade600,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         'Kembali ke Beranda',
@@ -308,16 +319,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               Text(
                 'Buat Akun Baru',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade900,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade900,
+                ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
                 'Daftar untuk mulai menjelajahi beasiswa yang sesuai profilmu.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
               ),
               const SizedBox(height: Spacing.xl),
 
@@ -333,14 +344,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline_rounded,
-                          color: Colors.red.shade700, size: 18),
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: Colors.red.shade700,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           state.errorMessage!,
                           style: TextStyle(
-                              color: Colors.red.shade800, fontSize: 13),
+                            color: Colors.red.shade800,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
@@ -527,8 +543,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: Colors.grey.shade50,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
         borderSide: BorderSide(color: Colors.grey.shade300),
@@ -539,8 +554,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        borderSide:
-            const BorderSide(color: AppTheme.brandPrimary, width: 1.5),
+        borderSide: const BorderSide(color: AppTheme.brandPrimary, width: 1.5),
       ),
     );
   }

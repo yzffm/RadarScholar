@@ -6,10 +6,7 @@ import '../core/theme.dart';
 import '../models/scholarship.dart';
 
 class ScholarshipCard extends StatelessWidget {
-  const ScholarshipCard({
-    super.key,
-    required this.scholarship,
-  });
+  const ScholarshipCard({super.key, required this.scholarship});
 
   final Scholarship scholarship;
 
@@ -41,7 +38,8 @@ class ScholarshipCard extends StatelessWidget {
                       children: [
                         Text(
                           scholarship.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.grey.shade900,
                               ),
@@ -50,8 +48,10 @@ class ScholarshipCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          scholarship.source?.providerName ?? 'Penyedia Belum Tersedia',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          scholarship.source?.providerName ??
+                              'Penyedia Belum Tersedia',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: AppTheme.brandPrimary,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -64,35 +64,45 @@ class ScholarshipCard extends StatelessWidget {
               ),
               const SizedBox(height: Spacing.sm),
               Text(
-                scholarship.summary.isNotEmpty ? scholarship.summary : scholarship.description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade700,
-                    ),
+                scholarship.summary.isNotEmpty
+                    ? scholarship.summary
+                    : scholarship.description,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: Spacing.md),
               Row(
                 children: [
-                  Icon(Icons.calendar_today_rounded, size: 14, color: Colors.grey.shade500),
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    size: 14,
+                    color: Colors.grey.shade500,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     _formatDeadline(scholarship.deadline),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const Spacer(),
                   Text(
                     'Lihat Detail',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: AppTheme.brandPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: AppTheme.brandPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(Icons.arrow_forward_rounded, size: 14, color: AppTheme.brandPrimary),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 14,
+                    color: AppTheme.brandPrimary,
+                  ),
                 ],
               ),
             ],

@@ -91,7 +91,8 @@ class RegisterNotifier extends StateNotifier<RegisterFormState> {
 
   void toggleConfirmPasswordVisibility() {
     state = state.copyWith(
-        isConfirmPasswordVisible: !state.isConfirmPasswordVisible);
+      isConfirmPasswordVisible: !state.isConfirmPasswordVisible,
+    );
   }
 
   String? validateDisplayName(String? value) {
@@ -194,7 +195,8 @@ class RegisterNotifier extends StateNotifier<RegisterFormState> {
 }
 
 final registerControllerProvider =
-    StateNotifierProvider.autoDispose<RegisterNotifier, RegisterFormState>(
-        (ref) {
-  return RegisterNotifier(ref);
-});
+    StateNotifierProvider.autoDispose<RegisterNotifier, RegisterFormState>((
+      ref,
+    ) {
+      return RegisterNotifier(ref);
+    });

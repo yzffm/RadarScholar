@@ -25,13 +25,13 @@ void main() {
       overrides: [
         scholarshipRepositoryProvider.overrideWithValue(mockRepository),
       ],
-      child: const MaterialApp(
-        home: DiscoveryPage(),
-      ),
+      child: const MaterialApp(home: DiscoveryPage()),
     );
   }
 
-  testWidgets('DiscoveryPage shows loading then list of scholarships', (WidgetTester tester) async {
+  testWidgets('DiscoveryPage shows loading then list of scholarships', (
+    WidgetTester tester,
+  ) async {
     final now = DateTime.now();
     final mockResponse = ScholarshipListResponse(
       items: [
@@ -62,12 +62,14 @@ void main() {
       totalPages: 1,
     );
 
-    when(mockRepository.getScholarships(
-      page: 1,
-      pageSize: 20,
-      search: null,
-      status: null,
-    )).thenAnswer((_) async => mockResponse);
+    when(
+      mockRepository.getScholarships(
+        page: 1,
+        pageSize: 20,
+        search: null,
+        status: null,
+      ),
+    ).thenAnswer((_) async => mockResponse);
 
     await tester.pumpWidget(createWidgetUnderTest());
 

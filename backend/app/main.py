@@ -38,7 +38,9 @@ def create_app() -> FastAPI:
     application.include_router(users_router)
 
     from app.scholarships.router import router as scholarships_router
+    from app.applications.router import router as applications_router
     application.include_router(scholarships_router, prefix="/api/v1")
+    application.include_router(applications_router, prefix="/api/v1")
 
     return application
 

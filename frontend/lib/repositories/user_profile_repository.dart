@@ -25,8 +25,7 @@ class UserProfileRepository {
     try {
       final response = await _api.get('/api/v1/users/me');
       if (response.statusCode == 200 && response.data != null) {
-        return UserProfile.fromJson(
-            response.data as Map<String, dynamic>);
+        return UserProfile.fromJson(response.data as Map<String, dynamic>);
       }
       return null;
     } catch (e) {

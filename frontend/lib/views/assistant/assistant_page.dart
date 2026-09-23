@@ -16,16 +16,16 @@ class AssistantPage extends StatelessWidget {
               Text(
                 'Asisten AI RadarScholar',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.brandPrimary,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.brandPrimary,
+                ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
                 'Pendampingan cerdas untuk persiapan berkas dan wawancara beasiswa.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
               ),
               const SizedBox(height: Spacing.xl),
               // Feature overview cards
@@ -98,15 +98,19 @@ class AssistantPage extends StatelessWidget {
                       Expanded(
                         child: Text(
                           title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppTheme.brandSecondary.withValues(alpha: 0.15),
+                          color: AppTheme.brandSecondary.withValues(
+                            alpha: 0.15,
+                          ),
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(
@@ -124,9 +128,9 @@ class AssistantPage extends StatelessWidget {
                   Text(
                     description,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade600,
-                          height: 1.4,
-                        ),
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),

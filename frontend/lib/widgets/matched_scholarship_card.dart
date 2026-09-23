@@ -6,10 +6,7 @@ import '../models/scholarship.dart';
 import '../models/match_result.dart';
 
 class MatchedScholarshipCard extends StatelessWidget {
-  const MatchedScholarshipCard({
-    super.key,
-    required this.matchedScholarship,
-  });
+  const MatchedScholarshipCard({super.key, required this.matchedScholarship});
 
   final MatchedScholarshipResponse matchedScholarship;
 
@@ -23,7 +20,10 @@ class MatchedScholarshipCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: Spacing.md),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: _getRelevanceColor(match.relevance).withOpacity(0.5), width: 1.5),
+        side: BorderSide(
+          color: _getRelevanceColor(match.relevance).withValues(alpha: 0.5),
+          width: 1.5,
+        ),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -46,7 +46,8 @@ class MatchedScholarshipCard extends StatelessWidget {
                       children: [
                         Text(
                           scholarship.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.grey.shade900,
                               ),
@@ -55,8 +56,10 @@ class MatchedScholarshipCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          scholarship.source?.providerName ?? 'Penyedia Belum Tersedia',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          scholarship.source?.providerName ??
+                              'Penyedia Belum Tersedia',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: AppTheme.brandPrimary,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -71,46 +74,58 @@ class MatchedScholarshipCard extends StatelessWidget {
               Text(
                 match.explanation,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: Spacing.md),
               Row(
                 children: [
-                  Icon(Icons.check_circle_outline, size: 14, color: Colors.green.shade600),
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: 14,
+                    color: Colors.green.shade600,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${match.matchedCount} Memenuhi',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.green.shade700,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: Colors.green.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   if (match.notMatchedCount > 0) ...[
-                    Icon(Icons.cancel_outlined, size: 14, color: Colors.red.shade600),
+                    Icon(
+                      Icons.cancel_outlined,
+                      size: 14,
+                      color: Colors.red.shade600,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${match.notMatchedCount} Tidak',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.red.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: Colors.red.shade700,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                   const Spacer(),
                   Text(
                     'Lihat Detail',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: AppTheme.brandPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: AppTheme.brandPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(Icons.arrow_forward_rounded, size: 14, color: AppTheme.brandPrimary),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 14,
+                    color: AppTheme.brandPrimary,
+                  ),
                 ],
               ),
             ],

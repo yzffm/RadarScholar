@@ -3,10 +3,7 @@
 /// Part of the Model layer in MVC architecture.
 /// Represents the response from GET /health endpoint.
 class HealthResponse {
-  const HealthResponse({
-    required this.status,
-    required this.version,
-  });
+  const HealthResponse({required this.status, required this.version});
 
   /// Server health status (e.g., "ok").
   final String status;
@@ -24,10 +21,7 @@ class HealthResponse {
 
   /// Converts this response to a JSON map.
   Map<String, dynamic> toJson() {
-    return {
-      'status': status,
-      'version': version,
-    };
+    return {'status': status, 'version': version};
   }
 
   /// Whether the server reports healthy status.

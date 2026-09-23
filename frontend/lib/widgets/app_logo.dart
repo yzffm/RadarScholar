@@ -21,12 +21,8 @@ class AppLogo extends StatelessWidget {
     this.onTap,
   });
 
-  const AppLogo.icon({
-    super.key,
-    this.height = 40,
-    this.width,
-    this.onTap,
-  }) : mode = AppLogoMode.iconOnly;
+  const AppLogo.icon({super.key, this.height = 40, this.width, this.onTap})
+    : mode = AppLogoMode.iconOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +58,9 @@ class AppLogo extends StatelessWidget {
               Text(
                 'RadarScholar',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0D3B98),
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0D3B98),
+                ),
               ),
             ],
           ],

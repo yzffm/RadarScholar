@@ -41,11 +41,12 @@ class ScholarshipDiscoveryError extends ScholarshipDiscoveryState {
 
 class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
   final ScholarshipRepository _repository;
-  
+
   String? _currentSearch;
   String? _currentStatus;
-  
-  ScholarshipController(this._repository) : super(const ScholarshipDiscoveryInitial());
+
+  ScholarshipController(this._repository)
+    : super(const ScholarshipDiscoveryInitial());
 
   Future<void> fetchScholarships({
     bool refresh = false,
@@ -55,7 +56,7 @@ class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
     // Determine page
     int targetPage = 1;
     List<Scholarship> existingItems = [];
-    
+
     if (!refresh && state is ScholarshipDiscoverySuccess) {
       final currentState = state as ScholarshipDiscoverySuccess;
       if (!currentState.hasMore) return; // No more items to load
@@ -85,9 +86,11 @@ class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
       );
 
       final newItems = [...existingItems, ...response.items];
-      
+
       if (newItems.isEmpty) {
-        state = ScholarshipDiscoveryEmpty(isSearch: search != null && search.isNotEmpty);
+        state = ScholarshipDiscoveryEmpty(
+          isSearch: search != null && search.isNotEmpty,
+        );
       } else {
         state = ScholarshipDiscoverySuccess(
           scholarships: newItems,
@@ -97,20 +100,33 @@ class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
         );
       }
     } catch (e) {
-      state = const ScholarshipDiscoveryError('Gagal memuat beasiswa. Periksa koneksi internet dan coba lagi.');
+      state = const ScholarshipDiscoveryError(
+        'Gagal memuat beasiswa. Periksa koneksi internet dan coba lagi.',
+      );
     }
   }
 
   Future<void> search(String query) async {
-    await fetchScholarships(refresh: true, search: query, status: _currentStatus);
+    await fetchScholarships(
+      refresh: true,
+      search: query,
+      status: _currentStatus,
+    );
   }
 
   Future<void> setStatusFilter(String? status) async {
-    await fetchScholarships(refresh: true, search: _currentSearch, status: status);
+    await fetchScholarships(
+      refresh: true,
+      search: _currentSearch,
+      status: status,
+    );
   }
 }
 
-final scholarshipControllerProvider = StateNotifierProvider<ScholarshipController, ScholarshipDiscoveryState>((ref) {
-  final repo = ref.watch(scholarshipRepositoryProvider);
-  return ScholarshipController(repo);
-});
+final scholarshipControllerProvider =
+    StateNotifierProvider<ScholarshipController, ScholarshipDiscoveryState>((
+      ref,
+    ) {
+      final repo = ref.watch(scholarshipRepositoryProvider);
+      return ScholarshipController(repo);
+    });

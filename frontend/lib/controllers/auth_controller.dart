@@ -220,9 +220,9 @@ class AuthController extends StateNotifier<AppAuthState> {
 /// Global auth state provider.
 final authControllerProvider =
     StateNotifierProvider<AuthController, AppAuthState>((ref) {
-  final authRepo = ref.watch(authRepositoryProvider);
-  return AuthController(authRepo);
-});
+      final authRepo = ref.watch(authRepositoryProvider);
+      return AuthController(authRepo);
+    });
 
 /// Convenience provider for checking if user is authenticated.
 final isAuthenticatedProvider = Provider<bool>((ref) {

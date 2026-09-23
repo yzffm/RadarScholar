@@ -31,7 +31,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   void _handleEmailLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final success = await ref.read(loginControllerProvider.notifier).submitLogin();
+      final success = await ref
+          .read(loginControllerProvider.notifier)
+          .submitLogin();
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -52,7 +54,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   void _handleGoogleLogin() async {
-    final success = await ref.read(loginControllerProvider.notifier).loginWithGoogle();
+    final success = await ref
+        .read(loginControllerProvider.notifier)
+        .loginWithGoogle();
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -96,9 +100,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           flex: 5,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 48),
-            decoration: const BoxDecoration(
-              gradient: AppTheme.heroGradient,
-            ),
+            decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -110,7 +112,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     const SizedBox(width: 14),
                     Text(
                       'RadarScholar',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -124,16 +127,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(AppRadius.xxl),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.verified_rounded, color: AppTheme.brandSecondary, size: 16),
+                          Icon(
+                            Icons.verified_rounded,
+                            color: AppTheme.brandSecondary,
+                            size: 16,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'Platform Intelijen Beasiswa Mahasiswa',
@@ -150,37 +162,40 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Text(
                       'Temukan Beasiswa yang\nSesuai Profil Akademikmu.',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2,
-                          ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
                     ),
                     const SizedBox(height: Spacing.md),
                     Text(
                       'Sistem pencocokan deterministik tanpa tebak-tebakan. Pantau deadline resmi dan persiapkan dokumen aplikasi dengan pendampingan AI cerdas.',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            height: 1.6,
-                          ),
+                        color: Colors.white.withValues(alpha: 0.85),
+                        height: 1.6,
+                      ),
                     ),
                     const SizedBox(height: Spacing.xxl),
                     // Value points
                     _buildPillarItem(
                       icon: Icons.shield_outlined,
                       title: '100% Sumber Terkurasi & Resmi',
-                      subtitle: 'Bebas hoaks dengan atribusi tautan asli penyedia beasiswa.',
+                      subtitle:
+                          'Bebas hoaks dengan atribusi tautan asli penyedia beasiswa.',
                     ),
                     const SizedBox(height: Spacing.md),
                     _buildPillarItem(
                       icon: Icons.rule_folder_outlined,
                       title: 'Evaluasi Objektif & Kualitatif',
-                      subtitle: 'Penjelasan relevansi transparan berdasarkan kriteria terverifikasi.',
+                      subtitle:
+                          'Penjelasan relevansi transparan berdasarkan kriteria terverifikasi.',
                     ),
                     const SizedBox(height: Spacing.md),
                     _buildPillarItem(
                       icon: Icons.auto_awesome_rounded,
                       title: 'Asisten Dokumen & Wawancara AI',
-                      subtitle: 'Bantuan penulisan esai dan motivasi tanpa memalsukan fakta.',
+                      subtitle:
+                          'Bantuan penulisan esai dan motivasi tanpa memalsukan fakta.',
                     ),
                   ],
                 ),
@@ -268,7 +283,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.arrow_back_rounded, size: 16, color: Colors.grey.shade600),
+                      Icon(
+                        Icons.arrow_back_rounded,
+                        size: 16,
+                        color: Colors.grey.shade600,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         'Kembali ke Beranda',
@@ -288,16 +307,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               Text(
                 'Selamat Datang Kembali',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade900,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade900,
+                ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
                 'Masuk ke akun Anda untuk mengakses rekomendasi beasiswa.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
               ),
               const SizedBox(height: Spacing.xl),
 
@@ -321,9 +340,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       Container(
                         width: 22,
                         height: 22,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                        ),
+                        decoration: const BoxDecoration(shape: BoxShape.circle),
                         child: Center(
                           child: Text(
                             'G',
@@ -384,12 +401,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline_rounded, color: Colors.red.shade700, size: 18),
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: Colors.red.shade700,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           state.errorMessage!,
-                          style: TextStyle(color: Colors.red.shade800, fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.red.shade800,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
@@ -414,11 +438,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 enabled: !state.isLoading,
                 decoration: InputDecoration(
                   hintText: 'nama@universitas.ac.id',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
                   prefixIcon: const Icon(Icons.mail_outline_rounded, size: 20),
                   filled: true,
                   fillColor: Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -429,7 +459,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: const BorderSide(color: AppTheme.brandPrimary, width: 1.5),
+                    borderSide: const BorderSide(
+                      color: AppTheme.brandPrimary,
+                      width: 1.5,
+                    ),
                   ),
                 ),
                 onChanged: (val) => controller.updateEmail(val),
@@ -454,7 +487,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 enabled: !state.isLoading,
                 decoration: InputDecoration(
                   hintText: 'Minimal 6 karakter',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
                   prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -468,7 +504,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   filled: true,
                   fillColor: Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -479,7 +518,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: const BorderSide(color: AppTheme.brandPrimary, width: 1.5),
+                    borderSide: const BorderSide(
+                      color: AppTheme.brandPrimary,
+                      width: 1.5,
+                    ),
                   ),
                 ),
                 onChanged: (val) => controller.updatePassword(val),
@@ -530,7 +572,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Fitur pemulihan kata sandi akan aktif pada M2.'),
+                          content: Text(
+                            'Fitur pemulihan kata sandi akan aktif pada M2.',
+                          ),
                         ),
                       );
                     },

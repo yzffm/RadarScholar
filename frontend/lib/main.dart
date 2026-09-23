@@ -12,11 +12,7 @@ void main() async {
   // Returns false if credentials aren't configured (dev mode).
   await initSupabase();
 
-  runApp(
-    const ProviderScope(
-      child: RadarScholarApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: RadarScholarApp()));
 }
 
 /// Root application widget for RadarScholar.

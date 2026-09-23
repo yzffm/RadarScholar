@@ -5,18 +5,16 @@ import 'package:radarscholar/views/auth/login_page.dart';
 
 void main() {
   group('LoginPage Widget Tests', () {
-    testWidgets('Renders all form fields and special Google Login button', (tester) async {
+    testWidgets('Renders all form fields and special Google Login button', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1280, 1024);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LoginPage(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LoginPage())),
       );
       await tester.pumpAndSettle();
 
@@ -29,18 +27,16 @@ void main() {
       expect(find.text('Daftar Sekarang'), findsOneWidget);
     });
 
-    testWidgets('Shows validation error when submitting empty fields', (tester) async {
+    testWidgets('Shows validation error when submitting empty fields', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1280, 1024);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LoginPage(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LoginPage())),
       );
       await tester.pumpAndSettle();
 

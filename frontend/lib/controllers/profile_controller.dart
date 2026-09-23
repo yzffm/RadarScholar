@@ -82,14 +82,14 @@ class ProfileController extends StateNotifier<ProfileState> {
 /// Profile state provider — automatically fetches when authenticated.
 final profileControllerProvider =
     StateNotifierProvider<ProfileController, ProfileState>((ref) {
-  final repo = ref.watch(userProfileRepositoryProvider);
-  final controller = ProfileController(repo);
+      final repo = ref.watch(userProfileRepositoryProvider);
+      final controller = ProfileController(repo);
 
-  // Auto-fetch profile when user is authenticated
-  final authState = ref.watch(authControllerProvider);
-  if (authState is AuthAuthenticated) {
-    controller.fetchProfile();
-  }
+      // Auto-fetch profile when user is authenticated
+      final authState = ref.watch(authControllerProvider);
+      if (authState is AuthAuthenticated) {
+        controller.fetchProfile();
+      }
 
-  return controller;
-});
+      return controller;
+    });

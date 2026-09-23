@@ -73,7 +73,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   List<String> _splitComma(String text) {
     if (text.trim().isEmpty) return [];
-    return text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    return text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
   }
 
   Future<void> _saveProfile() async {
@@ -93,7 +97,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       'goals': _goalsController.text.trim(),
     };
 
-    final success = await ref.read(profileControllerProvider.notifier).saveProfile(data);
+    final success = await ref
+        .read(profileControllerProvider.notifier)
+        .saveProfile(data);
 
     if (success && mounted) {
       setState(() => _isEditing = false);
@@ -122,9 +128,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
         ],
       ),
-      body: SafeArea(
-        child: _buildBody(state),
-      ),
+      body: SafeArea(child: _buildBody(state)),
     );
   }
 
@@ -138,14 +142,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline_rounded, color: Colors.red, size: 48),
+            const Icon(
+              Icons.error_outline_rounded,
+              color: Colors.red,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(state.message, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: () => ref.read(profileControllerProvider.notifier).fetchProfile(),
+              onPressed: () =>
+                  ref.read(profileControllerProvider.notifier).fetchProfile(),
               child: const Text('Coba Lagi'),
-            )
+            ),
           ],
         ),
       );
@@ -237,9 +246,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -258,9 +267,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+          Text(
+            label,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+          ),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
@@ -290,7 +305,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.info_outline_rounded, color: AppTheme.brandPrimary),
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: AppTheme.brandPrimary,
+                      ),
                       SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -304,24 +322,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 const SizedBox(height: Spacing.xl),
 
                 // Data Akademik
-                Text('Data Akademik', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  'Data Akademik',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: Spacing.md),
                 TextFormField(
                   controller: _univController,
-                  decoration: const InputDecoration(labelText: 'Universitas', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Universitas',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: Spacing.md),
                 Row(
                   children: [
-                    Expanded(child: TextFormField(
-                      controller: _facultyController,
-                      decoration: const InputDecoration(labelText: 'Fakultas', border: OutlineInputBorder()),
-                    )),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _facultyController,
+                        decoration: const InputDecoration(
+                          labelText: 'Fakultas',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: Spacing.md),
-                    Expanded(child: TextFormField(
-                      controller: _majorController,
-                      decoration: const InputDecoration(labelText: 'Program Studi (Jurusan)', border: OutlineInputBorder()),
-                    )),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _majorController,
+                        decoration: const InputDecoration(
+                          labelText: 'Program Studi (Jurusan)',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: Spacing.md),
@@ -330,11 +366,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     Expanded(
                       child: DropdownButtonFormField<DegreeLevel>(
                         value: _selectedDegree,
-                        decoration: const InputDecoration(labelText: 'Jenjang', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Jenjang',
+                          border: OutlineInputBorder(),
+                        ),
                         items: DegreeLevel.values.map((e) {
-                          return DropdownMenuItem(value: e, child: Text(e.value));
+                          return DropdownMenuItem(
+                            value: e,
+                            child: Text(e.value),
+                          );
                         }).toList(),
-                        onChanged: (val) => setState(() => _selectedDegree = val),
+                        onChanged: (val) =>
+                            setState(() => _selectedDegree = val),
                       ),
                     ),
                     const SizedBox(width: Spacing.md),
@@ -342,11 +385,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: TextFormField(
                         controller: _semesterController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(labelText: 'Semester (Cth: 5)', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Semester (Cth: 5)',
+                          border: OutlineInputBorder(),
+                        ),
                         validator: (val) {
                           if (val != null && val.isNotEmpty) {
                             final n = int.tryParse(val);
-                            if (n == null || n < 1 || n > 14) return 'Semester 1 - 14';
+                            if (n == null || n < 1 || n > 14)
+                              return 'Semester 1 - 14';
                           }
                           return null;
                         },
@@ -356,12 +403,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     Expanded(
                       child: TextFormField(
                         controller: _gpaController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(labelText: 'IPK (Cth: 3.75)', border: OutlineInputBorder()),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'IPK (Cth: 3.75)',
+                          border: OutlineInputBorder(),
+                        ),
                         validator: (val) {
                           if (val != null && val.isNotEmpty) {
                             final n = double.tryParse(val);
-                            if (n == null || n < 0 || n > 4) return 'IPK 0.0 - 4.0';
+                            if (n == null || n < 0 || n > 4)
+                              return 'IPK 0.0 - 4.0';
                           }
                           return null;
                         },
@@ -372,38 +425,71 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
                 const SizedBox(height: Spacing.xxl),
                 // Pengalaman
-                Text('Pengalaman & Kemampuan', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  'Pengalaman & Kemampuan',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: Spacing.xs),
-                Text('Pisahkan dengan koma (,)', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                Text(
+                  'Pisahkan dengan koma (,)',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
                 const SizedBox(height: Spacing.md),
                 TextFormField(
                   controller: _skillsController,
-                  decoration: const InputDecoration(labelText: 'Keahlian / Skills', hintText: 'Python, Public Speaking, Design', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Keahlian / Skills',
+                    hintText: 'Python, Public Speaking, Design',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: Spacing.md),
                 TextFormField(
                   controller: _orgsController,
-                  decoration: const InputDecoration(labelText: 'Organisasi', hintText: 'BEM UI, HMIF ITB', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Organisasi',
+                    hintText: 'BEM UI, HMIF ITB',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: Spacing.md),
                 TextFormField(
                   controller: _achievementsController,
-                  decoration: const InputDecoration(labelText: 'Pencapaian / Prestasi', hintText: 'Juara 1 Hackathon Nasional', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Pencapaian / Prestasi',
+                    hintText: 'Juara 1 Hackathon Nasional',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
 
                 const SizedBox(height: Spacing.xxl),
                 // Minat
-                Text('Minat & Tujuan', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  'Minat & Tujuan',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: Spacing.md),
                 TextFormField(
                   controller: _careerController,
-                  decoration: const InputDecoration(labelText: 'Minat Karir (Pisahkan koma)', hintText: 'Data Scientist, Software Engineer', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Minat Karir (Pisahkan koma)',
+                    hintText: 'Data Scientist, Software Engineer',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: Spacing.md),
                 TextFormField(
                   controller: _goalsController,
                   maxLines: 3,
-                  decoration: const InputDecoration(labelText: 'Tujuan Masa Depan', hintText: 'Ceritakan singkat tentang tujuan karir Anda...', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Tujuan Masa Depan',
+                    hintText: 'Ceritakan singkat tentang tujuan karir Anda...',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
 
                 const SizedBox(height: Spacing.xxl),

@@ -12,18 +12,19 @@ import 'auth_interceptor.dart';
 /// to every request for authenticated API calls (CPMK 1).
 class ApiService {
   ApiService({Dio? dio})
-      : _dio = dio ??
-            Dio(
-              BaseOptions(
-                baseUrl: AppConfig.apiBaseUrl,
-                connectTimeout: const Duration(seconds: 10),
-                receiveTimeout: const Duration(seconds: 10),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                },
-              ),
-            ) {
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              baseUrl: AppConfig.apiBaseUrl,
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 10),
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+            ),
+          ) {
     // Add auth interceptor for JWT token attachment
     if (dio == null) {
       _dio.interceptors.add(AuthInterceptor());
@@ -56,6 +57,15 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
   }) {
     return _dio.put<T>(path, data: data, queryParameters: queryParameters);
+  }
+
+  /// PATCH request to the given [path] with optional [data].
+  Future<Response<T>> patch<T>(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _dio.patch<T>(path, data: data, queryParameters: queryParameters);
   }
 
   /// DELETE request to the given [path].

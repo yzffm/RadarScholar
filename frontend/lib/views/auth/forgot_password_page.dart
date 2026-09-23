@@ -13,8 +13,7 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
-  ConsumerState<ForgotPasswordPage> createState() =>
-      _ForgotPasswordPageState();
+  ConsumerState<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
 class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
@@ -50,8 +49,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     });
 
     final authController = ref.read(authControllerProvider.notifier);
-    final success =
-        await authController.resetPassword(_emailController.text.trim());
+    final success = await authController.resetPassword(
+      _emailController.text.trim(),
+    );
 
     if (!mounted) return;
 
@@ -107,7 +107,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
-        child: _isSent ? _buildSuccessContent(context) : _buildFormContent(context),
+        child: _isSent
+            ? _buildSuccessContent(context)
+            : _buildFormContent(context),
       ),
     );
   }
@@ -128,8 +130,11 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.arrow_back_rounded,
-                      size: 16, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.arrow_back_rounded,
+                    size: 16,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Kembali ke Login',
@@ -168,9 +173,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             child: Text(
               'Lupa Kata Sandi?',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade900,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade900,
+              ),
             ),
           ),
           const SizedBox(height: Spacing.xs),
@@ -178,9 +183,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             child: Text(
               'Masukkan email Anda dan kami akan mengirimkan link untuk mengatur ulang kata sandi.',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
             ),
           ),
           const SizedBox(height: Spacing.xl),
@@ -197,14 +202,19 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline_rounded,
-                      color: Colors.red.shade700, size: 18),
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.red.shade700,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style:
-                          TextStyle(color: Colors.red.shade800, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.red.shade800,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -229,13 +239,14 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             enabled: !_isLoading,
             decoration: InputDecoration(
               hintText: 'nama@universitas.ac.id',
-              hintStyle:
-                  TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
               prefixIcon: const Icon(Icons.mail_outline_rounded, size: 20),
               filled: true,
               fillColor: Colors.grey.shade50,
               contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 14),
+                horizontal: 16,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
                 borderSide: BorderSide(color: Colors.grey.shade300),
@@ -247,7 +258,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
                 borderSide: const BorderSide(
-                    color: AppTheme.brandPrimary, width: 1.5),
+                  color: AppTheme.brandPrimary,
+                  width: 1.5,
+                ),
               ),
             ),
             validator: _validateEmail,
@@ -310,18 +323,18 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
         Text(
           'Link Terkirim!',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade900,
-              ),
+            fontWeight: FontWeight.bold,
+            color: Colors.grey.shade900,
+          ),
         ),
         const SizedBox(height: Spacing.sm),
         Text(
           'Kami telah mengirimkan link pemulihan ke email Anda. '
           'Periksa inbox (dan folder spam) untuk melanjutkan.',
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
         ),
         const SizedBox(height: Spacing.xl),
         SizedBox(
@@ -337,10 +350,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             ),
             child: const Text(
               'Kembali ke Login',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
           ),
         ),

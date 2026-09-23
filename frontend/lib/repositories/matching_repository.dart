@@ -29,7 +29,9 @@ class MatchingRepository {
       return MatchedScholarshipListResponse.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
-        throw Exception(e.response?.data['detail'] ?? 'Profil pengguna belum dilengkapi.');
+        throw Exception(
+          e.response?.data['detail'] ?? 'Profil pengguna belum dilengkapi.',
+        );
       }
       throw Exception('Failed to get matched scholarships: ${e.message}');
     } catch (e) {
@@ -37,13 +39,19 @@ class MatchingRepository {
     }
   }
 
-  Future<MatchedScholarshipResponse> getMatchDetail(String scholarshipId) async {
+  Future<MatchedScholarshipResponse> getMatchDetail(
+    String scholarshipId,
+  ) async {
     try {
-      final response = await _apiService.get('/scholarships/$scholarshipId/match');
+      final response = await _apiService.get(
+        '/scholarships/$scholarshipId/match',
+      );
       return MatchedScholarshipResponse.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
-        throw Exception(e.response?.data['detail'] ?? 'Profil pengguna belum dilengkapi.');
+        throw Exception(
+          e.response?.data['detail'] ?? 'Profil pengguna belum dilengkapi.',
+        );
       }
       throw Exception('Failed to get match details: ${e.message}');
     } catch (e) {

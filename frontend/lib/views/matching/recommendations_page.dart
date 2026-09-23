@@ -9,7 +9,8 @@ class RecommendationsPage extends ConsumerStatefulWidget {
   const RecommendationsPage({super.key});
 
   @override
-  ConsumerState<RecommendationsPage> createState() => _RecommendationsPageState();
+  ConsumerState<RecommendationsPage> createState() =>
+      _RecommendationsPageState();
 }
 
 class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
@@ -38,9 +39,11 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.read(matchingControllerProvider.notifier).fetchMatchedScholarships();
+              ref
+                  .read(matchingControllerProvider.notifier)
+                  .fetchMatchedScholarships();
             },
-          )
+          ),
         ],
       ),
       body: state.when(
@@ -63,9 +66,9 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
           Text(
             'Belum Ada Rekomendasi',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade800,
+            ),
           ),
           const SizedBox(height: Spacing.sm),
           Text(
@@ -85,14 +88,18 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline_rounded, size: 48, color: Colors.red.shade400),
+            Icon(
+              Icons.error_outline_rounded,
+              size: 48,
+              color: Colors.red.shade400,
+            ),
             const SizedBox(height: Spacing.md),
             Text(
               'Terjadi Kesalahan',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade900,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade900,
+              ),
             ),
             const SizedBox(height: Spacing.sm),
             Text(
@@ -103,7 +110,9 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
             const SizedBox(height: Spacing.lg),
             ElevatedButton(
               onPressed: () {
-                ref.read(matchingControllerProvider.notifier).fetchMatchedScholarships();
+                ref
+                    .read(matchingControllerProvider.notifier)
+                    .fetchMatchedScholarships();
               },
               child: const Text('Coba Lagi'),
             ),
@@ -116,16 +125,16 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
   Widget _buildSuccessState(data) {
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(matchingControllerProvider.notifier).fetchMatchedScholarships();
+        await ref
+            .read(matchingControllerProvider.notifier)
+            .fetchMatchedScholarships();
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(Spacing.md),
         itemCount: data.items.length,
         itemBuilder: (context, index) {
           final matchedScholarship = data.items[index];
-          return MatchedScholarshipCard(
-            matchedScholarship: matchedScholarship,
-          );
+          return MatchedScholarshipCard(matchedScholarship: matchedScholarship);
         },
       ),
     );

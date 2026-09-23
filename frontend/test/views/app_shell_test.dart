@@ -5,7 +5,9 @@ import 'package:radarscholar/views/shell/app_shell.dart';
 
 void main() {
   group('AppShell Responsive Tests', () {
-    testWidgets('Renders bottom NavigationBar on mobile viewport (< 600px)', (tester) async {
+    testWidgets('Renders bottom NavigationBar on mobile viewport (< 600px)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -14,9 +16,7 @@ void main() {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
-            home: AppShell(
-              child: Text('Mobile Shell Child Content'),
-            ),
+            home: AppShell(child: Text('Mobile Shell Child Content')),
           ),
         ),
       );
@@ -26,7 +26,9 @@ void main() {
       expect(find.text('Mobile Shell Child Content'), findsOneWidget);
     });
 
-    testWidgets('Renders NavigationRail on tablet viewport (600px - 1024px)', (tester) async {
+    testWidgets('Renders NavigationRail on tablet viewport (600px - 1024px)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -35,9 +37,7 @@ void main() {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
-            home: AppShell(
-              child: Text('Tablet Shell Child Content'),
-            ),
+            home: AppShell(child: Text('Tablet Shell Child Content')),
           ),
         ),
       );
@@ -47,7 +47,9 @@ void main() {
       expect(find.text('Tablet Shell Child Content'), findsOneWidget);
     });
 
-    testWidgets('Renders persistent Sidebar on desktop viewport (>= 1024px)', (tester) async {
+    testWidgets('Renders persistent Sidebar on desktop viewport (>= 1024px)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1280, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -56,9 +58,7 @@ void main() {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
-            home: AppShell(
-              child: Text('Desktop Shell Child Content'),
-            ),
+            home: AppShell(child: Text('Desktop Shell Child Content')),
           ),
         ),
       );

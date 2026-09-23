@@ -4,7 +4,7 @@ import '../models/scholarship.dart';
 import '../services/api_service.dart';
 
 /// Provider for ApiService (assuming it's either provided globally or we create a new one)
-/// Let's assume there's a global apiServiceProvider. 
+/// Let's assume there's a global apiServiceProvider.
 /// Let me check if there's an existing one. I will use a simple Provider.
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
@@ -24,15 +24,12 @@ class ScholarshipRepository {
     String? search,
     String? status,
   }) async {
-    final queryParams = <String, dynamic>{
-      'page': page,
-      'page_size': pageSize,
-    };
-    
+    final queryParams = <String, dynamic>{'page': page, 'page_size': pageSize};
+
     if (search != null && search.isNotEmpty) {
       queryParams['search'] = search;
     }
-    
+
     if (status != null && status.isNotEmpty) {
       queryParams['status'] = status;
     }
@@ -41,7 +38,7 @@ class ScholarshipRepository {
       '/api/v1/scholarships',
       queryParameters: queryParams,
     );
-    
+
     return ScholarshipListResponse.fromJson(response.data);
   }
 

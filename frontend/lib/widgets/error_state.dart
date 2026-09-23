@@ -37,29 +37,25 @@ class ErrorState extends StatelessWidget {
                   color: Colors.red.shade50,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  size: 40,
-                  color: Colors.red.shade600,
-                ),
+                child: Icon(icon, size: 40, color: Colors.red.shade600),
               ),
               const SizedBox(height: Spacing.lg),
               Text(
                 title,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red.shade900,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade900,
+                ),
               ),
               const SizedBox(height: Spacing.sm),
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade700,
-                      height: 1.5,
-                    ),
+                  color: Colors.grey.shade700,
+                  height: 1.5,
+                ),
               ),
               if (onRetry != null) ...[
                 const SizedBox(height: Spacing.xl),

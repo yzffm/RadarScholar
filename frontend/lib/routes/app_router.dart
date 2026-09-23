@@ -11,10 +11,12 @@ import '../views/shell/app_shell.dart';
 import '../views/discovery/discovery_page.dart';
 import '../views/saved/saved_page.dart';
 import '../views/applications/applications_page.dart';
+import '../views/applications/application_detail_page.dart';
 import '../views/assistant/assistant_page.dart';
 import '../views/profile/profile_page.dart';
 import '../views/discovery/scholarship_detail_page.dart';
 import '../views/matching/recommendations_page.dart';
+
 /// A Listenable that notifies when the auth state changes.
 /// This is used to trigger GoRouter redirects without rebuilding the whole router.
 class RouterNotifier extends ChangeNotifier {
@@ -46,14 +48,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
       final isAuth = authState is AuthAuthenticated;
-      
+
       // Determine if we are on a public auth route
       final isGoingToLogin = state.matchedLocation == '/login';
       final isGoingToRegister = state.matchedLocation == '/register';
       final isGoingToForgot = state.matchedLocation == '/forgot-password';
       final isGoingToLanding = state.matchedLocation == '/';
-      
-      final isGoingToAuthRoute = isGoingToLogin || isGoingToRegister || isGoingToForgot;
+
+      final isGoingToAuthRoute =
+          isGoingToLogin || isGoingToRegister || isGoingToForgot;
 
       if (!isAuth && !isGoingToAuthRoute && !isGoingToLanding) {
         // Redirect to login if unauthenticated and trying to access a protected route
@@ -129,6 +132,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ScholarshipDetailPage(scholarshipId: id);
+        },
+      ),
+      GoRoute(
+        path: '/applications/:id',
+        name: 'application_detail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ApplicationDetailPage(applicationId: id);
         },
       ),
       GoRoute(

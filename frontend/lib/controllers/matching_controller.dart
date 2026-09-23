@@ -11,7 +11,8 @@ part 'matching_controller.freezed.dart';
 class MatchingState with _$MatchingState {
   const factory MatchingState.initial() = _Initial;
   const factory MatchingState.loading() = _Loading;
-  const factory MatchingState.success(MatchedScholarshipListResponse data) = _Success;
+  const factory MatchingState.success(MatchedScholarshipListResponse data) =
+      _Success;
   const factory MatchingState.empty() = _Empty;
   const factory MatchingState.error(String message) = _Error;
 }
@@ -23,9 +24,9 @@ final matchingRepositoryProvider = Provider<MatchingRepository>((ref) {
 
 final matchingControllerProvider =
     StateNotifierProvider<MatchingController, MatchingState>((ref) {
-  final repository = ref.watch(matchingRepositoryProvider);
-  return MatchingController(repository);
-});
+      final repository = ref.watch(matchingRepositoryProvider);
+      return MatchingController(repository);
+    });
 
 class MatchingController extends StateNotifier<MatchingState> {
   final MatchingRepository _repository;

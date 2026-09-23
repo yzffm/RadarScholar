@@ -42,28 +42,24 @@ class EmptyState extends StatelessWidget {
                     color: AppTheme.brandPrimary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    size: 40,
-                    color: AppTheme.brandPrimary,
-                  ),
+                  child: Icon(icon, size: 40, color: AppTheme.brandPrimary),
                 ),
               const SizedBox(height: Spacing.lg),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: Spacing.sm),
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
-                      height: 1.5,
-                    ),
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
               ),
               if (actionLabel != null && onAction != null) ...[
                 const SizedBox(height: Spacing.xl),

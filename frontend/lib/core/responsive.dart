@@ -39,4 +39,3 @@ class Responsive {
       width >= Breakpoints.mobile && width < Breakpoints.tablet;
   static bool isDesktop(double width) => width >= Breakpoints.tablet;
 }
-

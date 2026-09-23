@@ -19,7 +19,9 @@ void main() {
       expect(find.text('Memuat data beasiswa...'), findsOneWidget);
     });
 
-    testWidgets('EmptyState renders title, message and action button', (tester) async {
+    testWidgets('EmptyState renders title, message and action button', (
+      tester,
+    ) async {
       bool actionTriggered = false;
 
       await tester.pumpWidget(
@@ -43,7 +45,9 @@ void main() {
       expect(actionTriggered, isTrue);
     });
 
-    testWidgets('ErrorState renders error title and retry button', (tester) async {
+    testWidgets('ErrorState renders error title and retry button', (
+      tester,
+    ) async {
       bool retryTriggered = false;
 
       await tester.pumpWidget(

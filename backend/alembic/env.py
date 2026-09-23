@@ -33,6 +33,11 @@ from app.scholarships.models import (  # noqa: E402, F401
     ScholarshipSource,
 )
 from app.users.models import UserProfile  # noqa: E402, F401
+from app.applications.models import (  # noqa: E402, F401
+    SavedScholarship,
+    Application,
+    ApplicationTask,
+)
 
 target_metadata = Base.metadata
 

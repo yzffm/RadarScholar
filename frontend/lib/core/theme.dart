@@ -32,22 +32,14 @@ class AppTheme {
   static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF0A266E),
-      Color(0xFF0D3B98),
-      Color(0xFF1A56DB),
-    ],
+    colors: [Color(0xFF0A266E), Color(0xFF0D3B98), Color(0xFF1A56DB)],
   );
 
   /// Accent sky blue gradient for highlights and badge accents.
   static const LinearGradient accentGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF0284C7),
-      Color(0xFF29A9FF),
-      Color(0xFF38BDF8),
-    ],
+    colors: [Color(0xFF0284C7), Color(0xFF29A9FF), Color(0xFF38BDF8)],
   );
 
   // ─── Light Theme ───────────────────────────────────────────────────
@@ -70,10 +62,7 @@ class AppTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Colors.grey.shade200,
-          width: 1,
-        ),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
       ),
       clipBehavior: Clip.antiAlias,
     ),
@@ -83,48 +72,28 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 14,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 14,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 14,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     chipTheme: ChipThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
     navigationRailTheme: const NavigationRailThemeData(
       labelType: NavigationRailLabelType.all,
@@ -138,14 +107,10 @@ class AppTheme {
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
     dialogTheme: DialogThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
   );
 
@@ -169,10 +134,7 @@ class AppTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Colors.grey.shade800,
-          width: 1,
-        ),
+        side: BorderSide(color: Colors.grey.shade800, width: 1),
       ),
       clipBehavior: Clip.antiAlias,
     ),
@@ -182,48 +144,28 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 14,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 14,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 14,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     chipTheme: ChipThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
     navigationRailTheme: const NavigationRailThemeData(
       labelType: NavigationRailLabelType.all,
@@ -237,23 +179,21 @@ class AppTheme {
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
     dialogTheme: DialogThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
   );
 
   // ─── Typography ────────────────────────────────────────────────────
   static TextTheme _buildTextTheme(Brightness brightness) {
-    final baseColor =
-        brightness == Brightness.light ? Colors.grey.shade900 : Colors.white;
-    final subtleColor =
-        brightness == Brightness.light ? Colors.grey.shade600 : Colors.grey.shade400;
+    final baseColor = brightness == Brightness.light
+        ? Colors.grey.shade900
+        : Colors.white;
+    final subtleColor = brightness == Brightness.light
+        ? Colors.grey.shade600
+        : Colors.grey.shade400;
 
     return TextTheme(
       displayLarge: TextStyle(

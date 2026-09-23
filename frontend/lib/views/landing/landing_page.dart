@@ -92,10 +92,7 @@ class LandingPage extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF0F5FF),
-            Colors.white,
-          ],
+          colors: [Color(0xFFF0F5FF), Colors.white],
         ),
       ),
       child: Padding(
@@ -127,8 +124,9 @@ class LandingPage extends ConsumerWidget {
 
   Widget _buildHeroText(BuildContext context, bool isCentered) {
     final align = isCentered ? TextAlign.center : TextAlign.start;
-    final crossAlign =
-        isCentered ? CrossAxisAlignment.center : CrossAxisAlignment.start;
+    final crossAlign = isCentered
+        ? CrossAxisAlignment.center
+        : CrossAxisAlignment.start;
 
     return Column(
       crossAxisAlignment: crossAlign,
@@ -174,11 +172,11 @@ class LandingPage extends ConsumerWidget {
           'Temukan Beasiswa yang Benar-benar Relevan untuk Masa Depanmu.',
           textAlign: align,
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF0F172A),
-                height: 1.2,
-                fontSize: 36,
-              ),
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF0F172A),
+            height: 1.2,
+            fontSize: 36,
+          ),
         ),
         const SizedBox(height: Spacing.md),
 
@@ -187,10 +185,10 @@ class LandingPage extends ConsumerWidget {
           'RadarScholar bukan sekadar direktori tautan. Kami membantu mahasiswa Indonesia mengevaluasi kriteria resmi secara deterministik, memantau tenggat waktu, dan menyusun berkas dengan pendampingan AI terpercaya.',
           textAlign: align,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey.shade600,
-                height: 1.6,
-                fontSize: 16,
-              ),
+            color: Colors.grey.shade600,
+            height: 1.6,
+            fontSize: 16,
+          ),
         ),
         const SizedBox(height: Spacing.xl),
 
@@ -206,7 +204,10 @@ class LandingPage extends ConsumerWidget {
               label: const Text('Mulai Eksplorasi'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.brandPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
@@ -217,8 +218,14 @@ class LandingPage extends ConsumerWidget {
               icon: const Icon(Icons.login_rounded, size: 20),
               label: const Text('Masuk ke Akun'),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                side: const BorderSide(color: AppTheme.brandPrimary, width: 1.5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                side: const BorderSide(
+                  color: AppTheme.brandPrimary,
+                  width: 1.5,
+                ),
                 foregroundColor: AppTheme.brandPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.md),
@@ -249,10 +256,7 @@ class LandingPage extends ConsumerWidget {
       child: Column(
         children: [
           // Logo Centerpiece
-          AppLogo(
-            mode: AppLogoMode.full,
-            height: 54,
-          ),
+          AppLogo(mode: AppLogoMode.full, height: 54),
           const SizedBox(height: Spacing.lg),
           const Divider(height: 1),
           const SizedBox(height: Spacing.lg),
@@ -320,7 +324,10 @@ class LandingPage extends ConsumerWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
@@ -339,10 +346,7 @@ class LandingPage extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   desc,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -376,9 +380,9 @@ class LandingPage extends ConsumerWidget {
               Text(
                 'Alur Kerja RadarScholar',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0F172A),
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -405,7 +409,9 @@ class LandingPage extends ConsumerWidget {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.brandPrimary.withValues(alpha: 0.3),
+                                    color: AppTheme.brandPrimary.withValues(
+                                      alpha: 0.3,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 3),
                                   ),
@@ -508,9 +514,9 @@ class LandingPage extends ConsumerWidget {
               Text(
                 'Mengapa RadarScholar Berbeda?',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0F172A),
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -547,8 +553,12 @@ class LandingPage extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: (p['color'] as Color).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(AppRadius.md),
+                                color: (p['color'] as Color).withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.md,
+                                ),
                               ),
                               child: Icon(
                                 p['icon'] as IconData,
@@ -623,22 +633,31 @@ class LandingPage extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.hub_outlined, color: Colors.grey.shade700, size: 20),
+                      Icon(
+                        Icons.hub_outlined,
+                        color: Colors.grey.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Status Integrasi Backend (CPMK 1)',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
                   healthAsync.when(
                     data: (health) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
-                        color: health.isHealthy ? Colors.green.shade50 : Colors.red.shade50,
+                        color: health.isHealthy
+                            ? Colors.green.shade50
+                            : Colors.red.shade50,
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         border: Border.all(
                           color: health.isHealthy
@@ -690,7 +709,10 @@ class LandingPage extends ConsumerWidget {
                       ],
                     ),
                     error: (error, _) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.orange.shade50,
                         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -699,12 +721,18 @@ class LandingPage extends ConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.cloud_off_rounded,
-                              color: Colors.orange.shade700, size: 20),
+                          Icon(
+                            Icons.cloud_off_rounded,
+                            color: Colors.orange.shade700,
+                            size: 20,
+                          ),
                           const SizedBox(width: 10),
                           const Text(
                             'Backend lokal belum aktif (jalankan uvicorn)',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
@@ -714,7 +742,10 @@ class LandingPage extends ConsumerWidget {
                   TextButton.icon(
                     onPressed: () => ref.invalidate(healthControllerProvider),
                     icon: const Icon(Icons.refresh_rounded, size: 16),
-                    label: const Text('Perbarui Status', style: TextStyle(fontSize: 12)),
+                    label: const Text(
+                      'Perbarui Status',
+                      style: TextStyle(fontSize: 12),
+                    ),
                   ),
                 ],
               ),
@@ -739,10 +770,7 @@ class LandingPage extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AppLogo(
-                    mode: AppLogoMode.iconOnly,
-                    height: 36,
-                  ),
+                  AppLogo(mode: AppLogoMode.iconOnly, height: 36),
                   Text(
                     'RadarScholar Platform',
                     style: TextStyle(

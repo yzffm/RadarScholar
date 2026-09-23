@@ -8,31 +8,33 @@ import '../../models/scholarship.dart';
 import '../../models/match_result.dart';
 import '../../repositories/scholarship_repository.dart';
 import '../../controllers/matching_controller.dart';
+import '../../controllers/application_controller.dart';
 import '../../widgets/empty_state.dart';
 
 // Provider for fetching single scholarship detail
-final scholarshipDetailProvider = FutureProvider.family<Scholarship, String>((ref, id) async {
+final scholarshipDetailProvider = FutureProvider.family<Scholarship, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(scholarshipRepositoryProvider);
   return repo.getScholarshipDetail(id);
 });
 
 // Provider for fetching match detail if authenticated
-final scholarshipMatchDetailProvider = FutureProvider.family<MatchedScholarshipResponse?, String>((ref, id) async {
-  final isAuth = ref.watch(isAuthenticatedProvider);
-  if (!isAuth) return null;
-  final repo = ref.watch(matchingRepositoryProvider);
-  try {
-    return await repo.getMatchDetail(id);
-  } catch (e) {
-    return null;
-  }
-});
+final scholarshipMatchDetailProvider =
+    FutureProvider.family<MatchedScholarshipResponse?, String>((ref, id) async {
+      final isAuth = ref.watch(isAuthenticatedProvider);
+      if (!isAuth) return null;
+      final repo = ref.watch(matchingRepositoryProvider);
+      try {
+        return await repo.getMatchDetail(id);
+      } catch (e) {
+        return null;
+      }
+    });
 
 class ScholarshipDetailPage extends ConsumerWidget {
-  const ScholarshipDetailPage({
-    super.key,
-    required this.scholarshipId,
-  });
+  const ScholarshipDetailPage({super.key, required this.scholarshipId});
 
   final String scholarshipId;
 
@@ -41,24 +43,27 @@ class ScholarshipDetailPage extends ConsumerWidget {
     final detailAsync = ref.watch(scholarshipDetailProvider(scholarshipId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detail Beasiswa'),
-      ),
+      appBar: AppBar(title: const Text('Detail Beasiswa')),
       body: detailAsync.when(
-        data: (scholarship) => _buildContent(context, scholarship),
+        data: (scholarship) => _buildContent(context, ref, scholarship),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: EmptyState(
             icon: Icons.error_outline,
             title: 'Gagal memuat detail',
-            message: 'Terjadi kesalahan saat memuat detail beasiswa. Silakan coba lagi.',
+            message:
+                'Terjadi kesalahan saat memuat detail beasiswa. Silakan coba lagi.',
           ),
         ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, Scholarship scholarship) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    Scholarship scholarship,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(Spacing.md),
       child: Column(
@@ -70,25 +75,27 @@ class ScholarshipDetailPage extends ConsumerWidget {
           Text(
             scholarship.title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade900,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade900,
+            ),
           ),
           const SizedBox(height: Spacing.xs),
           Text(
             scholarship.source?.providerName ?? 'Penyedia Belum Tersedia',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.brandPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: AppTheme.brandPrimary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: Spacing.md),
-          
+
           // Match Section
           Consumer(
             builder: (context, ref, child) {
-              final matchAsync = ref.watch(scholarshipMatchDetailProvider(scholarship.id));
-              
+              final matchAsync = ref.watch(
+                scholarshipMatchDetailProvider(scholarship.id),
+              );
+
               return matchAsync.when(
                 data: (matchData) {
                   if (matchData == null) {
@@ -113,7 +120,10 @@ class ScholarshipDetailPage extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_rounded, color: Colors.amber.shade800),
+                Icon(
+                  Icons.calendar_today_rounded,
+                  color: Colors.amber.shade800,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -142,95 +152,223 @@ class ScholarshipDetailPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: Spacing.lg),
-          
+
           // Description
           Text(
             'Deskripsi',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: Spacing.sm),
           Text(
             scholarship.description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade800,
-                  height: 1.5,
-                ),
+              color: Colors.grey.shade800,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: Spacing.xl),
-          
+
           // Benefits
           if (scholarship.benefits.isNotEmpty) ...[
             Text(
               'Cakupan Beasiswa',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: Spacing.sm),
-            ...scholarship.benefits.map((b) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          b.description,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
+            ...scholarship.benefits.map(
+              (b) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.green,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        b.description,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: Spacing.xl),
           ],
-          
+
           // Requirements
           if (scholarship.requirements.isNotEmpty) ...[
             Text(
               'Persyaratan',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: Spacing.sm),
-            ...scholarship.requirements.map((r) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            ...scholarship.requirements.map(
+              (r) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.rule_rounded,
+                      color: Colors.blue.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        r.description,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: Spacing.xl),
+          ],
+
+          // Call to action
+          Consumer(
+            builder: (context, ref, child) {
+              final isAuth = ref.watch(isAuthenticatedProvider);
+              if (!isAuth) {
+                return _buildPrimaryAction(scholarship.applicationUrl);
+              }
+
+              final savedState = ref.watch(savedScholarshipsControllerProvider);
+              final isSaved =
+                  savedState is SavedScholarshipsSuccess &&
+                  savedState.savedScholarships.any(
+                    (s) => s.scholarship.id == scholarship.id,
+                  );
+
+              final appState = ref.watch(applicationsControllerProvider);
+              final isTracked =
+                  appState is ApplicationsSuccess &&
+                  appState.applications.any(
+                    (a) => a.scholarship.id == scholarship.id,
+                  );
+
+              return Column(
+                children: [
+                  Row(
                     children: [
-                      Icon(Icons.rule_rounded, color: Colors.blue.shade700, size: 20),
-                      const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          r.description,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            if (isSaved) {
+                              ref
+                                  .read(
+                                    savedScholarshipsControllerProvider
+                                        .notifier,
+                                  )
+                                  .unsaveScholarship(scholarship.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Dihapus dari tersimpan'),
+                                ),
+                              );
+                            } else {
+                              ref
+                                  .read(
+                                    savedScholarshipsControllerProvider
+                                        .notifier,
+                                  )
+                                  .saveScholarship(scholarship.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Disimpan ke daftar'),
+                                ),
+                              );
+                            }
+                          },
+                          icon: Icon(
+                            isSaved ? Icons.bookmark : Icons.bookmark_border,
+                          ),
+                          label: Text(isSaved ? 'Tersimpan' : 'Simpan'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            foregroundColor: AppTheme.brandPrimary,
+                            side: const BorderSide(
+                              color: AppTheme.brandPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: Spacing.sm),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            if (isTracked) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Sudah dilacak')),
+                              );
+                            } else {
+                              ref
+                                  .read(applicationsControllerProvider.notifier)
+                                  .createApplication(scholarship.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Mulai dilacak')),
+                              );
+                            }
+                          },
+                          icon: Icon(
+                            isTracked
+                                ? Icons.check_circle
+                                : Icons.track_changes,
+                          ),
+                          label: Text(isTracked ? 'Dilacak' : 'Lacak Lamaran'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            backgroundColor: isTracked
+                                ? Colors.green
+                                : AppTheme.brandSecondary,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                )),
-            const SizedBox(height: Spacing.xl),
-          ],
-          
-          // Call to action
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => _launchUrl(scholarship.applicationUrl),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: AppTheme.brandPrimary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-              ),
-              child: const Text(
-                'Kunjungi Situs Resmi',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
+                  const SizedBox(height: Spacing.sm),
+                  _buildPrimaryAction(scholarship.applicationUrl),
+                ],
+              );
+            },
           ),
           const SizedBox(height: Spacing.xl),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryAction(String url) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () => _launchUrl(url),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: AppTheme.brandPrimary,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+        ),
+        child: const Text(
+          'Kunjungi Situs Resmi',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -269,9 +407,9 @@ class ScholarshipDetailPage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: AppTheme.brandPrimary.withOpacity(0.05),
+        color: AppTheme.brandPrimary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppTheme.brandPrimary.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.brandPrimary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -280,9 +418,9 @@ class ScholarshipDetailPage extends ConsumerWidget {
           Expanded(
             child: Text(
               'Masuk ke akun untuk melihat kecocokan beasiswa ini dengan profil Anda.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade800),
             ),
           ),
         ],
@@ -299,7 +437,7 @@ class ScholarshipDetailPage extends ConsumerWidget {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -310,11 +448,17 @@ class ScholarshipDetailPage extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: AppTheme.brandPrimary, size: 20),
+              const Icon(
+                Icons.auto_awesome,
+                color: AppTheme.brandPrimary,
+                size: 20,
+              ),
               const SizedBox(width: Spacing.sm),
               Text(
                 'Kecocokan Profil',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               _buildRelevanceBadge(match.relevance),
@@ -323,12 +467,16 @@ class ScholarshipDetailPage extends ConsumerWidget {
           const SizedBox(height: Spacing.sm),
           Text(
             match.explanation,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
           ),
           const SizedBox(height: Spacing.sm),
           const Divider(),
           const SizedBox(height: Spacing.sm),
-          ...match.criterionEvaluations.map((eval) => _buildCriterionRow(context, eval)),
+          ...match.criterionEvaluations.map(
+            (eval) => _buildCriterionRow(context, eval),
+          ),
         ],
       ),
     );

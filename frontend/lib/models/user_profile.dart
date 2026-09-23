@@ -20,9 +20,9 @@ enum DegreeLevel {
   static DegreeLevel? fromString(String? value) {
     if (value == null) return null;
     return DegreeLevel.values.cast<DegreeLevel?>().firstWhere(
-          (e) => e!.value == value,
-          orElse: () => null,
-        );
+      (e) => e!.value == value,
+      orElse: () => null,
+    );
   }
 }
 

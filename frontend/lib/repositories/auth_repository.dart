@@ -32,8 +32,7 @@ class AuthRepository {
   String? get accessToken => _client?.auth.currentSession?.accessToken;
 
   /// Stream of auth state changes.
-  Stream<AuthState>? get onAuthStateChange =>
-      _client?.auth.onAuthStateChange;
+  Stream<AuthState>? get onAuthStateChange => _client?.auth.onAuthStateChange;
 
   /// Sign in with email and password.
   Future<AuthResponse> signInWithEmail({
@@ -45,10 +44,7 @@ class AuthRepository {
       throw AuthException('Layanan autentikasi belum dikonfigurasi.');
     }
 
-    return client.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+    return client.auth.signInWithPassword(email: email, password: password);
   }
 
   /// Register with email and password.
