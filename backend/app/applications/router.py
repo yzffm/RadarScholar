@@ -1,10 +1,9 @@
 import uuid
-from typing import Sequence
+from collections.abc import Sequence
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.database.session import get_db
 from app.applications.schemas import (
     ApplicationCreate,
     ApplicationResponse,
@@ -17,6 +16,7 @@ from app.applications.schemas import (
 from app.applications.service import ApplicationService
 from app.auth.dependencies import get_current_user
 from app.auth.models import AuthUser
+from app.database.session import get_db
 
 router = APIRouter()
 

@@ -1,9 +1,12 @@
+import uuid
+
 import pytest
+
 from app.matching.engine import MatchingEngine
 from app.matching.schemas import CriterionState
 from app.scholarships.models import ScholarshipRequirement
-from app.users.models import UserProfile, DegreeLevel
-import uuid
+from app.users.models import DegreeLevel, UserProfile
+
 
 @pytest.fixture
 def engine():

@@ -9,10 +9,11 @@ Security rules (agents.md §12):
 - No secrets are exposed in error messages.
 """
 
+import logging
+
 import httpx
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-import logging
 
 from app.auth.models import AuthUser
 from app.core.config import settings
@@ -49,7 +50,7 @@ async def get_current_user(
         "apikey": settings.SUPABASE_ANON_KEY,
         "Authorization": f"Bearer {token}",
     }
-    
+
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.get(
@@ -62,7 +63,7 @@ async def get_current_user(
                     detail="Token tidak valid atau sesi telah berakhir. Silakan login kembali.",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-            
+
             user_data = response.json()
             user_id = user_data.get("id")
             email = user_data.get("email", "")

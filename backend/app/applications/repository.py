@@ -1,5 +1,5 @@
 import uuid
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload
@@ -117,7 +117,7 @@ class ApplicationRepository:
         update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
-        
+
         self.session.add(db_obj)
         self.session.commit()
         self.session.refresh(db_obj)
@@ -162,7 +162,7 @@ class ApplicationTaskRepository:
         update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
-        
+
         self.session.add(db_obj)
         self.session.commit()
         self.session.refresh(db_obj)

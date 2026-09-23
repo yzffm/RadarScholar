@@ -25,6 +25,11 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # --- Import all models for autogenerate support ---
+from app.applications.models import (  # noqa: E402, F401
+    Application,
+    ApplicationTask,
+    SavedScholarship,
+)
 from app.database.base import Base  # noqa: E402
 from app.scholarships.models import (  # noqa: E402, F401
     Scholarship,
@@ -33,11 +38,6 @@ from app.scholarships.models import (  # noqa: E402, F401
     ScholarshipSource,
 )
 from app.users.models import UserProfile  # noqa: E402, F401
-from app.applications.models import (  # noqa: E402, F401
-    SavedScholarship,
-    Application,
-    ApplicationTask,
-)
 
 target_metadata = Base.metadata
 

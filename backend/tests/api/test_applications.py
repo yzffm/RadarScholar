@@ -1,14 +1,15 @@
 import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.main import app
+from app.applications.models import SavedScholarship
 from app.auth.dependencies import get_current_user
 from app.auth.models import AuthUser
 from app.database.session import get_db
+from app.main import app
 from app.scholarships.models import Scholarship, ScholarshipSource
-from app.applications.models import SavedScholarship, Application, ApplicationTask
 
 
 @pytest.fixture
@@ -30,7 +31,7 @@ def test_scholarship(db_session: Session):
     source = ScholarshipSource(provider_name="Test Provider", source_url="http://test.com")
     db_session.add(source)
     db_session.commit()
-    
+
     # Create scholarship
     scholarship = Scholarship(
         source_id=source.id,
@@ -42,9 +43,9 @@ def test_scholarship(db_session: Session):
     db_session.add(scholarship)
     db_session.commit()
     db_session.refresh(scholarship)
-    
+
     yield scholarship
-    
+
     # Cleanup
     db_session.delete(scholarship)
     db_session.delete(source)
@@ -56,7 +57,7 @@ def mock_auth():
     user_id = str(uuid.uuid4())
     def _mock_get_current_user():
         return AuthUser(id=user_id, email="test@example.com")
-    
+
     app.dependency_overrides[get_current_user] = _mock_get_current_user
     yield user_id
     app.dependency_overrides.clear()
@@ -81,7 +82,7 @@ def test_save_scholarship(client: TestClient, db_session: Session, test_scholars
 def test_get_saved_scholarships(client: TestClient, db_session: Session, test_scholarship: Scholarship, mock_auth: str):
     """Test listing saved scholarships."""
     client.post(f"/api/v1/scholarships/{test_scholarship.id}/save")
-    
+
     response = client.get("/api/v1/saved-scholarships")
     assert response.status_code == 200
     data = response.json()

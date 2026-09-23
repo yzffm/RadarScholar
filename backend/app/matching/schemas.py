@@ -1,5 +1,6 @@
 import enum
-from typing import Any, List
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -27,13 +28,13 @@ class CriterionEvaluation(BaseModel):
     actual_value: Any | None
     state: CriterionState
     explanation: str
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 
 class MatchResult(BaseModel):
     relevance: RelevanceTier
-    criterion_evaluations: List[CriterionEvaluation]
+    criterion_evaluations: list[CriterionEvaluation]
     matched_count: int
     not_matched_count: int
     unknown_count: int

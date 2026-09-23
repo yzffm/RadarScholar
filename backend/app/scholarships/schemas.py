@@ -13,7 +13,6 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 # ==============================================================================
 # ScholarshipSource Schemas
 # ==============================================================================
-
 from app.matching.schemas import MatchResult
 
 

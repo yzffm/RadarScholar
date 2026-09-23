@@ -10,7 +10,7 @@ class MatchingEngine:
 
     def evaluate(self, profile: UserProfile, requirement: ScholarshipRequirement) -> CriterionEvaluation:
         """Evaluates a single requirement against the user's profile."""
-        
+
         req_type = requirement.requirement_type.upper()
         op = requirement.operator.upper()
         val = requirement.value
@@ -48,7 +48,7 @@ class MatchingEngine:
     def _evaluate_gpa(self, profile: UserProfile, op: str, val: dict[str, Any], desc: str) -> CriterionEvaluation:
         if "gpa" not in val:
             return self._needs_verification("GPA", op, val, "Format nilai GPA tidak sesuai.")
-        
+
         required_gpa = val["gpa"]
         try:
             required_gpa = float(required_gpa)
@@ -130,7 +130,7 @@ class MatchingEngine:
     def _evaluate_semester(self, profile: UserProfile, op: str, val: dict[str, Any], desc: str) -> CriterionEvaluation:
         if "semester" not in val:
             return self._needs_verification("SEMESTER", op, val, "Format nilai Semester tidak sesuai.")
-        
+
         req_sem = val["semester"]
         try:
             req_sem = int(req_sem)
@@ -212,7 +212,7 @@ class MatchingEngine:
     def _evaluate_organization(self, profile: UserProfile, op: str, val: dict[str, Any], desc: str) -> CriterionEvaluation:
         if "required" not in val:
             return self._needs_verification("ORGANIZATION", op, val, "Format nilai Organisasi tidak sesuai.")
-        
+
         req_val = bool(val["required"])
         orgs = profile.organizations or []
         has_orgs = len(orgs) > 0
@@ -237,13 +237,13 @@ class MatchingEngine:
                         state=CriterionState.UNKNOWN,
                         explanation="Pengalaman organisasi belum tersedia pada profil Anda."
                     )
-        
+
         return self._needs_verification("ORGANIZATION", op, val, f"Operator '{op}' tidak didukung untuk Organisasi.")
 
     def _evaluate_education_level(self, profile: UserProfile, op: str, val: dict[str, Any], desc: str) -> CriterionEvaluation:
         if "level" not in val:
             return self._needs_verification("EDUCATION_LEVEL", op, val, "Format tingkat pendidikan tidak sesuai.")
-        
+
         req_level = str(val["level"]).strip().upper()
         actual_level = profile.degree_level
 
@@ -305,7 +305,7 @@ class MatchingEngine:
     def _evaluate_major(self, profile: UserProfile, op: str, val: dict[str, Any], desc: str) -> CriterionEvaluation:
         if "major" not in val and "majors" not in val:
             return self._needs_verification("MAJOR", op, val, "Format nilai jurusan tidak sesuai.")
-        
+
         actual_major = profile.major
 
         if actual_major is None or str(actual_major).strip() == "":
@@ -344,7 +344,7 @@ class MatchingEngine:
             req_majors = val.get("majors", [])
             if not isinstance(req_majors, list):
                 return self._needs_verification("MAJOR", op, val, "Format jurusan untuk IN harus berupa daftar.")
-                
+
             req_majors_norm = [str(m).strip().upper() for m in req_majors]
             if actual_major_norm in req_majors_norm:
                 return CriterionEvaluation(
@@ -364,7 +364,7 @@ class MatchingEngine:
                     state=CriterionState.NOT_MATCH,
                     explanation=f"Jurusan Anda ({actual_major}) tidak termasuk dalam jurusan yang dipersyaratkan."
                 )
-        
+
         return self._needs_verification("MAJOR", op, val, f"Operator '{op}' tidak didukung untuk jurusan.")
 
     def _needs_verification(self, req_type: str, op: str, val: Any, reason: str) -> CriterionEvaluation:

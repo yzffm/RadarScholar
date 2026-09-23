@@ -1,5 +1,5 @@
 import uuid
-from typing import Sequence
+from collections.abc import Sequence
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -41,13 +41,13 @@ class ApplicationService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Beasiswa tidak ditemukan."
             )
-        
+
         # Check duplicate
         existing = self.saved_repo.get_by_user_and_scholarship(user_id, scholarship_id)
         if existing:
             # Idempotent behavior
             return existing
-        
+
         return self.saved_repo.create(user_id, scholarship_id)
 
     def unsave_scholarship(self, user_id: str, scholarship_id: uuid.UUID) -> None:
@@ -76,7 +76,7 @@ class ApplicationService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Beasiswa tidak ditemukan."
             )
-        
+
         # Check duplicate
         existing = self.app_repo.get_by_user_and_scholarship(user_id, obj_in.scholarship_id)
         if existing:
@@ -84,7 +84,7 @@ class ApplicationService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Anda sudah membuat tracking aplikasi untuk beasiswa ini."
             )
-            
+
         return self.app_repo.create(user_id, obj_in)
 
     def update_application(self, application_id: uuid.UUID, user_id: str, obj_in: ApplicationUpdate) -> Application:
@@ -104,7 +104,7 @@ class ApplicationService:
     def _verify_task_ownership(self, task_id: uuid.UUID, application_id: uuid.UUID, user_id: str) -> ApplicationTask:
         # 1. Verify application is owned by user
         application = self.get_application(application_id, user_id)
-        
+
         # 2. Verify task exists
         task = self.task_repo.get_by_id(task_id)
         if not task:
@@ -112,14 +112,14 @@ class ApplicationService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Tugas tidak ditemukan."
             )
-            
+
         # 3. Verify task belongs to application
         if task.application_id != application.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Tugas ini bukan bagian dari aplikasi yang diminta."
             )
-            
+
         return task
 
     def add_task(self, application_id: uuid.UUID, user_id: str, obj_in: ApplicationTaskCreate) -> ApplicationTask:

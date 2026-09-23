@@ -1,7 +1,6 @@
-from typing import List
 
 from app.matching.engine import MatchingEngine
-from app.matching.schemas import CriterionState, MatchResult, RelevanceTier, CriterionEvaluation
+from app.matching.schemas import CriterionEvaluation, CriterionState, MatchResult, RelevanceTier
 from app.scholarships.models import Scholarship
 from app.users.models import UserProfile
 
@@ -12,8 +11,8 @@ class MatchingService:
 
     def match(self, profile: UserProfile, scholarship: Scholarship) -> MatchResult:
         """Evaluates a scholarship against a user profile to generate a match result."""
-        evaluations: List[CriterionEvaluation] = []
-        
+        evaluations: list[CriterionEvaluation] = []
+
         matched_count = 0
         not_matched_count = 0
         unknown_count = 0
@@ -22,7 +21,7 @@ class MatchingService:
         for req in scholarship.requirements:
             eval_result = self.engine.evaluate(profile, req)
             evaluations.append(eval_result)
-            
+
             if eval_result.state == CriterionState.MATCH:
                 matched_count += 1
             elif eval_result.state == CriterionState.NOT_MATCH:
@@ -39,7 +38,7 @@ class MatchingService:
             needs_verification_count=needs_verification_count,
             total_count=len(scholarship.requirements)
         )
-        
+
         explanation = self._generate_overall_explanation(relevance, not_matched_count)
 
         return MatchResult(
@@ -53,26 +52,26 @@ class MatchingService:
         )
 
     def _determine_relevance(
-        self, 
-        matched_count: int, 
-        not_matched_count: int, 
-        unknown_count: int, 
-        needs_verification_count: int, 
+        self,
+        matched_count: int,
+        not_matched_count: int,
+        unknown_count: int,
+        needs_verification_count: int,
         total_count: int
     ) -> RelevanceTier:
-        
+
         if total_count == 0:
             return RelevanceTier.PERLU_DICEK
-            
+
         if not_matched_count > 0:
             return RelevanceTier.TIDAK_MEMENUHI
 
         if matched_count == total_count:
             return RelevanceTier.SANGAT_RELEVAN
-            
+
         if matched_count > 0 and unknown_count == 0 and needs_verification_count == 0:
             return RelevanceTier.SANGAT_RELEVAN
-            
+
         if matched_count > 0 and unknown_count > 0 and needs_verification_count == 0:
             if matched_count >= unknown_count:
                 return RelevanceTier.RELEVAN
@@ -81,10 +80,10 @@ class MatchingService:
 
         if needs_verification_count > 0:
             return RelevanceTier.PERLU_DICEK
-            
+
         if matched_count == 0 and unknown_count > 0:
             return RelevanceTier.BELUM_CUKUP_INFORMASI
-            
+
         return RelevanceTier.PERLU_DICEK
 
     def _generate_overall_explanation(self, relevance: RelevanceTier, not_matched_count: int) -> str:
@@ -100,5 +99,5 @@ class MatchingService:
             return "Data profil Anda belum cukup untuk melakukan evaluasi kecocokan secara akurat."
         elif relevance == RelevanceTier.TIDAK_MEMENUHI:
             return f"Ada {not_matched_count} persyaratan yang tidak terpenuhi oleh profil Anda."
-        
+
         return "Status kecocokan tidak dapat dipastikan."

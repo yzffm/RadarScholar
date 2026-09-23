@@ -3,14 +3,19 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.database.session import get_db
-from app.scholarships import service
-from app.scholarships.schemas import ScholarshipListResponse, ScholarshipResponse, MatchedScholarshipListResponse, MatchedScholarshipResponse
 from app.auth.dependencies import get_current_user
 from app.auth.models import AuthUser
-from app.users.service import get_profile
-from app.matching.service import MatchingService
+from app.database.session import get_db
 from app.matching.schemas import RelevanceTier
+from app.matching.service import MatchingService
+from app.scholarships import service
+from app.scholarships.schemas import (
+    MatchedScholarshipListResponse,
+    MatchedScholarshipResponse,
+    ScholarshipListResponse,
+    ScholarshipResponse,
+)
+from app.users.service import get_profile
 
 router = APIRouter(prefix="/scholarships", tags=["Scholarships"])
 
@@ -57,11 +62,11 @@ def get_matched_scholarships(
         )
 
     # We fetch the active scholarships first (can be optimized later)
-    # The M4 service already supports getting scholarships paginated, but we want all to rank them, 
+    # The M4 service already supports getting scholarships paginated, but we want all to rank them,
     # or a sufficient number. Since MVP, let's fetch all active matching the search, evaluate, rank, then paginate.
     # Note: For production with thousands, this requires a DB-level engine or pre-calculation.
     # We will fetch all active matching search (without pagination), rank them, then paginate.
-    
+
     scholarships_list = service.get_scholarships_paginated(
         db=db,
         page=1,
@@ -72,7 +77,7 @@ def get_matched_scholarships(
 
     matching_service = MatchingService()
     matched_results = []
-    
+
     for sch in scholarships_list:
         match_res = matching_service.match(profile, sch)
         matched_results.append(
@@ -100,7 +105,7 @@ def get_matched_scholarships(
         # 6. title
         dl = item.scholarship.deadline
         dl_ts = dl.timestamp() if dl else float('inf')
-        
+
         return (
             relevance_order[item.match.relevance],
             item.match.not_matched_count,
@@ -170,7 +175,7 @@ def get_scholarship_match(
 
     matching_service = MatchingService()
     match_res = matching_service.match(profile, scholarship)
-    
+
     return MatchedScholarshipResponse(
         scholarship=scholarship,
         match=match_res

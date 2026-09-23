@@ -30,7 +30,7 @@ def test_valid_token_returns_user(mock_settings, mock_get):
     """Valid JWT verified by Supabase should return AuthUser."""
     mock_settings.SUPABASE_URL = "http://test-supabase.com"
     mock_settings.SUPABASE_ANON_KEY = "test-anon-key"
-    
+
     # Mock successful Supabase response
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -59,7 +59,7 @@ def test_invalid_token_returns_401(mock_settings, mock_get):
     """Invalid JWT rejected by Supabase should return 401."""
     mock_settings.SUPABASE_URL = "http://test-supabase.com"
     mock_settings.SUPABASE_ANON_KEY = "test-anon-key"
-    
+
     # Mock failed Supabase response
     mock_response = MagicMock()
     mock_response.status_code = 401
