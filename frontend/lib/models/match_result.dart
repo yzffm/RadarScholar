@@ -41,11 +41,13 @@ class CriterionEvaluation with _$CriterionEvaluation {
 class MatchResult with _$MatchResult {
   const factory MatchResult({
     required RelevanceTier relevance,
-    @JsonKey(name: 'criterion_evaluations') required List<CriterionEvaluation> criterionEvaluations,
+    @JsonKey(name: 'criterion_evaluations')
+    required List<CriterionEvaluation> criterionEvaluations,
     @JsonKey(name: 'matched_count') required int matchedCount,
     @JsonKey(name: 'not_matched_count') required int notMatchedCount,
     @JsonKey(name: 'unknown_count') required int unknownCount,
-    @JsonKey(name: 'needs_verification_count') required int needsVerificationCount,
+    @JsonKey(name: 'needs_verification_count')
+    required int needsVerificationCount,
     required String explanation,
   }) = _MatchResult;
 

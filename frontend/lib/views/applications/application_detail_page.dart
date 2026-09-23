@@ -6,6 +6,7 @@ import '../../controllers/application_controller.dart';
 import '../../repositories/application_repository.dart';
 import '../../core/theme.dart';
 import '../../models/application.dart';
+import 'application_assistant_page.dart';
 
 class ApplicationDetailPage extends ConsumerStatefulWidget {
   final String applicationId;
@@ -220,6 +221,18 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) =>
+                ApplicationAssistantSheet(applicationId: widget.applicationId),
+          );
+        },
+        icon: const Icon(Icons.auto_awesome),
+        label: const Text('Asisten AI'),
       ),
     );
   }
