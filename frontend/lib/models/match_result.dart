@@ -25,10 +25,10 @@ enum RelevanceTier {
 @freezed
 class CriterionEvaluation with _$CriterionEvaluation {
   const factory CriterionEvaluation({
-    required String requirementType,
+    @JsonKey(name: 'requirement_type') required String requirementType,
     required String operator,
-    required dynamic requiredValue,
-    dynamic actualValue,
+    @JsonKey(name: 'required_value') required dynamic requiredValue,
+    @JsonKey(name: 'actual_value') dynamic actualValue,
     required CriterionState state,
     required String explanation,
   }) = _CriterionEvaluation;
@@ -41,11 +41,11 @@ class CriterionEvaluation with _$CriterionEvaluation {
 class MatchResult with _$MatchResult {
   const factory MatchResult({
     required RelevanceTier relevance,
-    required List<CriterionEvaluation> criterionEvaluations,
-    required int matchedCount,
-    required int notMatchedCount,
-    required int unknownCount,
-    required int needsVerificationCount,
+    @JsonKey(name: 'criterion_evaluations') required List<CriterionEvaluation> criterionEvaluations,
+    @JsonKey(name: 'matched_count') required int matchedCount,
+    @JsonKey(name: 'not_matched_count') required int notMatchedCount,
+    @JsonKey(name: 'unknown_count') required int unknownCount,
+    @JsonKey(name: 'needs_verification_count') required int needsVerificationCount,
     required String explanation,
   }) = _MatchResult;
 

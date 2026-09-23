@@ -9,10 +9,10 @@ part of 'match_result.dart';
 _$CriterionEvaluationImpl _$$CriterionEvaluationImplFromJson(
   Map<String, dynamic> json,
 ) => _$CriterionEvaluationImpl(
-  requirementType: json['requirementType'] as String,
+  requirementType: json['requirement_type'] as String,
   operator: json['operator'] as String,
-  requiredValue: json['requiredValue'],
-  actualValue: json['actualValue'],
+  requiredValue: json['required_value'],
+  actualValue: json['actual_value'],
   state: $enumDecode(_$CriterionStateEnumMap, json['state']),
   explanation: json['explanation'] as String,
 );
@@ -20,10 +20,10 @@ _$CriterionEvaluationImpl _$$CriterionEvaluationImplFromJson(
 Map<String, dynamic> _$$CriterionEvaluationImplToJson(
   _$CriterionEvaluationImpl instance,
 ) => <String, dynamic>{
-  'requirementType': instance.requirementType,
+  'requirement_type': instance.requirementType,
   'operator': instance.operator,
-  'requiredValue': instance.requiredValue,
-  'actualValue': instance.actualValue,
+  'required_value': instance.requiredValue,
+  'actual_value': instance.actualValue,
   'state': _$CriterionStateEnumMap[instance.state]!,
   'explanation': instance.explanation,
 };
@@ -39,24 +39,24 @@ const _$CriterionStateEnumMap = {
 _$MatchResultImpl _$$MatchResultImplFromJson(Map<String, dynamic> json) =>
     _$MatchResultImpl(
       relevance: $enumDecode(_$RelevanceTierEnumMap, json['relevance']),
-      criterionEvaluations: (json['criterionEvaluations'] as List<dynamic>)
+      criterionEvaluations: (json['criterion_evaluations'] as List<dynamic>)
           .map((e) => CriterionEvaluation.fromJson(e as Map<String, dynamic>))
           .toList(),
-      matchedCount: (json['matchedCount'] as num).toInt(),
-      notMatchedCount: (json['notMatchedCount'] as num).toInt(),
-      unknownCount: (json['unknownCount'] as num).toInt(),
-      needsVerificationCount: (json['needsVerificationCount'] as num).toInt(),
+      matchedCount: (json['matched_count'] as num).toInt(),
+      notMatchedCount: (json['not_matched_count'] as num).toInt(),
+      unknownCount: (json['unknown_count'] as num).toInt(),
+      needsVerificationCount: (json['needs_verification_count'] as num).toInt(),
       explanation: json['explanation'] as String,
     );
 
 Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
     <String, dynamic>{
       'relevance': _$RelevanceTierEnumMap[instance.relevance]!,
-      'criterionEvaluations': instance.criterionEvaluations,
-      'matchedCount': instance.matchedCount,
-      'notMatchedCount': instance.notMatchedCount,
-      'unknownCount': instance.unknownCount,
-      'needsVerificationCount': instance.needsVerificationCount,
+      'criterion_evaluations': instance.criterionEvaluations,
+      'matched_count': instance.matchedCount,
+      'not_matched_count': instance.notMatchedCount,
+      'unknown_count': instance.unknownCount,
+      'needs_verification_count': instance.needsVerificationCount,
       'explanation': instance.explanation,
     };
 

@@ -22,7 +22,7 @@ class MatchingRepository {
 
     try {
       final response = await _apiService.get(
-        '/scholarships/matched',
+        '/api/v1/scholarships/matched',
         queryParameters: queryParameters,
       );
 
@@ -44,7 +44,7 @@ class MatchingRepository {
   ) async {
     try {
       final response = await _apiService.get(
-        '/scholarships/$scholarshipId/match',
+        '/api/v1/scholarships/$scholarshipId/match',
       );
       return MatchedScholarshipResponse.fromJson(response.data);
     } on DioException catch (e) {

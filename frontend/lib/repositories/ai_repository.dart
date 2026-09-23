@@ -18,7 +18,7 @@ class AiRepository {
   ) async {
     try {
       final response = await _apiService.get(
-        '/scholarships/$scholarshipId/ai-explanation',
+        '/api/v1/scholarships/$scholarshipId/ai-explanation',
       );
       return MatchExplanation.fromJson(response.data);
     } on DioException catch (e) {

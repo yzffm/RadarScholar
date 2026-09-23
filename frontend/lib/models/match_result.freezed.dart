@@ -21,9 +21,12 @@ CriterionEvaluation _$CriterionEvaluationFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$CriterionEvaluation {
+  @JsonKey(name: 'requirement_type')
   String get requirementType => throw _privateConstructorUsedError;
   String get operator => throw _privateConstructorUsedError;
+  @JsonKey(name: 'required_value')
   dynamic get requiredValue => throw _privateConstructorUsedError;
+  @JsonKey(name: 'actual_value')
   dynamic get actualValue => throw _privateConstructorUsedError;
   CriterionState get state => throw _privateConstructorUsedError;
   String get explanation => throw _privateConstructorUsedError;
@@ -46,10 +49,10 @@ abstract class $CriterionEvaluationCopyWith<$Res> {
   ) = _$CriterionEvaluationCopyWithImpl<$Res, CriterionEvaluation>;
   @useResult
   $Res call({
-    String requirementType,
+    @JsonKey(name: 'requirement_type') String requirementType,
     String operator,
-    dynamic requiredValue,
-    dynamic actualValue,
+    @JsonKey(name: 'required_value') dynamic requiredValue,
+    @JsonKey(name: 'actual_value') dynamic actualValue,
     CriterionState state,
     String explanation,
   });
@@ -119,10 +122,10 @@ abstract class _$$CriterionEvaluationImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String requirementType,
+    @JsonKey(name: 'requirement_type') String requirementType,
     String operator,
-    dynamic requiredValue,
-    dynamic actualValue,
+    @JsonKey(name: 'required_value') dynamic requiredValue,
+    @JsonKey(name: 'actual_value') dynamic actualValue,
     CriterionState state,
     String explanation,
   });
@@ -184,10 +187,10 @@ class __$$CriterionEvaluationImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$CriterionEvaluationImpl implements _CriterionEvaluation {
   const _$CriterionEvaluationImpl({
-    required this.requirementType,
+    @JsonKey(name: 'requirement_type') required this.requirementType,
     required this.operator,
-    required this.requiredValue,
-    this.actualValue,
+    @JsonKey(name: 'required_value') required this.requiredValue,
+    @JsonKey(name: 'actual_value') this.actualValue,
     required this.state,
     required this.explanation,
   });
@@ -196,12 +199,15 @@ class _$CriterionEvaluationImpl implements _CriterionEvaluation {
       _$$CriterionEvaluationImplFromJson(json);
 
   @override
+  @JsonKey(name: 'requirement_type')
   final String requirementType;
   @override
   final String operator;
   @override
+  @JsonKey(name: 'required_value')
   final dynamic requiredValue;
   @override
+  @JsonKey(name: 'actual_value')
   final dynamic actualValue;
   @override
   final CriterionState state;
@@ -266,10 +272,10 @@ class _$CriterionEvaluationImpl implements _CriterionEvaluation {
 
 abstract class _CriterionEvaluation implements CriterionEvaluation {
   const factory _CriterionEvaluation({
-    required final String requirementType,
+    @JsonKey(name: 'requirement_type') required final String requirementType,
     required final String operator,
-    required final dynamic requiredValue,
-    final dynamic actualValue,
+    @JsonKey(name: 'required_value') required final dynamic requiredValue,
+    @JsonKey(name: 'actual_value') final dynamic actualValue,
     required final CriterionState state,
     required final String explanation,
   }) = _$CriterionEvaluationImpl;
@@ -278,12 +284,15 @@ abstract class _CriterionEvaluation implements CriterionEvaluation {
       _$CriterionEvaluationImpl.fromJson;
 
   @override
+  @JsonKey(name: 'requirement_type')
   String get requirementType;
   @override
   String get operator;
   @override
+  @JsonKey(name: 'required_value')
   dynamic get requiredValue;
   @override
+  @JsonKey(name: 'actual_value')
   dynamic get actualValue;
   @override
   CriterionState get state;
@@ -305,11 +314,16 @@ MatchResult _$MatchResultFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$MatchResult {
   RelevanceTier get relevance => throw _privateConstructorUsedError;
+  @JsonKey(name: 'criterion_evaluations')
   List<CriterionEvaluation> get criterionEvaluations =>
       throw _privateConstructorUsedError;
+  @JsonKey(name: 'matched_count')
   int get matchedCount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'not_matched_count')
   int get notMatchedCount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unknown_count')
   int get unknownCount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'needs_verification_count')
   int get needsVerificationCount => throw _privateConstructorUsedError;
   String get explanation => throw _privateConstructorUsedError;
 
@@ -332,11 +346,12 @@ abstract class $MatchResultCopyWith<$Res> {
   @useResult
   $Res call({
     RelevanceTier relevance,
+    @JsonKey(name: 'criterion_evaluations')
     List<CriterionEvaluation> criterionEvaluations,
-    int matchedCount,
-    int notMatchedCount,
-    int unknownCount,
-    int needsVerificationCount,
+    @JsonKey(name: 'matched_count') int matchedCount,
+    @JsonKey(name: 'not_matched_count') int notMatchedCount,
+    @JsonKey(name: 'unknown_count') int unknownCount,
+    @JsonKey(name: 'needs_verification_count') int needsVerificationCount,
     String explanation,
   });
 }
@@ -411,11 +426,12 @@ abstract class _$$MatchResultImplCopyWith<$Res>
   @useResult
   $Res call({
     RelevanceTier relevance,
+    @JsonKey(name: 'criterion_evaluations')
     List<CriterionEvaluation> criterionEvaluations,
-    int matchedCount,
-    int notMatchedCount,
-    int unknownCount,
-    int needsVerificationCount,
+    @JsonKey(name: 'matched_count') int matchedCount,
+    @JsonKey(name: 'not_matched_count') int notMatchedCount,
+    @JsonKey(name: 'unknown_count') int unknownCount,
+    @JsonKey(name: 'needs_verification_count') int needsVerificationCount,
     String explanation,
   });
 }
@@ -482,10 +498,12 @@ class __$$MatchResultImplCopyWithImpl<$Res>
 class _$MatchResultImpl implements _MatchResult {
   const _$MatchResultImpl({
     required this.relevance,
+    @JsonKey(name: 'criterion_evaluations')
     required final List<CriterionEvaluation> criterionEvaluations,
-    required this.matchedCount,
-    required this.notMatchedCount,
-    required this.unknownCount,
+    @JsonKey(name: 'matched_count') required this.matchedCount,
+    @JsonKey(name: 'not_matched_count') required this.notMatchedCount,
+    @JsonKey(name: 'unknown_count') required this.unknownCount,
+    @JsonKey(name: 'needs_verification_count')
     required this.needsVerificationCount,
     required this.explanation,
   }) : _criterionEvaluations = criterionEvaluations;
@@ -497,6 +515,7 @@ class _$MatchResultImpl implements _MatchResult {
   final RelevanceTier relevance;
   final List<CriterionEvaluation> _criterionEvaluations;
   @override
+  @JsonKey(name: 'criterion_evaluations')
   List<CriterionEvaluation> get criterionEvaluations {
     if (_criterionEvaluations is EqualUnmodifiableListView)
       return _criterionEvaluations;
@@ -505,12 +524,16 @@ class _$MatchResultImpl implements _MatchResult {
   }
 
   @override
+  @JsonKey(name: 'matched_count')
   final int matchedCount;
   @override
+  @JsonKey(name: 'not_matched_count')
   final int notMatchedCount;
   @override
+  @JsonKey(name: 'unknown_count')
   final int unknownCount;
   @override
+  @JsonKey(name: 'needs_verification_count')
   final int needsVerificationCount;
   @override
   final String explanation;
@@ -573,10 +596,12 @@ class _$MatchResultImpl implements _MatchResult {
 abstract class _MatchResult implements MatchResult {
   const factory _MatchResult({
     required final RelevanceTier relevance,
+    @JsonKey(name: 'criterion_evaluations')
     required final List<CriterionEvaluation> criterionEvaluations,
-    required final int matchedCount,
-    required final int notMatchedCount,
-    required final int unknownCount,
+    @JsonKey(name: 'matched_count') required final int matchedCount,
+    @JsonKey(name: 'not_matched_count') required final int notMatchedCount,
+    @JsonKey(name: 'unknown_count') required final int unknownCount,
+    @JsonKey(name: 'needs_verification_count')
     required final int needsVerificationCount,
     required final String explanation,
   }) = _$MatchResultImpl;
@@ -587,14 +612,19 @@ abstract class _MatchResult implements MatchResult {
   @override
   RelevanceTier get relevance;
   @override
+  @JsonKey(name: 'criterion_evaluations')
   List<CriterionEvaluation> get criterionEvaluations;
   @override
+  @JsonKey(name: 'matched_count')
   int get matchedCount;
   @override
+  @JsonKey(name: 'not_matched_count')
   int get notMatchedCount;
   @override
+  @JsonKey(name: 'unknown_count')
   int get unknownCount;
   @override
+  @JsonKey(name: 'needs_verification_count')
   int get needsVerificationCount;
   @override
   String get explanation;
