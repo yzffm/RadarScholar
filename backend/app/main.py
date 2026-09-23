@@ -37,6 +37,9 @@ def create_app() -> FastAPI:
     application.include_router(health_router, tags=["Health"])
     application.include_router(users_router)
 
+    from app.scholarships.router import router as scholarships_router
+    application.include_router(scholarships_router, prefix="/api/v1")
+
     return application
 
 

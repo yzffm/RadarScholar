@@ -7,11 +7,10 @@ Verifies that:
 - Expired tokens raise 401
 """
 
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import jwt
-import pytest
-from datetime import datetime, timedelta, timezone
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 
@@ -40,7 +39,7 @@ def _make_token(
     expired: bool = False,
 ) -> str:
     """Helper to create a JWT token for testing."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload = {
         "sub": user_id,
         "email": email,

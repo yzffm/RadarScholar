@@ -13,7 +13,8 @@ import '../views/saved/saved_page.dart';
 import '../views/applications/applications_page.dart';
 import '../views/assistant/assistant_page.dart';
 import '../views/profile/profile_page.dart';
-
+import '../views/discovery/scholarship_detail_page.dart';
+import '../views/matching/recommendations_page.dart';
 /// A Listenable that notifies when the auth state changes.
 /// This is used to trigger GoRouter redirects without rebuilding the whole router.
 class RouterNotifier extends ChangeNotifier {
@@ -121,6 +122,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const ProfilePage(),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/scholarships/:id',
+        name: 'scholarship_detail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ScholarshipDetailPage(scholarshipId: id);
+        },
+      ),
+      GoRoute(
+        path: '/recommendations',
+        name: 'recommendations',
+        builder: (context, state) => const RecommendationsPage(),
       ),
     ],
   );

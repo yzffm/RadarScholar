@@ -162,10 +162,10 @@ Copy `backend/.env.example` to `backend/.env` and fill in values:
 |-----------|-------------|--------|
 | M0 | Product Contract & Repository Foundation | ✅ |
 | M1 | Design System & App Shell | ✅ |
-| M2 | Authentication & Profile | ⬜ |
-| M3 | Scholarship Data Foundation | ⬜ |
-| M4 | Scholarship Discovery | ⬜ |
-| M5 | Matching | ⬜ |
+| M2 | Authentication & Profile | ✅ |
+| M3 | Scholarship Data Foundation | ✅ |
+| M4 | Scholarship Discovery | ✅ |
+| M5 | Matching | ✅ |
 | M6 | Saved & Application Tracking | ⬜ |
 | M7 | Curated Crawler | ⬜ |
 | M8 | AI Intelligence | ⬜ |
@@ -182,6 +182,15 @@ Copy `backend/.env.example` to `backend/.env` and fill in values:
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/health` | Backend health check |
+
+### M4 & M5
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/scholarships` | Discover scholarships (paginated, search, filter) |
+| GET | `/api/v1/scholarships/{id}` | Get single scholarship detail |
+| GET | `/api/v1/scholarships/matched` | Discover scholarships matched against authenticated user's profile |
+| GET | `/api/v1/scholarships/{id}/match` | Get match evaluation for a single scholarship against authenticated user's profile |
 
 ## License
 

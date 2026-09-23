@@ -707,7 +707,22 @@ AI assistance
 Official application
 ```
 
-## 19. Course Mapping
+## 19. API Endpoints
+
+### M0
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Backend health check |
+
+### M4 & M5
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/scholarships` | Discover scholarships (paginated, search, filter) |
+| GET | `/api/v1/scholarships/{id}` | Get single scholarship detail |
+| GET | `/api/v1/scholarships/matched` | Discover scholarships matched against authenticated user's profile |
+| GET | `/api/v1/scholarships/{id}/match` | Get match evaluation for a single scholarship against authenticated user's profile |
+
+## 20. Course Mapping
 
 | Component | Relevant Course Area | Evidence |
 |---|---|---|

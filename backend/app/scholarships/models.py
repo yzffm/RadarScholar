@@ -1,12 +1,13 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional, Any
+from typing import Any
 
-from sqlalchemy import String, Boolean, DateTime, Text, ForeignKey, JSON
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
+
 
 class ScholarshipSource(Base):
     __tablename__ = "scholarship_sources"
@@ -20,7 +21,7 @@ class ScholarshipSource(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    scholarships: Mapped[List["Scholarship"]] = relationship(back_populates="source", cascade="all, delete-orphan")
+    scholarships: Mapped[list["Scholarship"]] = relationship(back_populates="source", cascade="all, delete-orphan")
 
 
 class Scholarship(Base):
@@ -31,7 +32,7 @@ class Scholarship(Base):
     title: Mapped[str] = mapped_column(String, index=True)
     summary: Mapped[str] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text)
-    deadline: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     application_url: Mapped[str] = mapped_column(String)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -39,8 +40,8 @@ class Scholarship(Base):
 
     # Relationships
     source: Mapped["ScholarshipSource"] = relationship(back_populates="scholarships")
-    benefits: Mapped[List["ScholarshipBenefit"]] = relationship(back_populates="scholarship", cascade="all, delete-orphan")
-    requirements: Mapped[List["ScholarshipRequirement"]] = relationship(back_populates="scholarship", cascade="all, delete-orphan")
+    benefits: Mapped[list["ScholarshipBenefit"]] = relationship(back_populates="scholarship", cascade="all, delete-orphan")
+    requirements: Mapped[list["ScholarshipRequirement"]] = relationship(back_populates="scholarship", cascade="all, delete-orphan")
 
 
 class ScholarshipBenefit(Base):

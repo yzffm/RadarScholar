@@ -1,8 +1,9 @@
 """Tests for user profile schemas validation."""
 
 import pytest
-from app.users.schemas import UserProfileCreate, UserProfileUpdate, DegreeLevelSchema
 from pydantic import ValidationError
+
+from app.users.schemas import DegreeLevelSchema, UserProfileCreate, UserProfileUpdate
 
 
 def test_profile_create_all_optional():

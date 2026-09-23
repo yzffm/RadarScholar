@@ -4,8 +4,8 @@ Defines schemas for request and response validation for scholarship
 data, sources, requirements, and benefits.
 """
 
-from datetime import date, datetime
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
@@ -13,6 +13,9 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 # ==============================================================================
 # ScholarshipSource Schemas
 # ==============================================================================
+
+from app.matching.schemas import MatchResult
+
 
 class ScholarshipSourceBase(BaseModel):
     provider_name: str
@@ -72,28 +75,43 @@ class ScholarshipRequirementResponse(ScholarshipRequirementBase):
 
 class ScholarshipBase(BaseModel):
     title: str
+    summary: str
     description: str
-    degree_level: str
-    status: str
-    deadline: Optional[date] = None
-    funding_type: str
-    target_country: Optional[str] = None
-    original_url: HttpUrl
+    deadline: datetime | None = None
+    application_url: str
+    is_active: bool = True
 
 class ScholarshipCreate(ScholarshipBase):
     source_id: UUID
-    benefits: Optional[List[ScholarshipBenefitCreate]] = Field(default_factory=list)
-    requirements: Optional[List[ScholarshipRequirementCreate]] = Field(default_factory=list)
+    benefits: list[ScholarshipBenefitCreate] | None = Field(default_factory=list)
+    requirements: list[ScholarshipRequirementCreate] | None = Field(default_factory=list)
 
 class ScholarshipResponse(ScholarshipBase):
     id: UUID
     source_id: UUID
     created_at: datetime
     updated_at: datetime
-    
-    # We can include nested lists of benefits and requirements in the response
-    benefits: List[ScholarshipBenefitResponse] = Field(default_factory=list)
-    requirements: List[ScholarshipRequirementResponse] = Field(default_factory=list)
-    source: Optional[ScholarshipSourceResponse] = None
+
+    benefits: list[ScholarshipBenefitResponse] = Field(default_factory=list)
+    requirements: list[ScholarshipRequirementResponse] = Field(default_factory=list)
+    source: ScholarshipSourceResponse | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+class ScholarshipListResponse(BaseModel):
+    items: list[ScholarshipResponse]
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
+
+class MatchedScholarshipResponse(BaseModel):
+    scholarship: ScholarshipResponse
+    match: MatchResult
+
+class MatchedScholarshipListResponse(BaseModel):
+    items: list[MatchedScholarshipResponse]
+    page: int
+    page_size: int
+    total: int
+    total_pages: int

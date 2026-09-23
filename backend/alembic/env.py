@@ -10,9 +10,8 @@ import os
 import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # Add the backend directory to sys.path so we can import app modules.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -27,8 +26,13 @@ if config.config_file_name is not None:
 
 # --- Import all models for autogenerate support ---
 from app.database.base import Base  # noqa: E402
+from app.scholarships.models import (  # noqa: E402, F401
+    Scholarship,
+    ScholarshipBenefit,
+    ScholarshipRequirement,
+    ScholarshipSource,
+)
 from app.users.models import UserProfile  # noqa: E402, F401
-from app.scholarships.models import ScholarshipSource, Scholarship, ScholarshipBenefit, ScholarshipRequirement  # noqa: E402, F401
 
 target_metadata = Base.metadata
 

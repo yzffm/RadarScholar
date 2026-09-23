@@ -8,9 +8,9 @@ avoid field mismatches in future milestones (M5 Matching, M9 AI Assistant).
 """
 
 import enum
-from datetime import datetime
 
 from sqlalchemy import (
+    JSON,
     Column,
     DateTime,
     Enum,
@@ -18,7 +18,6 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
-    JSON,
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
