@@ -166,13 +166,15 @@ Copy `backend/.env.example` to `backend/.env` and fill in values:
 | M3 | Scholarship Data Foundation | ✅ |
 | M4 | Scholarship Discovery | ✅ |
 | M5 | Matching | ✅ |
-| M6 | Saved & Application Tracking | ⬜ |
-| M7 | Curated Crawler | ⬜ |
-| M8 | AI Intelligence | ⬜ |
-| M9 | AI Application Assistant | ⬜ |
-| M10 | Source Monitoring/Admin | ⬜ |
+| M6 | Saved & Application Tracking | ✅ |
+| M7 | Curated Crawler | ✅ |
+| M8 | AI Intelligence | ✅ |
+| M9 | AI Application Assistant | ✅ |
+| M10 | Source Monitoring/Admin | 🟨 |
 | M11 | Hardening | ⬜ |
 | M12 | Deployment/Release | ⬜ |
+
+> ✅ Implemented & test-covered · 🟨 Implemented, test coverage pending · ⬜ Not started
 
 
 ## API Endpoints
