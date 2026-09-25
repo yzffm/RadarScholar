@@ -118,4 +118,7 @@ class UserProfileResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    # Admin
+    is_admin: bool = False
+
     model_config = {"from_attributes": True}

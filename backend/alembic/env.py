@@ -38,6 +38,7 @@ from app.scholarships.models import (  # noqa: E402, F401
     ScholarshipSource,
 )
 from app.users.models import UserProfile  # noqa: E402, F401
+from app.crawler.models import CrawlRun  # noqa: E402, F401
 
 target_metadata = Base.metadata
 

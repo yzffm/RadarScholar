@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 
 from app.crawler.base import BaseScraper, ScrapedScholarship
 from app.crawler.registry import SourceEntry, get_enabled_sources
+from app.crawler.models import CrawlRun
 from app.scholarships.models import (
     Scholarship,
     ScholarshipBenefit,
@@ -149,7 +150,52 @@ class CrawlerPipeline:
                     result.errors.append(f"[{key}] {src_result.error}")
 
         result.finished_at = datetime.utcnow()
+        
+        if not self.dry_run:
+            self._save_run_result(result)
+            
         return result
+
+    def _save_run_result(self, result: CrawlerRunResult) -> None:
+        """Persist the crawl run result to the database."""
+        try:
+            status = "FAILED" if result.sources_failed > 0 else "SUCCESS"
+            if result.sources_failed > 0 and result.sources_succeeded > 0:
+                status = "PARTIAL_SUCCESS"
+
+            source_results_dict = [
+                {
+                    "source_key": sr.source_key,
+                    "provider_name": sr.provider_name,
+                    "success": sr.success,
+                    "created": sr.created,
+                    "updated": sr.updated,
+                    "skipped": sr.skipped,
+                    "error": sr.error
+                }
+                for sr in result.source_results
+            ]
+
+            run_record = CrawlRun(
+                id=uuid.uuid4(),
+                started_at=result.started_at,
+                finished_at=result.finished_at,
+                status=status,
+                sources_attempted=result.sources_attempted,
+                sources_succeeded=result.sources_succeeded,
+                sources_failed=result.sources_failed,
+                scholarships_created=result.scholarships_created,
+                scholarships_updated=result.scholarships_updated,
+                scholarships_skipped=result.scholarships_skipped,
+                errors=result.errors,
+                source_results=source_results_dict,
+            )
+            self.db.add(run_record)
+            self.db.commit()
+            logger.info("Saved crawl run result to database.")
+        except Exception as exc:
+            logger.error("Failed to save crawl run result: %s", exc, exc_info=True)
+            self.db.rollback()
 
     def _process_source(self, key: str, entry: SourceEntry) -> SourceResult:
         """Process a single curated source."""

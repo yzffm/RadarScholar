@@ -16,6 +16,7 @@ import '../views/assistant/assistant_page.dart';
 import '../views/profile/profile_page.dart';
 import '../views/discovery/scholarship_detail_page.dart';
 import '../views/matching/recommendations_page.dart';
+import '../views/admin/admin_dashboard_page.dart';
 
 /// A Listenable that notifies when the auth state changes.
 /// This is used to trigger GoRouter redirects without rebuilding the whole router.
@@ -123,6 +124,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/profile',
             name: 'profile',
             builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: '/admin',
+            name: 'admin',
+            builder: (context, state) => const AdminDashboardPage(),
           ),
         ],
       ),

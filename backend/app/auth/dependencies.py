@@ -17,6 +17,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.auth.models import AuthUser
 from app.core.config import settings
+from app.database.session import get_db
+from sqlalchemy.orm import Session
+from app.users.models import UserProfile
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 logger = logging.getLogger(__name__)
@@ -82,3 +85,17 @@ async def get_current_user(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Gagal menghubungi layanan autentikasi.",
         )
+
+async def get_admin_user(
+    user: AuthUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> AuthUser:
+    """Check if the current user has admin privileges."""
+    profile = db.query(UserProfile).filter(UserProfile.id == user.id).first()
+    if not profile or not profile.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Akses ditolak. Endpoint ini memerlukan hak akses administrator.",
+        )
+    return user
+

@@ -58,6 +58,9 @@ class UserProfile {
   // Timestamps
   final DateTime createdAt;
   final DateTime updatedAt;
+  
+  // Admin
+  final bool isAdmin;
 
   const UserProfile({
     required this.id,
@@ -82,6 +85,7 @@ class UserProfile {
     this.goals,
     required this.createdAt,
     required this.updatedAt,
+    this.isAdmin = false,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -108,6 +112,7 @@ class UserProfile {
       goals: json['goals'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      isAdmin: json['is_admin'] as bool? ?? false,
     );
   }
 
@@ -176,6 +181,7 @@ class UserProfile {
       goals: goals ?? this.goals,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      isAdmin: isAdmin,
     );
   }
 

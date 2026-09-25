@@ -12,6 +12,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     Column,
     DateTime,
     Enum,
@@ -56,6 +57,7 @@ class UserProfile(Base):
     email = Column(String(320), nullable=False, index=True)
     display_name = Column(String(255), nullable=True)
     avatar_url = Column(Text, nullable=True)
+    is_admin = Column(Boolean, nullable=False, default=False)
 
     # === Academic (Technical Docs §4 — Academic) ===
     university = Column(String(255), nullable=True)
