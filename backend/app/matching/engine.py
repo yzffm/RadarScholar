@@ -23,7 +23,7 @@ class MatchingEngine:
         elif req_type == "ORGANIZATION":
             return self._evaluate_organization(profile, op, val, desc)
         elif req_type == "EDUCATION_LEVEL" or req_type == "DEGREE_LEVEL":
-            return self._evaluate_education_level(profile, op, val, desc)
+            return self._evaluate_education_level(profile, req_type, op, val, desc)
         elif req_type == "MAJOR":
             return self._evaluate_major(profile, op, val, desc)
         elif req_type == "AGE":
@@ -240,18 +240,46 @@ class MatchingEngine:
 
         return self._needs_verification("ORGANIZATION", op, val, f"Operator '{op}' tidak didukung untuk Organisasi.")
 
-    def _evaluate_education_level(self, profile: UserProfile, op: str, val: dict[str, Any], desc: str) -> CriterionEvaluation:
-        if "level" not in val:
-            return self._needs_verification("EDUCATION_LEVEL", op, val, "Format tingkat pendidikan tidak sesuai.")
+    def _evaluate_education_level(
+        self,
+        profile: UserProfile,
+        req_type: str,
+        op: str,
+        val: dict[str, Any],
+        desc: str,
+    ) -> CriterionEvaluation:
+        if not isinstance(val, dict):
+            return self._needs_verification(
+                req_type, op, val, "Format tingkat pendidikan tidak sesuai."
+            )
 
-        req_level = str(val["level"]).strip().upper()
+        raw_levels = val.get("levels")
+        if raw_levels is None:
+            raw_levels = val.get("level")
+        if raw_levels is None:
+            return self._needs_verification(
+                req_type, op, val, "Format tingkat pendidikan tidak sesuai."
+            )
+
+        if isinstance(raw_levels, list):
+            req_levels = [str(level).strip().upper() for level in raw_levels]
+        else:
+            req_levels = [
+                level.strip().upper() for level in str(raw_levels).split(",")
+            ]
+
+        if not req_levels or any(not level for level in req_levels):
+            return self._needs_verification(
+                req_type, op, val, "Daftar tingkat pendidikan tidak valid."
+            )
+
         actual_level = profile.degree_level
 
         if actual_level is None:
             return CriterionEvaluation(
-                requirement_type="EDUCATION_LEVEL",
+                requirement_type=req_type,
                 operator=op,
-                required_value=req_level,
+                required_value=req_levels if op == "IN" else req_levels[0],
                 actual_value=None,
                 state=CriterionState.UNKNOWN,
                 explanation="Tingkat pendidikan belum tersedia pada profil Anda."
@@ -260,30 +288,36 @@ class MatchingEngine:
         actual_level_str = actual_level.value.upper()
 
         if op == "EQUALS" or op == "EQ":
-            if actual_level_str == req_level:
+            if len(req_levels) != 1:
+                return self._needs_verification(
+                    req_type,
+                    op,
+                    val,
+                    "Operator EQ hanya mendukung satu tingkat pendidikan.",
+                )
+            required_level = req_levels[0]
+            if actual_level_str == required_level:
                 return CriterionEvaluation(
-                    requirement_type="EDUCATION_LEVEL",
+                    requirement_type=req_type,
                     operator=op,
-                    required_value=req_level,
+                    required_value=required_level,
                     actual_value=actual_level_str,
                     state=CriterionState.MATCH,
                     explanation=f"Tingkat pendidikan Anda ({actual_level_str}) sesuai persyaratan."
                 )
             else:
                 return CriterionEvaluation(
-                    requirement_type="EDUCATION_LEVEL",
+                    requirement_type=req_type,
                     operator=op,
-                    required_value=req_level,
+                    required_value=required_level,
                     actual_value=actual_level_str,
                     state=CriterionState.NOT_MATCH,
-                    explanation=f"Tingkat pendidikan Anda ({actual_level_str}) tidak sesuai persyaratan ({req_level})."
+                    explanation=f"Tingkat pendidikan Anda ({actual_level_str}) tidak sesuai persyaratan ({required_level})."
                 )
         elif op == "IN":
-            req_levels = req_level.split(",")
-            req_levels = [l.strip() for l in req_levels]
             if actual_level_str in req_levels:
                 return CriterionEvaluation(
-                    requirement_type="EDUCATION_LEVEL",
+                    requirement_type=req_type,
                     operator=op,
                     required_value=req_levels,
                     actual_value=actual_level_str,
@@ -292,7 +326,7 @@ class MatchingEngine:
                 )
             else:
                 return CriterionEvaluation(
-                    requirement_type="EDUCATION_LEVEL",
+                    requirement_type=req_type,
                     operator=op,
                     required_value=req_levels,
                     actual_value=actual_level_str,
@@ -300,7 +334,7 @@ class MatchingEngine:
                     explanation=f"Tingkat pendidikan Anda ({actual_level_str}) tidak sesuai persyaratan."
                 )
 
-        return self._needs_verification("EDUCATION_LEVEL", op, val, f"Operator '{op}' tidak didukung untuk tingkat pendidikan.")
+        return self._needs_verification(req_type, op, val, f"Operator '{op}' tidak didukung untuk tingkat pendidikan.")
 
     def _evaluate_major(self, profile: UserProfile, op: str, val: dict[str, Any], desc: str) -> CriterionEvaluation:
         if "major" not in val and "majors" not in val:

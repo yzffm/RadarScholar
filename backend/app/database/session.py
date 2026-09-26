@@ -5,6 +5,7 @@ via the DATABASE_URL environment variable.
 """
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
@@ -17,12 +18,14 @@ def get_engine():
             "DATABASE_URL is not configured. "
             "Set it in .env or environment variables."
         )
-    return create_engine(
-        settings.DATABASE_URL,
-        pool_pre_ping=True,
-        pool_size=5,
-        max_overflow=10,
-    )
+    url = make_url(settings.DATABASE_URL)
+    engine_options = {"pool_pre_ping": True}
+
+    # SQLite's default pools do not accept PostgreSQL-style pool sizing.
+    if url.get_backend_name() != "sqlite":
+        engine_options.update(pool_size=5, max_overflow=10)
+
+    return create_engine(settings.DATABASE_URL, **engine_options)
 
 
 # Lazy engine — only created when DATABASE_URL is available.

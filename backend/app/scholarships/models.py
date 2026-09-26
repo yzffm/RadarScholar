@@ -35,13 +35,21 @@ class Scholarship(Base):
     deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     application_url: Mapped[str] = mapped_column(String)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # NULL means the record has not been verified against the live source.
+    last_verified_live_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
     source: Mapped["ScholarshipSource"] = relationship(back_populates="scholarships")
-    benefits: Mapped[list["ScholarshipBenefit"]] = relationship(back_populates="scholarship", cascade="all, delete-orphan")
-    requirements: Mapped[list["ScholarshipRequirement"]] = relationship(back_populates="scholarship", cascade="all, delete-orphan")
+    benefits: Mapped[list["ScholarshipBenefit"]] = relationship(
+        back_populates="scholarship", cascade="all, delete-orphan"
+    )
+    requirements: Mapped[list["ScholarshipRequirement"]] = relationship(
+        back_populates="scholarship", cascade="all, delete-orphan"
+    )
 
 
 class ScholarshipBenefit(Base):

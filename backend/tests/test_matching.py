@@ -77,6 +77,24 @@ def test_evaluate_degree_unknown(engine):
     res = engine.evaluate(profile, req)
     assert res.state == CriterionState.UNKNOWN
 
+
+@pytest.mark.parametrize(
+    ("degree_level", "levels", "expected"),
+    [
+        (DegreeLevel.S1, ["S1", "D4"], CriterionState.MATCH),
+        (DegreeLevel.S2, ["S1", "D4"], CriterionState.NOT_MATCH),
+        (DegreeLevel.S2, ["S2", "S3"], CriterionState.MATCH),
+    ],
+)
+def test_evaluate_degree_level_list_from_scraper(engine, degree_level, levels, expected):
+    profile = UserProfile(degree_level=degree_level)
+    req = create_req("DEGREE_LEVEL", "IN", {"levels": levels})
+
+    res = engine.evaluate(profile, req)
+
+    assert res.state == expected
+    assert res.requirement_type == "DEGREE_LEVEL"
+
 def test_evaluate_major_in_match(engine):
     profile = UserProfile(major="Computer Science")
     req = create_req("MAJOR", "IN", {"majors": ["Computer Science", "Information Systems"]})
