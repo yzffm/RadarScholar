@@ -39,7 +39,8 @@ def upgrade() -> None:
     )
     op.add_column('user_profiles', sa.Column('is_admin', sa.Boolean(), nullable=True))
     # We set default=False earlier but existing rows will be NULL, so we update them and make it False.
-    op.execute("UPDATE user_profiles SET is_admin = 0 WHERE is_admin IS NULL")
+    op.execute("UPDATE user_profiles SET is_admin = FALSE WHERE is_admin IS NULL")
+    op.alter_column('user_profiles', 'is_admin', existing_type=sa.Boolean(), nullable=False)
     # ### end Alembic commands ###
 
 
