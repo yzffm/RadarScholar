@@ -92,7 +92,10 @@ class LpdpScraper(BaseScraper):
                 "Could not reach LPDP page (%s) — using known baseline data instead",
                 exc,
             )
-            return self.parse_html("")
+            results = self.parse_html("")
+            for item in results:
+                item.is_live_verified = False
+            return results
 
         return self.parse_html(response.text)
 

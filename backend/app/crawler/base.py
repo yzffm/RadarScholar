@@ -55,6 +55,11 @@ class ScrapedScholarship(BaseModel):
     is_active: bool = True
     requirements: list[ScrapedRequirement] = Field(default_factory=list)
     benefits: list[ScrapedBenefit] = Field(default_factory=list)
+    # True when this data came from a successfully fetched live page just now;
+    # False when it's the known verified baseline used as a fallback because
+    # the official page couldn't be reached. Lets the pipeline track, per
+    # scholarship, when it was last actually confirmed against the live source.
+    is_live_verified: bool = True
 
 
 class BaseScraper(ABC):
@@ -120,11 +125,9 @@ class BaseScraper(ABC):
                         attempt, max_retries + 1, url, exc, wait,
                     )
                     time.sleep(wait)
-        if last_exc is not None:
-            raise last_exc
-        
-        # Fallback if max_retries was set to a negative number somehow
-        raise RuntimeError(f"Fetch failed for {url}: exceeded max retries without an explicit error")
+        if last_exc is None:
+            raise RuntimeError("Unreachable: fetch failed without an exception")
+        raise last_exc  # noqa: RSE102 — last_exc is always set when this line is reached
 
     @abstractmethod
     def scrape(self) -> list[ScrapedScholarship]:

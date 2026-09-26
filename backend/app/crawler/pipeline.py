@@ -299,6 +299,7 @@ class CrawlerPipeline:
             is_active=item.is_active,
             requirements=item.requirements,
             benefits=item.benefits,
+            is_live_verified=item.is_live_verified,
         )
 
     def _upsert_scholarship(
@@ -344,6 +345,7 @@ class CrawlerPipeline:
             deadline=item.deadline,
             application_url=item.application_url,
             is_active=item.is_active,
+            last_verified_live_at=datetime.utcnow() if item.is_live_verified else None,
         )
         self.db.add(scholarship)
         self.db.flush()
@@ -390,6 +392,13 @@ class CrawlerPipeline:
 
         if changed:
             existing.updated_at = datetime.utcnow()
+
+        # Record fresh live confirmation independent of whether any displayed
+        # field actually changed — "still accurate as of today" is itself
+        # useful information, and we deliberately never move this timestamp
+        # backward/blank when today's crawl fell back to baseline data.
+        if item.is_live_verified:
+            existing.last_verified_live_at = datetime.utcnow()
 
         # Replace requirements (delete old, add new)
         # This is safe because requirements belong to the scholarship catalog,

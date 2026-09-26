@@ -90,6 +90,10 @@ class ScholarshipResponse(ScholarshipBase):
     source_id: UUID
     created_at: datetime
     updated_at: datetime
+    # NULL if this scholarship has never been confirmed against its live
+    # source page (curated baseline only). See app/crawler/base.py's
+    # is_live_verified for how this gets set.
+    last_verified_live_at: datetime | None = None
 
     benefits: list[ScholarshipBenefitResponse] = Field(default_factory=list)
     requirements: list[ScholarshipRequirementResponse] = Field(default_factory=list)
