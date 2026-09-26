@@ -19,6 +19,7 @@ from app.scholarships.models import (
     Scholarship,
     ScholarshipBenefit,
     ScholarshipRequirement,
+    ScholarshipSource,
 )
 
 # ---------------------------------------------------------------------------
@@ -94,6 +95,13 @@ class FailingScraper:
 
     def scrape(self):
         raise RuntimeError("Source unavailable")
+
+
+class EmptyScraper:
+    """A scraper that succeeds but returns no records."""
+
+    def scrape(self):
+        return []
 
 
 # ---------------------------------------------------------------------------
@@ -291,6 +299,121 @@ class TestPipelineUpdate:
 
         scholarship = db_session.query(Scholarship).first()
         assert scholarship.title == "Updated Title"
+
+
+class TestSourcePolicy:
+    def test_disabled_source_is_not_scraped(self, db_session: Session):
+        source = ScholarshipSource(
+            provider_name="Test Provider",
+            source_url="https://example.com/scholarship",
+            active=False,
+            crawl_allowed=False,
+        )
+        db_session.add(source)
+        db_session.commit()
+
+        mock_registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([_make_scraped()]),
+                enabled=True,
+            ),
+        }
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=mock_registry):
+            with patch.object(FakeScraper, "scrape") as scrape:
+                result = CrawlerPipeline(db_session).run()
+
+        assert result.sources_succeeded == 1
+        assert result.sources_failed == 0
+        assert result.source_results[0].skipped_by_policy is True
+        assert scrape.call_count == 0
+        assert db_session.query(Scholarship).count() == 0
+
+
+class TestStaleHandling:
+    def test_successful_crawl_marks_missing_scholarship_inactive(
+        self, db_session: Session
+    ):
+        old_item = _make_scraped(
+            title="Old Scholarship",
+            application_url="https://example.com/old",
+        )
+        current_item = _make_scraped(
+            title="Current Scholarship",
+            application_url="https://example.com/current",
+        )
+        registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([old_item]),
+                enabled=True,
+            ),
+        }
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        registry["test"].scraper_factory = lambda: FakeScraper([current_item])
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            result = CrawlerPipeline(db_session).run()
+
+        scholarships = (
+            db_session.query(Scholarship)
+            .order_by(Scholarship.title)
+            .all()
+        )
+        assert result.sources_succeeded == 1
+        assert len(scholarships) == 2
+        assert scholarships[0].title == "Current Scholarship"
+        assert scholarships[0].is_active is True
+        assert scholarships[1].title == "Old Scholarship"
+        assert scholarships[1].is_active is False
+
+    def test_empty_crawl_preserves_existing_scholarship(self, db_session: Session):
+        registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([_make_scraped()]),
+                enabled=True,
+            ),
+        }
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        registry["test"].scraper_factory = EmptyScraper
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            result = CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        assert result.sources_succeeded == 1
+        assert scholarship.is_active is True
+
+    def test_partial_parse_preserves_existing_scholarship(self, db_session: Session):
+        registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([_make_scraped()]),
+                enabled=True,
+            ),
+        }
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        registry["test"].scraper_factory = lambda: FakeScraper(
+            [_make_scraped(), None]
+        )
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        assert scholarship.is_active is True
 
 
 class TestResultSummary:

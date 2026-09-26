@@ -47,6 +47,8 @@ class SourceResult:
     created: int = 0
     updated: int = 0
     skipped: int = 0
+    skipped_by_policy: bool = False
+    skip_reason: str | None = None
     error: str | None = None
 
 
@@ -171,6 +173,8 @@ class CrawlerPipeline:
                     "created": sr.created,
                     "updated": sr.updated,
                     "skipped": sr.skipped,
+                    "skipped_by_policy": sr.skipped_by_policy,
+                    "skip_reason": sr.skip_reason,
                     "error": sr.error
                 }
                 for sr in result.source_results
@@ -205,6 +209,21 @@ class CrawlerPipeline:
         )
 
         try:
+            existing_source = self._find_source(entry)
+            if existing_source and (
+                not existing_source.active or not existing_source.crawl_allowed
+            ):
+                src_result.skipped_by_policy = True
+                src_result.skip_reason = (
+                    "Source dinonaktifkan oleh admin."
+                    if not existing_source.active
+                    else "Crawling source tidak diizinkan oleh admin."
+                )
+                logger.info(
+                    "Skipping source '%s': %s", key, src_result.skip_reason
+                )
+                return src_result
+
             scraper: BaseScraper = entry.scraper_factory()
             logger.info("Starting crawl for source: %s (%s)", key, entry.provider_name)
 
@@ -220,12 +239,16 @@ class CrawlerPipeline:
                 return src_result
 
             # Ensure/get the ScholarshipSource record
-            db_source = self._ensure_source(entry)
+            db_source = existing_source or self._ensure_source(entry)
+            seen_application_urls: set[str] = set()
+            processed_items = 0
 
             for item in scraped_items:
                 try:
                     item = self._normalize(item)
                     action = self._upsert_scholarship(db_source, item)
+                    seen_application_urls.add(item.application_url)
+                    processed_items += 1
                     if action == "created":
                         src_result.created += 1
                     elif action == "updated":
@@ -238,6 +261,12 @@ class CrawlerPipeline:
                         key, item.title if item else "?", exc,
                     )
                     src_result.skipped += 1
+
+            # Only deactivate missing records after a complete-looking crawl.
+            # A parser that skips any item may have lost part of the page, so
+            # preserving old records is safer than marking them stale.
+            if processed_items > 0 and src_result.skipped == 0:
+                self._mark_stale_scholarships(db_source, seen_application_urls)
 
             if not self.dry_run:
                 self.db.commit()
@@ -263,11 +292,7 @@ class CrawlerPipeline:
 
     def _ensure_source(self, entry: SourceEntry) -> ScholarshipSource:
         """Get or create the ScholarshipSource record for this provider."""
-        existing = (
-            self.db.query(ScholarshipSource)
-            .filter(ScholarshipSource.provider_name == entry.provider_name)
-            .first()
-        )
+        existing = self._find_source(entry)
         if existing:
             # Update source_url if changed
             if existing.source_url != entry.source_url:
@@ -285,6 +310,43 @@ class CrawlerPipeline:
         self.db.add(source)
         self.db.flush()  # Get the ID without committing
         return source
+
+    def _find_source(self, entry: SourceEntry) -> ScholarshipSource | None:
+        """Find the persisted source without creating or changing it."""
+        return (
+            self.db.query(ScholarshipSource)
+            .filter(ScholarshipSource.provider_name == entry.provider_name)
+            .first()
+        )
+
+    def _mark_stale_scholarships(
+        self,
+        source: ScholarshipSource,
+        seen_application_urls: set[str],
+    ) -> int:
+        """Deactivate active records absent from a successful source crawl."""
+        stale_count = 0
+        active_scholarships = (
+            self.db.query(Scholarship)
+            .filter(
+                Scholarship.source_id == source.id,
+                Scholarship.is_active.is_(True),
+            )
+            .all()
+        )
+        for scholarship in active_scholarships:
+            if _normalize_url(scholarship.application_url) not in seen_application_urls:
+                scholarship.is_active = False
+                scholarship.updated_at = datetime.utcnow()
+                stale_count += 1
+
+        if stale_count:
+            logger.info(
+                "Marked %d stale scholarships inactive for '%s'",
+                stale_count,
+                source.provider_name,
+            )
+        return stale_count
 
     def _normalize(self, item: ScrapedScholarship) -> ScrapedScholarship:
         """Apply normalization rules to scraped data."""

@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 
 import '../models/user_profile.dart';
 import '../services/api_service.dart';
@@ -27,10 +28,21 @@ class UserProfileRepository {
       if (response.statusCode == 200 && response.data != null) {
         return UserProfile.fromJson(response.data as Map<String, dynamic>);
       }
-      return null;
-    } catch (e) {
-      // 404 means profile not created yet
-      return null;
+      if (response.statusCode == 404) {
+        return null;
+      }
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        type: DioExceptionType.badResponse,
+        message: 'Unexpected profile response: ${response.statusCode}',
+      );
+    } on DioException catch (error) {
+      // Only a confirmed 404 means the user has not created a profile yet.
+      if (error.response?.statusCode == 404) {
+        return null;
+      }
+      rethrow;
     }
   }
 

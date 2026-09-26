@@ -62,6 +62,13 @@ class ProfileController extends StateNotifier<ProfileState> {
   /// Create or update the profile.
   Future<bool> saveProfile(Map<String, dynamic> data) async {
     final currentState = state;
+
+    // Do not turn a failed fetch into a create request. The user must retry
+    // loading first so a transient backend failure cannot create duplicates.
+    if (currentState is ProfileError) {
+      return false;
+    }
+
     state = const ProfileLoading();
     try {
       UserProfile profile;
