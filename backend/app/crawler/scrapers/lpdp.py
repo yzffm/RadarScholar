@@ -77,13 +77,22 @@ class LpdpScraper(BaseScraper):
     source_url = "https://lpdp.kemenkeu.go.id/beasiswa"
 
     def scrape(self) -> list[ScrapedScholarship]:
-        """Fetch LPDP page and parse scholarships."""
+        """Fetch LPDP page and parse scholarships.
+
+        Falls back to the known verified baseline data (without a live
+        deadline) if the official page can't be reached — LPDP's site
+        actively blocks automated requests, and the crawler's core value
+        is the verified requirement/benefit data, not a live-scraped deadline.
+        """
         logger.info("Fetching LPDP beasiswa page")
         try:
             response = self.fetch(self.source_url)
         except httpx.HTTPError as exc:
-            logger.error("Failed to fetch LPDP page: %s", exc)
-            raise
+            logger.warning(
+                "Could not reach LPDP page (%s) — using known baseline data instead",
+                exc,
+            )
+            return self.parse_html("")
 
         return self.parse_html(response.text)
 

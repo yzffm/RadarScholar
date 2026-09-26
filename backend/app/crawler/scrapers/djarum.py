@@ -99,13 +99,23 @@ class DjarumScraper(BaseScraper):
     source_url = "https://djarumbeasiswaplus.org/our-program/regulation-djarum-beasiswa-plus"
 
     def scrape(self) -> list[ScrapedScholarship]:
-        """Fetch the regulation page and parse it."""
+        """Fetch the regulation page and parse it.
+
+        Falls back to the known verified baseline data (without a live
+        deadline) if the official page can't be reached — this source
+        is known to consistently block automated requests, and the
+        crawler's core value is the verified requirement/benefit data,
+        not a live-scraped deadline.
+        """
         logger.info("Fetching Djarum Beasiswa Plus regulation page")
         try:
             response = self.fetch(self.source_url)
         except httpx.HTTPError as exc:
-            logger.error("Failed to fetch Djarum page: %s", exc)
-            raise
+            logger.warning(
+                "Could not reach Djarum page (%s) — using known baseline data instead",
+                exc,
+            )
+            return self.parse_html("")
 
         return self.parse_html(response.text)
 

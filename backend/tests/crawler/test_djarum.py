@@ -5,6 +5,7 @@ Uses the local HTML fixture — does NOT depend on live internet.
 
 from pathlib import Path
 
+import httpx
 import pytest
 
 from app.crawler.scrapers.djarum import DjarumScraper
@@ -114,4 +115,22 @@ class TestDjarumParserEdgeCases:
     def test_no_deadline_in_html(self, scraper: DjarumScraper):
         """If no date is in the HTML, deadline should be None."""
         results = scraper.parse_html("<html><head></head><body><p>No dates here</p></body></html>")
+        assert results[0].deadline is None
+
+
+class TestDjarumScrapeFallback:
+    """scrape() must degrade gracefully to known baseline data instead of
+    crashing the whole pipeline when the live page can't be reached
+    (this source is known to block automated requests)."""
+
+    def test_scrape_falls_back_when_fetch_fails(self, scraper: DjarumScraper, monkeypatch):
+        def _raise(*args, **kwargs):
+            raise httpx.HTTPError("simulated network failure")
+
+        monkeypatch.setattr(scraper, "fetch", _raise)
+        results = scraper.scrape()
+
+        assert len(results) == 1
+        assert results[0].title == "Djarum Beasiswa Plus"
+        assert len(results[0].requirements) >= 3
         assert results[0].deadline is None

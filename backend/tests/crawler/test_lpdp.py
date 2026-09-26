@@ -5,6 +5,7 @@ Uses the local HTML fixture — does NOT depend on live internet.
 
 from pathlib import Path
 
+import httpx
 import pytest
 
 from app.crawler.scrapers.lpdp import LpdpScraper
@@ -91,3 +92,21 @@ class TestLpdpParser:
     def test_is_active(self, scraper: LpdpScraper, lpdp_html: str):
         result = scraper.parse_html(lpdp_html)[0]
         assert result.is_active is True
+
+
+class TestLpdpScrapeFallback:
+    """scrape() must degrade gracefully to known baseline data instead of
+    crashing the whole pipeline when the live page can't be reached
+    (LPDP's site actively blocks automated requests)."""
+
+    def test_scrape_falls_back_when_fetch_fails(self, scraper: LpdpScraper, monkeypatch):
+        def _raise(*args, **kwargs):
+            raise httpx.HTTPError("simulated network failure")
+
+        monkeypatch.setattr(scraper, "fetch", _raise)
+        results = scraper.scrape()
+
+        assert len(results) == 1
+        assert results[0].title == "Beasiswa LPDP"
+        assert len(results[0].requirements) >= 1
+        assert results[0].deadline is None
