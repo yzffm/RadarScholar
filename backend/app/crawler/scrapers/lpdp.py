@@ -80,16 +80,7 @@ class LpdpScraper(BaseScraper):
         """Fetch LPDP page and parse scholarships."""
         logger.info("Fetching LPDP beasiswa page")
         try:
-            response = httpx.get(
-                self.source_url,
-                timeout=30.0,
-                follow_redirects=True,
-                headers={
-                    "User-Agent": "RadarScholar/0.1 (scholarship-research-project)",
-                    "Accept": "text/html",
-                },
-            )
-            response.raise_for_status()
+            response = self.fetch(self.source_url)
         except httpx.HTTPError as exc:
             logger.error("Failed to fetch LPDP page: %s", exc)
             raise
