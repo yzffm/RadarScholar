@@ -54,7 +54,7 @@ class ApplicationCreate(BaseModel):
 
     scholarship_id: UUID
     target_deadline: datetime | None = None
-    notes: str | None = None
+    notes: str | None = Field(None, max_length=5000)
 
 
 class ApplicationUpdate(BaseModel):
@@ -62,7 +62,7 @@ class ApplicationUpdate(BaseModel):
 
     status: ApplicationStatus | None = None
     target_deadline: datetime | None = None
-    notes: str | None = None
+    notes: str | None = Field(None, max_length=5000)
 
 
 class ApplicationResponse(BaseModel):

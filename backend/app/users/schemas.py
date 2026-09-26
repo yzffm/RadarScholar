@@ -7,8 +7,13 @@ compatibility (M5 Matching, M9 AI Assistant).
 
 from datetime import datetime
 from enum import Enum
+from typing import Annotated
 
 from pydantic import BaseModel, Field
+
+
+ProfileListItem = Annotated[str, Field(max_length=500)]
+ProfileList = Annotated[list[ProfileListItem], Field(max_length=20)]
 
 
 class DegreeLevelSchema(str, Enum):
@@ -39,18 +44,18 @@ class UserProfileCreate(BaseModel):
     gpa: float | None = Field(None, ge=0.0, le=4.0)
 
     # Experience
-    organizations: list[str] | None = None
-    achievements: list[str] | None = None
-    competitions: list[str] | None = None
-    volunteering: list[str] | None = None
-    internships: list[str] | None = None
-    certifications: list[str] | None = None
-    skills: list[str] | None = None
+    organizations: ProfileList | None = None
+    achievements: ProfileList | None = None
+    competitions: ProfileList | None = None
+    volunteering: ProfileList | None = None
+    internships: ProfileList | None = None
+    certifications: ProfileList | None = None
+    skills: ProfileList | None = None
 
     # Interests
-    career_interests: list[str] | None = None
-    fields_of_interest: list[str] | None = None
-    goals: str | None = None
+    career_interests: ProfileList | None = None
+    fields_of_interest: ProfileList | None = None
+    goals: str | None = Field(None, max_length=4000)
 
 
 class UserProfileUpdate(BaseModel):
@@ -70,18 +75,18 @@ class UserProfileUpdate(BaseModel):
     gpa: float | None = Field(None, ge=0.0, le=4.0)
 
     # Experience
-    organizations: list[str] | None = None
-    achievements: list[str] | None = None
-    competitions: list[str] | None = None
-    volunteering: list[str] | None = None
-    internships: list[str] | None = None
-    certifications: list[str] | None = None
-    skills: list[str] | None = None
+    organizations: ProfileList | None = None
+    achievements: ProfileList | None = None
+    competitions: ProfileList | None = None
+    volunteering: ProfileList | None = None
+    internships: ProfileList | None = None
+    certifications: ProfileList | None = None
+    skills: ProfileList | None = None
 
     # Interests
-    career_interests: list[str] | None = None
-    fields_of_interest: list[str] | None = None
-    goals: str | None = None
+    career_interests: ProfileList | None = None
+    fields_of_interest: ProfileList | None = None
+    goals: str | None = Field(None, max_length=4000)
 
 
 class UserProfileResponse(BaseModel):

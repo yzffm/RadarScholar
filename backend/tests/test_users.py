@@ -101,3 +101,14 @@ def test_invalid_degree_level():
     """Invalid degree level should be rejected."""
     with pytest.raises(ValidationError):
         UserProfileCreate(degree_level="S4")
+
+
+def test_profile_collection_limits():
+    with pytest.raises(ValidationError):
+        UserProfileCreate(organizations=["org"] * 21)
+
+    with pytest.raises(ValidationError):
+        UserProfileCreate(achievements=["A" * 501])
+
+    with pytest.raises(ValidationError):
+        UserProfileUpdate(goals="G" * 4001)

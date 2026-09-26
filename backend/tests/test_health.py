@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.api import health
 
 
 @pytest.fixture
@@ -31,3 +32,27 @@ def test_health_check_response_structure(client: TestClient):
 
     expected_keys = {"status", "version"}
     assert set(data.keys()) == expected_keys
+
+
+def test_readiness_check_returns_ready(client: TestClient):
+    response = client.get("/health/ready")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ready"
+
+
+def test_readiness_check_returns_503_when_database_is_unavailable(
+    client: TestClient,
+):
+    def unavailable_engine():
+        raise RuntimeError("database unavailable")
+
+    original_get_engine = health.get_engine
+    health.get_engine = unavailable_engine
+    try:
+        response = client.get("/health/ready")
+    finally:
+        health.get_engine = original_get_engine
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Layanan belum siap."
