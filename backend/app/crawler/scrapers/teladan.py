@@ -10,7 +10,7 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
-from app.crawler.date_utils import extract_contextual_deadline
+from app.crawler.date_utils import extract_contextual_dates, extract_contextual_deadline
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,7 @@ class TeladanScraper(BaseScraper):
             raise ValueError("TELADAN page marker was not found")
 
         deadline = extract_contextual_deadline(text)
+        historical_deadlines = extract_contextual_dates(text)
         requirements = [
             ScrapedRequirement(
                 requirement_type="NATIONALITY",
@@ -116,7 +117,7 @@ class TeladanScraper(BaseScraper):
                 ),
                 deadline=deadline,
                 application_url=self.application_url,
-                is_active=True,
+                is_active=not historical_deadlines or deadline is not None,
                 requirements=requirements,
                 benefits=benefits,
                 is_live_verified=True,

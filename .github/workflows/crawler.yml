@@ -27,6 +27,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run backend lint
+        working-directory: ./backend
+        run: |
+          ruff check app tests
+
+      - name: Run backend tests
+        working-directory: ./backend
+        run: |
+          pytest -q
+
+      - name: Validate database secret
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL repository secret is not configured."
+            exit 1
+          fi
+
       - name: Run Alembic Migrations
         working-directory: ./backend
         env:
@@ -39,4 +58,4 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          python -m app.crawler.main --source teladan
+          python -m app.crawler.main --source teladan --source pertamina_sobat_bumi --source cimb_scholarship --source bca_scholarship --source ugm_bulletin

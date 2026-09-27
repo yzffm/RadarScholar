@@ -190,6 +190,10 @@ class AuthController extends StateNotifier<AppAuthState> {
   /// Map Supabase error messages to user-friendly Indonesian messages.
   String _mapAuthError(String message) {
     final lower = message.toLowerCase();
+    if (lower.contains('belum dikonfigurasi') ||
+        lower.contains('not configured')) {
+      return 'Supabase Auth belum dikonfigurasi. Jalankan aplikasi dengan SUPABASE_URL dan SUPABASE_ANON_KEY.';
+    }
     if (lower.contains('invalid login credentials') ||
         lower.contains('invalid_credentials')) {
       return 'Email atau kata sandi salah.';

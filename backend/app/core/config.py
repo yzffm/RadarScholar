@@ -7,6 +7,8 @@ NEVER populate real secrets here. Use .env files locally
 and environment variables in production.
 """
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 
@@ -51,7 +53,10 @@ class Settings(BaseSettings):
     AI_RATE_LIMIT_WINDOW_SECONDS: int = 60
 
     model_config = {
-        "env_file": ".env",
+        # Resolve the project env file from this module, not the process CWD.
+        # This keeps `uvicorn`, Alembic, and CI consistent when launched from
+        # either the repository root or the backend directory.
+        "env_file": Path(__file__).resolve().parents[2] / ".env",
         "env_file_encoding": "utf-8",
         "case_sensitive": True,
     }

@@ -66,13 +66,17 @@ class _SavedPageState extends ConsumerState<SavedPage> {
     }
 
     if (state is SavedScholarshipsError) {
+      final colors = Theme.of(context).colorScheme;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            Icon(Icons.error_outline, color: colors.error, size: 48),
             const SizedBox(height: 16),
-            Text(state.message, textAlign: TextAlign.center),
+            Text(
+              'Daftar tersimpan belum dapat dimuat. Periksa koneksi dan coba lagi.',
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => ref
@@ -97,7 +101,7 @@ class _SavedPageState extends ConsumerState<SavedPage> {
             ),
             const SizedBox(height: Spacing.md),
             ElevatedButton(
-              onPressed: () => context.go('/'),
+              onPressed: () => context.go('/discovery'),
               child: const Text('Cari Beasiswa'),
             ),
           ],

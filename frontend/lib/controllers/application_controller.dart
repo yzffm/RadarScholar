@@ -130,10 +130,13 @@ class ApplicationsError extends ApplicationsState {
 
 class ApplicationsController extends StateNotifier<ApplicationsState> {
   final ApplicationRepository _repository;
+  bool _isFetching = false;
 
   ApplicationsController(this._repository) : super(const ApplicationsInitial());
 
   Future<void> fetchApplications() async {
+    if (_isFetching) return;
+    _isFetching = true;
     state = const ApplicationsLoading();
     try {
       final items = await _repository.getApplications();
@@ -144,6 +147,8 @@ class ApplicationsController extends StateNotifier<ApplicationsState> {
       }
     } catch (e) {
       state = const ApplicationsError('Gagal memuat aplikasi beasiswa.');
+    } finally {
+      _isFetching = false;
     }
   }
 

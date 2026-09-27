@@ -17,16 +17,17 @@ _MONTHS = {
 }
 _DEADLINE_CONTEXT = re.compile(
     r"deadline|batas\s+(?:akhir\s+)?pendaftaran|"
+    r"jadwal\s+pendaftaran|"
     r"pendaftaran\s+(?:dibuka\s+)?(?:sampai|hingga|ditutup)|"
-    r"(?:sampai|hingga|ditutup)\s+(?:tanggal\s+)?|tanggal\s+terakhir",
+    r"(?:sebelum|before)\s+|"
+    r"(?:sampai|hingga|ditutup)(?:\s+dengan)?\s+(?:tanggal\s+)?|tanggal\s+terakhir",
     re.IGNORECASE,
 )
 
 
-def extract_contextual_deadline(text: str) -> datetime | None:
-    """Return a future date only when nearby text identifies a deadline."""
-    now = utc_now()
-    candidates: list[datetime] = []
+def extract_contextual_dates(text: str) -> list[datetime]:
+    """Return dates identified by deadline/registration context."""
+    dates: list[datetime] = []
     for match in _DATE_PATTERN.finditer(text):
         segment_start = max(
             text.rfind(".", 0, match.start()),
@@ -45,13 +46,14 @@ def extract_contextual_deadline(text: str) -> datetime | None:
         if not _DEADLINE_CONTEXT.search(context):
             continue
         try:
-            date = datetime(
-                int(match.group(3)),
-                _MONTHS[match.group(2).lower()],
-                int(match.group(1)),
-            )
+            dates.append(datetime(int(match.group(3)), _MONTHS[match.group(2).lower()], int(match.group(1))))
         except (KeyError, ValueError):
             continue
-        if date > now:
-            candidates.append(date)
+    return dates
+
+
+def extract_contextual_deadline(text: str) -> datetime | None:
+    """Return a future date only when nearby text identifies a deadline."""
+    now = utc_now()
+    candidates = [date for date in extract_contextual_dates(text) if date > now]
     return max(candidates) if candidates else None

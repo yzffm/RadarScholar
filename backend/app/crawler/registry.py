@@ -38,9 +38,13 @@ def _build_registry() -> dict[str, SourceEntry]:
     Imports are deferred to avoid circular-import issues
     and to keep the registry declarative.
     """
+    from app.crawler.scrapers.bca import BcaScholarshipScraper
+    from app.crawler.scrapers.cimb import CimbScholarshipScraper
     from app.crawler.scrapers.djarum import DjarumScraper
     from app.crawler.scrapers.lpdp import LpdpScraper
+    from app.crawler.scrapers.pertamina import PertaminaSobatBumiScraper
     from app.crawler.scrapers.teladan import TeladanScraper
+    from app.crawler.scrapers.ugm_bulletin import UgmScholarshipBulletinScraper
 
     return {
         "djarum": SourceEntry(
@@ -61,6 +65,34 @@ def _build_registry() -> dict[str, SourceEntry]:
             provider_name="Tanoto Foundation TELADAN",
             source_url="https://www.tanotofoundation.org/initiative/teladan/",
             scraper_factory=TeladanScraper,
+            enabled=True,
+            crawl_status="ACTIVE",
+        ),
+        "pertamina_sobat_bumi": SourceEntry(
+            provider_name="Pertamina Foundation Sobat Bumi",
+            source_url="https://www.pertaminafoundation.org/",
+            scraper_factory=PertaminaSobatBumiScraper,
+            enabled=True,
+            crawl_status="ACTIVE",
+        ),
+        "cimb_scholarship": SourceEntry(
+            provider_name="CIMB Niaga Scholarship",
+            source_url="https://investor.cimbniaga.co.id/csr/scholarship.html",
+            scraper_factory=CimbScholarshipScraper,
+            enabled=True,
+            crawl_status="ACTIVE",
+        ),
+        "bca_scholarship": SourceEntry(
+            provider_name="Beasiswa BCA PPBP/PPTI",
+            source_url="https://karir.bca.co.id/beasiswa-bca",
+            scraper_factory=BcaScholarshipScraper,
+            enabled=True,
+            crawl_status="ACTIVE",
+        ),
+        "ugm_bulletin": SourceEntry(
+            provider_name="UGM Direktorat Kemahasiswaan Bulletin",
+            source_url="https://ditmawa.ugm.ac.id/2026/09/pembukaan-pendaftaran-beasiswa-cendekia-baznas-bcb-kerja-sama-kampus-dalam-negeri-2026/",
+            scraper_factory=UgmScholarshipBulletinScraper,
             enabled=True,
             crawl_status="ACTIVE",
         ),

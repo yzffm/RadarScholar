@@ -44,6 +44,9 @@ class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
 
   String? _currentSearch;
   String? _currentStatus;
+  bool _isFetching = false;
+
+  bool get isFetching => _isFetching;
 
   ScholarshipController(this._repository)
     : super(const ScholarshipDiscoveryInitial());
@@ -53,6 +56,8 @@ class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
     String? search,
     String? status,
   }) async {
+    if (_isFetching) return;
+
     // Determine page
     int targetPage = 1;
     List<Scholarship> existingItems = [];
@@ -77,6 +82,7 @@ class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
       state = const ScholarshipDiscoveryLoading();
     }
 
+    _isFetching = true;
     try {
       final response = await _repository.getScholarships(
         page: targetPage,
@@ -103,6 +109,8 @@ class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
       state = const ScholarshipDiscoveryError(
         'Gagal memuat beasiswa. Periksa koneksi internet dan coba lagi.',
       );
+    } finally {
+      _isFetching = false;
     }
   }
 

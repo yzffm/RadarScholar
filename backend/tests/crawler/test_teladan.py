@@ -22,9 +22,10 @@ def test_teladan_extracts_official_program_data(scraper, html):
 
     assert result.provider_name == "Tanoto Foundation TELADAN"
     assert result.title == "Program Beasiswa Kepemimpinan TELADAN 2027"
-    assert result.deadline.year == 2027
-    assert result.deadline.month == 9
-    assert result.deadline.day == 7
+    # The audited 2026 period is expired at runtime, so the parser must not
+    # expose it as a current deadline.
+    assert result.deadline is None
+    assert result.is_active is False
     assert result.application_url == "https://www.tanotofoundation.org/teladan-2027"
     assert result.is_live_verified is True
 

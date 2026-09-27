@@ -12,6 +12,7 @@ class ScholarshipCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(bottom: Spacing.md),
@@ -41,7 +42,7 @@ class ScholarshipCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade900,
+                                color: colors.onSurface,
                               ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -69,23 +70,25 @@ class ScholarshipCard extends StatelessWidget {
                     : scholarship.description,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
+                ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+              const SizedBox(height: Spacing.sm),
+              _buildFreshnessLabel(context),
               const SizedBox(height: Spacing.md),
               Row(
                 children: [
                   Icon(
                     Icons.calendar_today_rounded,
                     size: 14,
-                    color: Colors.grey.shade500,
+                    color: colors.onSurfaceVariant,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     _formatDeadline(scholarship.deadline),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
+                      color: colors.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -109,6 +112,25 @@ class ScholarshipCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFreshnessLabel(BuildContext context) {
+    final origin = scholarship.dataOrigin;
+    final label = switch (origin) {
+      'CRAWLER_LIVE' => 'Sumber resmi terverifikasi live',
+      'CRAWLER_BASELINE' => 'Baseline resmi, perlu verifikasi terbaru',
+      'SEED' => 'Data seed, perlu verifikasi terbaru',
+      _ => 'Status verifikasi belum tersedia',
+    };
+    final color = origin == 'CRAWLER_LIVE'
+        ? Colors.green.shade700
+        : Colors.orange.shade800;
+    return Text(
+      label,
+      style: Theme.of(
+        context,
+      ).textTheme.bodySmall?.copyWith(color: color, fontSize: 11),
     );
   }
 

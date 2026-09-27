@@ -875,10 +875,14 @@ mixin _$Scholarship {
   String get applicationUrl => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
+  @JsonKey(name: 'data_origin')
+  String get dataOrigin => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_verified_live_at')
+  DateTime? get lastVerifiedLiveAt => throw _privateConstructorUsedError;
   List<ScholarshipBenefit> get benefits => throw _privateConstructorUsedError;
   List<ScholarshipRequirement> get requirements =>
       throw _privateConstructorUsedError;
@@ -910,8 +914,10 @@ abstract class $ScholarshipCopyWith<$Res> {
     DateTime? deadline,
     @JsonKey(name: 'application_url') String applicationUrl,
     @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'data_origin') String dataOrigin,
     @JsonKey(name: 'created_at') DateTime createdAt,
     @JsonKey(name: 'updated_at') DateTime updatedAt,
+    @JsonKey(name: 'last_verified_live_at') DateTime? lastVerifiedLiveAt,
     List<ScholarshipBenefit> benefits,
     List<ScholarshipRequirement> requirements,
     ScholarshipSource? source,
@@ -943,8 +949,10 @@ class _$ScholarshipCopyWithImpl<$Res, $Val extends Scholarship>
     Object? deadline = freezed,
     Object? applicationUrl = null,
     Object? isActive = null,
+    Object? dataOrigin = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? lastVerifiedLiveAt = freezed,
     Object? benefits = null,
     Object? requirements = null,
     Object? source = freezed,
@@ -983,6 +991,10 @@ class _$ScholarshipCopyWithImpl<$Res, $Val extends Scholarship>
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
                       as bool,
+            dataOrigin: null == dataOrigin
+                ? _value.dataOrigin
+                : dataOrigin // ignore: cast_nullable_to_non_nullable
+                      as String,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -991,6 +1003,10 @@ class _$ScholarshipCopyWithImpl<$Res, $Val extends Scholarship>
                 ? _value.updatedAt
                 : updatedAt // ignore: cast_nullable_to_non_nullable
                       as DateTime,
+            lastVerifiedLiveAt: freezed == lastVerifiedLiveAt
+                ? _value.lastVerifiedLiveAt
+                : lastVerifiedLiveAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             benefits: null == benefits
                 ? _value.benefits
                 : benefits // ignore: cast_nullable_to_non_nullable
@@ -1041,8 +1057,10 @@ abstract class _$$ScholarshipImplCopyWith<$Res>
     DateTime? deadline,
     @JsonKey(name: 'application_url') String applicationUrl,
     @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'data_origin') String dataOrigin,
     @JsonKey(name: 'created_at') DateTime createdAt,
     @JsonKey(name: 'updated_at') DateTime updatedAt,
+    @JsonKey(name: 'last_verified_live_at') DateTime? lastVerifiedLiveAt,
     List<ScholarshipBenefit> benefits,
     List<ScholarshipRequirement> requirements,
     ScholarshipSource? source,
@@ -1074,8 +1092,10 @@ class __$$ScholarshipImplCopyWithImpl<$Res>
     Object? deadline = freezed,
     Object? applicationUrl = null,
     Object? isActive = null,
+    Object? dataOrigin = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? lastVerifiedLiveAt = freezed,
     Object? benefits = null,
     Object? requirements = null,
     Object? source = freezed,
@@ -1114,6 +1134,10 @@ class __$$ScholarshipImplCopyWithImpl<$Res>
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
                   as bool,
+        dataOrigin: null == dataOrigin
+            ? _value.dataOrigin
+            : dataOrigin // ignore: cast_nullable_to_non_nullable
+                  as String,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -1122,6 +1146,10 @@ class __$$ScholarshipImplCopyWithImpl<$Res>
             ? _value.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        lastVerifiedLiveAt: freezed == lastVerifiedLiveAt
+            ? _value.lastVerifiedLiveAt
+            : lastVerifiedLiveAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         benefits: null == benefits
             ? _value._benefits
             : benefits // ignore: cast_nullable_to_non_nullable
@@ -1151,8 +1179,10 @@ class _$ScholarshipImpl implements _Scholarship {
     this.deadline,
     @JsonKey(name: 'application_url') required this.applicationUrl,
     @JsonKey(name: 'is_active') this.isActive = true,
+    @JsonKey(name: 'data_origin') this.dataOrigin = 'UNKNOWN',
     @JsonKey(name: 'created_at') required this.createdAt,
     @JsonKey(name: 'updated_at') required this.updatedAt,
+    @JsonKey(name: 'last_verified_live_at') this.lastVerifiedLiveAt,
     final List<ScholarshipBenefit> benefits = const [],
     final List<ScholarshipRequirement> requirements = const [],
     this.source,
@@ -1182,11 +1212,17 @@ class _$ScholarshipImpl implements _Scholarship {
   @JsonKey(name: 'is_active')
   final bool isActive;
   @override
+  @JsonKey(name: 'data_origin')
+  final String dataOrigin;
+  @override
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @override
   @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
+  @override
+  @JsonKey(name: 'last_verified_live_at')
+  final DateTime? lastVerifiedLiveAt;
   final List<ScholarshipBenefit> _benefits;
   @override
   @JsonKey()
@@ -1210,7 +1246,7 @@ class _$ScholarshipImpl implements _Scholarship {
 
   @override
   String toString() {
-    return 'Scholarship(id: $id, sourceId: $sourceId, title: $title, summary: $summary, description: $description, deadline: $deadline, applicationUrl: $applicationUrl, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, benefits: $benefits, requirements: $requirements, source: $source)';
+    return 'Scholarship(id: $id, sourceId: $sourceId, title: $title, summary: $summary, description: $description, deadline: $deadline, applicationUrl: $applicationUrl, isActive: $isActive, dataOrigin: $dataOrigin, createdAt: $createdAt, updatedAt: $updatedAt, lastVerifiedLiveAt: $lastVerifiedLiveAt, benefits: $benefits, requirements: $requirements, source: $source)';
   }
 
   @override
@@ -1231,10 +1267,14 @@ class _$ScholarshipImpl implements _Scholarship {
                 other.applicationUrl == applicationUrl) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
+            (identical(other.dataOrigin, dataOrigin) ||
+                other.dataOrigin == dataOrigin) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
+            (identical(other.lastVerifiedLiveAt, lastVerifiedLiveAt) ||
+                other.lastVerifiedLiveAt == lastVerifiedLiveAt) &&
             const DeepCollectionEquality().equals(other._benefits, _benefits) &&
             const DeepCollectionEquality().equals(
               other._requirements,
@@ -1255,8 +1295,10 @@ class _$ScholarshipImpl implements _Scholarship {
     deadline,
     applicationUrl,
     isActive,
+    dataOrigin,
     createdAt,
     updatedAt,
+    lastVerifiedLiveAt,
     const DeepCollectionEquality().hash(_benefits),
     const DeepCollectionEquality().hash(_requirements),
     source,
@@ -1286,8 +1328,10 @@ abstract class _Scholarship implements Scholarship {
     final DateTime? deadline,
     @JsonKey(name: 'application_url') required final String applicationUrl,
     @JsonKey(name: 'is_active') final bool isActive,
+    @JsonKey(name: 'data_origin') final String dataOrigin,
     @JsonKey(name: 'created_at') required final DateTime createdAt,
     @JsonKey(name: 'updated_at') required final DateTime updatedAt,
+    @JsonKey(name: 'last_verified_live_at') final DateTime? lastVerifiedLiveAt,
     final List<ScholarshipBenefit> benefits,
     final List<ScholarshipRequirement> requirements,
     final ScholarshipSource? source,
@@ -1316,11 +1360,17 @@ abstract class _Scholarship implements Scholarship {
   @JsonKey(name: 'is_active')
   bool get isActive;
   @override
+  @JsonKey(name: 'data_origin')
+  String get dataOrigin;
+  @override
   @JsonKey(name: 'created_at')
   DateTime get createdAt;
   @override
   @JsonKey(name: 'updated_at')
   DateTime get updatedAt;
+  @override
+  @JsonKey(name: 'last_verified_live_at')
+  DateTime? get lastVerifiedLiveAt;
   @override
   List<ScholarshipBenefit> get benefits;
   @override

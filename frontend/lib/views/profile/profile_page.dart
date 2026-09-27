@@ -365,7 +365,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<DegreeLevel>(
-                        value: _selectedDegree,
+                        initialValue: _selectedDegree,
                         decoration: const InputDecoration(
                           labelText: 'Jenjang',
                           border: OutlineInputBorder(),
@@ -392,8 +392,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         validator: (val) {
                           if (val != null && val.isNotEmpty) {
                             final n = int.tryParse(val);
-                            if (n == null || n < 1 || n > 14)
+                            if (n == null || n < 1 || n > 14) {
                               return 'Semester 1 - 14';
+                            }
                           }
                           return null;
                         },
@@ -413,8 +414,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         validator: (val) {
                           if (val != null && val.isNotEmpty) {
                             final n = double.tryParse(val);
-                            if (n == null || n < 0 || n > 4)
+                            if (n == null || n < 0 || n > 4) {
                               return 'IPK 0.0 - 4.0';
+                            }
                           }
                           return null;
                         },

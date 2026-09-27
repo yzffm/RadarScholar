@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../controllers/admin_controller.dart';
-import '../../models/scholarship.dart';
-import '../../models/admin.dart';
 
 class AdminDashboardPage extends ConsumerWidget {
   const AdminDashboardPage({super.key});
@@ -23,12 +21,7 @@ class AdminDashboardPage extends ConsumerWidget {
             ],
           ),
         ),
-        body: const TabBarView(
-          children: [
-            _SourcesTab(),
-            _CrawlHistoryTab(),
-          ],
-        ),
+        body: const TabBarView(children: [_SourcesTab(), _CrawlHistoryTab()]),
       ),
     );
   }
@@ -61,16 +54,25 @@ class _SourcesTab extends ConsumerWidget {
                   value: source.active,
                   onChanged: (val) async {
                     try {
-                      await ref.read(adminSourcesControllerProvider.notifier).toggleSource(source.id);
+                      await ref
+                          .read(adminSourcesControllerProvider.notifier)
+                          .toggleSource(source.id);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Source ${source.providerName} is now ${val ? 'Active' : 'Inactive'}')),
+                          SnackBar(
+                            content: Text(
+                              'Source ${source.providerName} is now ${val ? 'Active' : 'Inactive'}',
+                            ),
+                          ),
                         );
                       }
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to toggle source: $e'), backgroundColor: Colors.red),
+                          SnackBar(
+                            content: Text('Failed to toggle source: $e'),
+                            backgroundColor: Colors.red,
+                          ),
                         );
                       }
                     }
@@ -107,14 +109,18 @@ class _CrawlHistoryTab extends ConsumerWidget {
           itemBuilder: (context, index) {
             final run = runs[index];
             final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
-            final Color statusColor = run.status == 'SUCCESS' 
-                ? Colors.green 
-                : (run.status == 'PARTIAL_SUCCESS' ? Colors.orange : Colors.red);
+            final Color statusColor = run.status == 'SUCCESS'
+                ? Colors.green
+                : (run.status == 'PARTIAL_SUCCESS'
+                      ? Colors.orange
+                      : Colors.red);
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12.0),
               child: ExpansionTile(
-                title: Text('Run on ${formatter.format(run.startedAt.toLocal())}'),
+                title: Text(
+                  'Run on ${formatter.format(run.startedAt.toLocal())}',
+                ),
                 subtitle: Text(
                   'Status: ${run.status} | '
                   'Attempted: ${run.sourcesAttempted} | '
@@ -130,14 +136,31 @@ class _CrawlHistoryTab extends ConsumerWidget {
                         Text('Succeeded Sources: ${run.sourcesSucceeded}'),
                         Text('Failed Sources: ${run.sourcesFailed}'),
                         const SizedBox(height: 8),
-                        Text('Scholarships Created: ${run.scholarshipsCreated}'),
-                        Text('Scholarships Updated: ${run.scholarshipsUpdated}'),
-                        Text('Scholarships Skipped: ${run.scholarshipsSkipped}'),
+                        Text(
+                          'Scholarships Created: ${run.scholarshipsCreated}',
+                        ),
+                        Text(
+                          'Scholarships Updated: ${run.scholarshipsUpdated}',
+                        ),
+                        Text(
+                          'Scholarships Skipped: ${run.scholarshipsSkipped}',
+                        ),
                         if (run.errors.isNotEmpty) ...[
                           const SizedBox(height: 12),
-                          const Text('Errors:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                          ...run.errors.map((e) => Text('- $e', style: const TextStyle(color: Colors.red))),
-                        ]
+                          const Text(
+                            'Errors:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                          ),
+                          ...run.errors.map(
+                            (e) => Text(
+                              '- $e',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,11 +23,51 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _carouselController = PageController();
+  Timer? _carouselTimer;
+  int _carouselIndex = 0;
+
+  static const _carouselSlides = [
+    (
+      title: 'Cari dengan arah yang jelas.',
+      body:
+          'Temukan peluang resmi yang lebih dekat dengan profil akademik dan tujuanmu.',
+      icon: Icons.explore_rounded,
+    ),
+    (
+      title: 'Pahami sebelum memutuskan.',
+      body:
+          'Bandingkan kriteria, benefit, deadline, dan status verifikasi dalam satu tempat.',
+      icon: Icons.fact_check_rounded,
+    ),
+    (
+      title: 'Siapkan aplikasi dengan percaya diri.',
+      body:
+          'Lacak progres dan gunakan AI sebagai pendamping, bukan pengganti keputusanmu.',
+      icon: Icons.track_changes_rounded,
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _carouselTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_carouselController.hasClients) return;
+      final next = (_carouselIndex + 1) % _carouselSlides.length;
+      _carouselController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOut,
+      );
+    });
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _carouselTimer?.cancel();
+    _carouselController.dispose();
     super.dispose();
   }
 
@@ -38,9 +80,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppTheme.brandPrimary,
-            content: const Text(
-              'Berhasil Masuk! (M1 UI Preview — Integrasi Supabase Auth penuh di M2)',
-            ),
+            content: const Text('Berhasil masuk ke RadarScholar.'),
             action: SnackBarAction(
               label: 'Ke Eksplorasi',
               textColor: AppTheme.brandSecondary,
@@ -61,9 +101,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: AppTheme.brandPrimary,
-          content: const Text(
-            'Login Google berhasil disimulasikan! (M1 UI Preview)',
-          ),
+          content: const Text('Login Google berhasil.'),
           action: SnackBarAction(
             label: 'Ke Eksplorasi',
             textColor: AppTheme.brandSecondary,
@@ -122,82 +160,71 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ],
                 ),
 
-                // Middle Pitch
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(AppRadius.xxl),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
+                SizedBox(
+                  height: 300,
+                  child: PageView.builder(
+                    controller: _carouselController,
+                    itemCount: _carouselSlides.length,
+                    onPageChanged: (index) =>
+                        setState(() => _carouselIndex = index),
+                    itemBuilder: (context, index) {
+                      final slide = _carouselSlides[index];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.verified_rounded,
+                            slide.icon,
                             color: AppTheme.brandSecondary,
-                            size: 16,
+                            size: 42,
                           ),
-                          SizedBox(width: 6),
+                          const SizedBox(height: Spacing.lg),
                           Text(
-                            'Platform Intelijen Beasiswa Mahasiswa',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            slide.title,
+                            style: Theme.of(context).textTheme.displaySmall
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.15,
+                                ),
+                          ),
+                          const SizedBox(height: Spacing.md),
+                          Text(
+                            slide.body,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.82),
+                                  height: 1.55,
+                                ),
                           ),
                         ],
+                      );
+                    },
+                  ),
+                ),
+                Row(
+                  children: List.generate(
+                    _carouselSlides.length,
+                    (index) => GestureDetector(
+                      onTap: () => _carouselController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 260),
+                        curve: Curves.easeOut,
+                      ),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        margin: const EdgeInsets.only(right: 8),
+                        width: index == _carouselIndex ? 28 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: index == _carouselIndex
+                              ? AppTheme.brandSecondary
+                              : Colors.white.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: Spacing.xl),
-                    Text(
-                      'Temukan Beasiswa yang\nSesuai Profil Akademikmu.',
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    Text(
-                      'Sistem pencocokan deterministik tanpa tebak-tebakan. Pantau deadline resmi dan persiapkan dokumen aplikasi dengan pendampingan AI cerdas.',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        height: 1.6,
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.xxl),
-                    // Value points
-                    _buildPillarItem(
-                      icon: Icons.shield_outlined,
-                      title: '100% Sumber Terkurasi & Resmi',
-                      subtitle:
-                          'Bebas hoaks dengan atribusi tautan asli penyedia beasiswa.',
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    _buildPillarItem(
-                      icon: Icons.rule_folder_outlined,
-                      title: 'Evaluasi Objektif & Kualitatif',
-                      subtitle:
-                          'Penjelasan relevansi transparan berdasarkan kriteria terverifikasi.',
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    _buildPillarItem(
-                      icon: Icons.auto_awesome_rounded,
-                      title: 'Asisten Dokumen & Wawancara AI',
-                      subtitle:
-                          'Bantuan penulisan esai dan motivasi tanpa memalsukan fakta.',
-                    ),
-                  ],
+                  ),
                 ),
 
                 // Bottom academic note
@@ -258,14 +285,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   // ─── Form Card (Shared) ──────────────────────────────────────────────
   Widget _buildFormCard(BuildContext context, LoginFormState state) {
     final controller = ref.read(loginControllerProvider.notifier);
+    final colors = Theme.of(context).colorScheme;
 
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+        side: BorderSide(color: colors.outlineVariant, width: 1),
       ),
-      color: Colors.white,
+      color: colors.surface,
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
         child: Form(
@@ -308,15 +336,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 'Selamat Datang Kembali',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade900,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
                 'Masuk ke akun Anda untuk mengakses rekomendasi beasiswa.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: Spacing.xl),
 
@@ -331,7 +359,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
-                    backgroundColor: Colors.white,
+                    backgroundColor: colors.surface,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -359,7 +387,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade800,
+                          color: colors.onSurface,
                         ),
                       ),
                     ],
@@ -428,7 +456,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
@@ -444,18 +472,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   prefixIcon: const Icon(Icons.mail_outline_rounded, size: 20),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: colors.surfaceContainerHighest,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colors.outlineVariant),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colors.outlineVariant),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
@@ -503,18 +531,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     onPressed: () => controller.togglePasswordVisibility(),
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: colors.surfaceContainerHighest,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colors.outlineVariant),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colors.outlineVariant),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
@@ -569,15 +597,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Fitur pemulihan kata sandi akan aktif pada M2.',
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => context.push('/forgot-password'),
                     child: const Text(
                       'Lupa kata sandi?',
                       style: TextStyle(
@@ -663,50 +683,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPillarItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(AppRadius.md),
-          ),
-          child: Icon(icon, color: Colors.white, size: 20),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.75),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

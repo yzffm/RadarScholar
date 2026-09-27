@@ -82,8 +82,12 @@ _$ScholarshipImpl _$$ScholarshipImplFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['deadline'] as String),
       applicationUrl: json['application_url'] as String,
       isActive: json['is_active'] as bool? ?? true,
+      dataOrigin: json['data_origin'] as String? ?? 'UNKNOWN',
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      lastVerifiedLiveAt: json['last_verified_live_at'] == null
+          ? null
+          : DateTime.parse(json['last_verified_live_at'] as String),
       benefits:
           (json['benefits'] as List<dynamic>?)
               ?.map(
@@ -114,8 +118,10 @@ Map<String, dynamic> _$$ScholarshipImplToJson(_$ScholarshipImpl instance) =>
       'deadline': instance.deadline?.toIso8601String(),
       'application_url': instance.applicationUrl,
       'is_active': instance.isActive,
+      'data_origin': instance.dataOrigin,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
+      'last_verified_live_at': instance.lastVerifiedLiveAt?.toIso8601String(),
       'benefits': instance.benefits,
       'requirements': instance.requirements,
       'source': instance.source,

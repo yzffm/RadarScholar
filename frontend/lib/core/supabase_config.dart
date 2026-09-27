@@ -18,9 +18,9 @@ import 'app_config.dart';
 /// Falls back gracefully if credentials are not configured.
 Future<bool> initSupabase() async {
   final url = AppConfig.supabaseUrl;
-  final anonKey = AppConfig.supabaseAnonKey;
+  final publishableKey = AppConfig.supabaseAnonKey;
 
-  if (url.isEmpty || anonKey.isEmpty) {
+  if (url.isEmpty || publishableKey.isEmpty) {
     // Supabase not configured — auth features will be unavailable.
     // This allows development without Supabase credentials.
     return false;
@@ -28,7 +28,7 @@ Future<bool> initSupabase() async {
 
   await Supabase.initialize(
     url: url,
-    anonKey: anonKey,
+    publishableKey: publishableKey,
     authOptions: const FlutterAuthClientOptions(
       authFlowType: AuthFlowType.pkce,
     ),

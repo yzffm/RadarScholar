@@ -65,6 +65,7 @@ class ScholarshipDetailPage extends ConsumerWidget {
     WidgetRef ref,
     Scholarship scholarship,
   ) {
+    final colors = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(Spacing.md),
       child: Column(
@@ -77,7 +78,7 @@ class ScholarshipDetailPage extends ConsumerWidget {
             scholarship.title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade900,
+              color: colors.onSurface,
             ),
           ),
           const SizedBox(height: Spacing.xs),
@@ -271,31 +272,57 @@ class ScholarshipDetailPage extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {
+                          onPressed: () async {
                             if (isSaved) {
-                              ref
-                                  .read(
-                                    savedScholarshipsControllerProvider
-                                        .notifier,
-                                  )
-                                  .unsaveScholarship(scholarship.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Dihapus dari tersimpan'),
-                                ),
-                              );
+                              try {
+                                await ref
+                                    .read(
+                                      savedScholarshipsControllerProvider
+                                          .notifier,
+                                    )
+                                    .unsaveScholarship(scholarship.id);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Dihapus dari tersimpan'),
+                                    ),
+                                  );
+                                }
+                              } catch (_) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Gagal menghapus dari tersimpan',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
                             } else {
-                              ref
-                                  .read(
-                                    savedScholarshipsControllerProvider
-                                        .notifier,
-                                  )
-                                  .saveScholarship(scholarship.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Disimpan ke daftar'),
-                                ),
-                              );
+                              try {
+                                await ref
+                                    .read(
+                                      savedScholarshipsControllerProvider
+                                          .notifier,
+                                    )
+                                    .saveScholarship(scholarship.id);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Disimpan ke daftar'),
+                                    ),
+                                  );
+                                }
+                              } catch (_) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Gagal menyimpan beasiswa'),
+                                    ),
+                                  );
+                                }
+                              }
                             }
                           },
                           icon: Icon(
@@ -314,18 +341,36 @@ class ScholarshipDetailPage extends ConsumerWidget {
                       const SizedBox(width: Spacing.sm),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {
+                          onPressed: () async {
                             if (isTracked) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Sudah dilacak')),
                               );
                             } else {
-                              ref
-                                  .read(applicationsControllerProvider.notifier)
-                                  .createApplication(scholarship.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Mulai dilacak')),
-                              );
+                              try {
+                                await ref
+                                    .read(
+                                      applicationsControllerProvider.notifier,
+                                    )
+                                    .createApplication(scholarship.id);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Lamaran mulai dilacak'),
+                                    ),
+                                  );
+                                }
+                              } catch (_) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Gagal memulai tracking lamaran',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
                             }
                           },
                           icon: Icon(

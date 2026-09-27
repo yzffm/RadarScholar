@@ -42,6 +42,7 @@ def test_readiness_check_returns_ready(client: TestClient, test_engine):
 
     assert response.status_code == 200
     assert response.json()["status"] == "ready"
+    assert response.json()["database"] == "sqlite"
 
 
 def test_readiness_check_returns_503_when_database_is_unavailable(

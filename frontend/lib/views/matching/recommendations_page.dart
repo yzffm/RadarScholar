@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controllers/matching_controller.dart';
 import '../../core/theme.dart';
+import '../../models/scholarship.dart';
 import '../../widgets/matched_scholarship_card.dart';
 
 class RecommendationsPage extends ConsumerStatefulWidget {
@@ -122,7 +123,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
     );
   }
 
-  Widget _buildSuccessState(data) {
+  Widget _buildSuccessState(MatchedScholarshipListResponse data) {
     return RefreshIndicator(
       onRefresh: () async {
         await ref

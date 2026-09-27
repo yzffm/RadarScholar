@@ -6,10 +6,7 @@ import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../widgets/app_logo.dart';
 
-/// RadarScholar Landing Page — Milestone 1.
-///
-/// Delivers an engaging, responsive showcase (CPMK 2) demonstrating
-/// live backend integration (CPMK 1) and MVC separation (CPMK 4).
+/// RadarScholar product landing page.
 class LandingPage extends ConsumerWidget {
   const LandingPage({super.key});
 
@@ -239,10 +236,11 @@ class LandingPage extends ConsumerWidget {
   }
 
   Widget _buildHeroVisual(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
         boxShadow: [
           BoxShadow(
@@ -251,31 +249,30 @@ class LandingPage extends ConsumerWidget {
             offset: const Offset(0, 12),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colors.outlineVariant),
       ),
       child: Column(
         children: [
-          // Logo Centerpiece
+          // Local logo asset is intentionally used as a replaceable visual anchor.
           AppLogo(mode: AppLogoMode.full, height: 54),
           const SizedBox(height: Spacing.lg),
           const Divider(height: 1),
           const SizedBox(height: Spacing.lg),
-          // Preview Card 1: Official verified source
           _buildHeroPreviewItem(
             icon: Icons.verified_user_rounded,
-            color: Colors.teal,
-            title: 'Beasiswa Prestasi Djarum 2026',
-            badge: 'Terkurasi Resmi',
-            desc: 'Jenjang S1 • Semester 4 • Min. IPK 3.00',
+            color: AppTheme.brandTertiary,
+            title: 'Sumber resmi, lebih terpercaya',
+            badge: 'Source-first',
+            desc:
+                'Lihat asal data, status verifikasi, dan deadline dengan jelas.',
           ),
           const SizedBox(height: Spacing.md),
-          // Preview Card 2: Deterministic match
           _buildHeroPreviewItem(
             icon: Icons.auto_graph_rounded,
             color: AppTheme.brandPrimary,
-            title: 'Beasiswa Bakti BCA Finance',
-            badge: 'Sangat Relevan',
-            desc: 'Bantuan UKT + Uang Saku Bulanan • Terverifikasi',
+            title: 'Match yang bisa dijelaskan',
+            badge: 'Deterministik',
+            desc: 'Pahami kenapa peluang tertentu relevan dengan profilmu.',
           ),
         ],
       ),
@@ -767,8 +764,11 @@ class LandingPage extends ConsumerWidget {
           constraints: const BoxConstraints(maxWidth: 1100),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 12,
                 children: [
                   AppLogo(mode: AppLogoMode.iconOnly, height: 36),
                   Text(
@@ -784,8 +784,10 @@ class LandingPage extends ConsumerWidget {
               const SizedBox(height: 20),
               Divider(color: Colors.white.withValues(alpha: 0.1), height: 1),
               const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                spacing: 12,
+                runSpacing: 8,
                 children: [
                   Text(
                     '© 2026 RadarScholar. Proyek Rekayasa Perangkat Lunak.',

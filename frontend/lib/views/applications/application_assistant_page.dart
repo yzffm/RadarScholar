@@ -151,7 +151,9 @@ class _ApplicationAssistantSheetState
                   ),
                   child: Text(
                     'Mode ini akan membangkitkan simulasi pertanyaan wawancara berdasarkan gabungan profil Anda dan detail beasiswa.',
-                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
                   ),
                 ),
 
@@ -194,7 +196,9 @@ class _ApplicationAssistantSheetState
                         margin: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(Spacing.sm),
-                          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.outlineVariant,
+                          ),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(Spacing.md),
@@ -251,12 +255,17 @@ class _ApplicationAssistantSheetState
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer),
+                      Icon(
+                        Icons.error_outline,
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
                       const SizedBox(height: Spacing.sm),
                       Text(
-                        err.toString(),
+                        'Asisten AI belum dapat memproses permintaan ini. Periksa profil, aplikasi, dan koneksi lalu coba lagi.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
                       ),
                       TextButton(
                         onPressed: _generateFeedback,

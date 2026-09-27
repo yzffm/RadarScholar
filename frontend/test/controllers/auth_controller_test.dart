@@ -116,5 +116,34 @@ void main() {
       expect(state, isA<AuthError>());
       expect((state as AuthError).message, 'Email atau kata sandi salah.');
     });
+
+    test('maps missing Supabase configuration to actionable message', () async {
+      when(mockAuthRepository.currentUser).thenReturn(null);
+      when(
+        mockAuthRepository.onAuthStateChange,
+      ).thenAnswer((_) => const Stream.empty());
+      when(
+        mockAuthRepository.signInWithEmail(
+          email: 'test@ui.ac.id',
+          password: 'password123',
+        ),
+      ).thenThrow(
+        const AuthException('Layanan autentikasi belum dikonfigurasi.'),
+      );
+
+      final container = makeContainer();
+      final controller = container.read(authControllerProvider.notifier);
+
+      final result = await controller.signInWithEmail(
+        'test@ui.ac.id',
+        'password123',
+      );
+
+      expect(result, false);
+      expect(
+        (container.read(authControllerProvider) as AuthError).message,
+        contains('SUPABASE_URL'),
+      );
+    });
   });
 }

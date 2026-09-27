@@ -31,8 +31,10 @@ async def health_check() -> dict:
 def readiness_check() -> dict:
     """Check that the process and its database dependency are ready."""
     engine = None
+    database = None
     try:
         engine = get_engine()
+        database = engine.url.get_backend_name()
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
     except Exception:
@@ -47,4 +49,5 @@ def readiness_check() -> dict:
     return {
         "status": "ready",
         "version": settings.APP_VERSION,
+        "database": database,
     }

@@ -22,6 +22,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchChanged);
     // Fetch initially
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref
@@ -32,8 +33,13 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
 
   @override
   void dispose() {
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {});
   }
 
   void _onSearchSubmit(String value) {
@@ -55,6 +61,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(scholarshipControllerProvider);
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: SafeArea(
@@ -86,13 +93,13 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colors.outlineVariant),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.search_rounded, color: Colors.grey.shade600),
+                    Icon(Icons.search_rounded, color: colors.onSurfaceVariant),
                     const SizedBox(width: 12),
                     Expanded(
                       child: TextField(
@@ -101,7 +108,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                         decoration: InputDecoration(
                           hintText: 'Cari beasiswa atau penyedia...',
                           hintStyle: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: colors.onSurfaceVariant,
                             fontSize: 14,
                           ),
                           border: InputBorder.none,
@@ -235,11 +242,14 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
           itemBuilder: (context, index) {
             if (index == state.scholarships.length) {
               // Reached the end, trigger load more
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                ref
-                    .read(scholarshipControllerProvider.notifier)
-                    .fetchScholarships();
-              });
+              final controller = ref.read(
+                scholarshipControllerProvider.notifier,
+              );
+              if (!controller.isFetching) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) controller.fetchScholarships();
+                });
+              }
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Center(child: CircularProgressIndicator()),

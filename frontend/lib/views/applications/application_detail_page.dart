@@ -64,7 +64,7 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Gagal menambahkan tugas: $e')),
+                      const SnackBar(content: Text('Gagal menambahkan tugas')),
                     );
                   }
                 }

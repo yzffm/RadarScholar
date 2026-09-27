@@ -183,6 +183,7 @@ class AppShell extends ConsumerWidget {
     int selectedIndex,
     List<NavigationDestinationItem> destinations,
   ) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       body: Row(
         children: [
@@ -190,9 +191,9 @@ class AppShell extends ConsumerWidget {
           Container(
             width: 260,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.surface,
               border: Border(
-                right: BorderSide(color: Colors.grey.shade200, width: 1),
+                right: BorderSide(color: colors.outlineVariant, width: 1),
               ),
             ),
             child: Column(
@@ -253,7 +254,7 @@ class AppShell extends ConsumerWidget {
                                   size: 22,
                                   color: isSelected
                                       ? AppTheme.brandPrimary
-                                      : Colors.grey.shade700,
+                                      : colors.onSurfaceVariant,
                                 ),
                                 const SizedBox(width: 14),
                                 Text(
@@ -265,7 +266,7 @@ class AppShell extends ConsumerWidget {
                                         : FontWeight.w500,
                                     color: isSelected
                                         ? AppTheme.brandPrimary
-                                        : Colors.grey.shade800,
+                                        : colors.onSurface,
                                   ),
                                 ),
                               ],
@@ -323,7 +324,7 @@ class AppShell extends ConsumerWidget {
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 13,
-                                            color: Colors.grey.shade900,
+                                            color: colors.onSurface,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -332,7 +333,7 @@ class AppShell extends ConsumerWidget {
                                           user.email ?? '',
                                           style: TextStyle(
                                             fontSize: 11,
-                                            color: Colors.grey.shade600,
+                                            color: colors.onSurfaceVariant,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -349,14 +350,14 @@ class AppShell extends ConsumerWidget {
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color: Colors.grey.shade900,
+                                          color: colors.onSurface,
                                         ),
                                       ),
                                       Text(
                                         'M2 — Terautentikasi',
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Colors.grey.shade600,
+                                          color: colors.onSurfaceVariant,
                                         ),
                                       ),
                                     ],

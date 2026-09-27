@@ -51,6 +51,15 @@ The API should now be running at `http://localhost:8000`.
 Verify liveness: `http://localhost:8000/health`
 Verify database readiness: `http://localhost:8000/health/ready`
 
+The readiness response includes the active database dialect. The local
+fallback is SQLite, while the crawler GitHub Action uses its `DATABASE_URL`
+secret. To see crawler results in the local Flutter discovery screen, the
+running backend must use the same Supabase/PostgreSQL `DATABASE_URL` as the
+workflow, or the frontend must point to the deployed backend that uses it.
+
+Do not assume that a successful GitHub Action crawl writes to the local
+`backend/radarscholar.db` file.
+
 ### 3. Frontend Setup
 
 ```bash

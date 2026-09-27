@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../controllers/auth_controller.dart';
+import '../controllers/profile_controller.dart';
 import '../views/landing/landing_page.dart';
 import '../views/auth/login_page.dart';
 import '../views/auth/register_page.dart';
@@ -28,6 +29,10 @@ class RouterNotifier extends ChangeNotifier {
       authControllerProvider,
       (_, __) => notifyListeners(),
     );
+    _ref.listen<ProfileState>(
+      profileControllerProvider,
+      (_, __) => notifyListeners(),
+    );
   }
 }
 
@@ -49,6 +54,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
       final isAuth = authState is AuthAuthenticated;
+      final isGoingToAdmin = state.matchedLocation == '/admin';
 
       // Determine if we are on a public auth route
       final isGoingToLogin = state.matchedLocation == '/login';
@@ -67,6 +73,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isAuth && (isGoingToAuthRoute || isGoingToLanding)) {
         // Redirect to app if authenticated and trying to access auth/landing page
         return '/discovery';
+      }
+
+      if (isGoingToAdmin) {
+        final profileState = ref.read(profileControllerProvider);
+        if (profileState is ProfileLoaded && !profileState.profile.isAdmin) {
+          return '/discovery';
+        }
       }
 
       return null;

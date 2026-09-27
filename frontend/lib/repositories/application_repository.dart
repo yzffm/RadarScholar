@@ -17,9 +17,7 @@ class ApplicationRepository {
   // --- Saved Scholarships ---
 
   Future<List<SavedScholarship>> getSavedScholarships() async {
-    final response = await _apiService.get(
-      '/api/v1/applications/saved-scholarships',
-    );
+    final response = await _apiService.get('/api/v1/saved-scholarships');
     return (response.data as List)
         .map((e) => SavedScholarship.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -27,21 +25,19 @@ class ApplicationRepository {
 
   Future<SavedScholarship> saveScholarship(String scholarshipId) async {
     final response = await _apiService.post(
-      '/api/v1/applications/scholarships/$scholarshipId/save',
+      '/api/v1/scholarships/$scholarshipId/save',
     );
     return SavedScholarship.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<void> unsaveScholarship(String scholarshipId) async {
-    await _apiService.delete(
-      '/api/v1/applications/scholarships/$scholarshipId/save',
-    );
+    await _apiService.delete('/api/v1/scholarships/$scholarshipId/save');
   }
 
   // --- Applications ---
 
   Future<List<Application>> getApplications() async {
-    final response = await _apiService.get('/api/v1/applications/');
+    final response = await _apiService.get('/api/v1/applications');
     return (response.data as List)
         .map((e) => Application.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -53,7 +49,7 @@ class ApplicationRepository {
     String? notes,
   }) async {
     final response = await _apiService.post(
-      '/api/v1/applications/',
+      '/api/v1/applications',
       data: {
         'scholarship_id': scholarshipId,
         if (targetDeadline != null)

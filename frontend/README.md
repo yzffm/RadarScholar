@@ -42,6 +42,10 @@ flutter run -d chrome \
   --dart-define=SUPABASE_ANON_KEY=your-public-anon-key
 ```
 
+Flutter does not read `backend/.env`. These two `--dart-define` values are
+required for email/password and Google authentication. The backend's
+`SUPABASE_URL` and the Flutter `SUPABASE_URL` must refer to the same project.
+
 Never put a Supabase service-role key or other privileged credential in Flutter
 source or `--dart-define` values.
 

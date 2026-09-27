@@ -149,6 +149,20 @@ The Flutter app connects to `http://localhost:8000` by default. Override with:
 flutter run -d chrome --dart-define=API_BASE_URL=http://your-host:8000
 ```
 
+Flutter authentication configuration is separate from `backend/.env`. For
+local login, pass the public Supabase values at build/run time:
+
+```bash
+flutter run -d chrome \
+  --dart-define=SUPABASE_URL=https://your-project.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=your-public-anon-key
+```
+
+The discovery page reads from the FastAPI backend, not directly from Supabase.
+The backend's `DATABASE_URL` must point to the same database used by the
+crawler workflow. A crawler run in GitHub Actions does not populate a local
+`backend/radarscholar.db` file.
+
 ## Environment Configuration
 
 Copy `backend/.env.example` to `backend/.env` and fill in values:

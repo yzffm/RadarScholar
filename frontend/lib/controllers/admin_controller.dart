@@ -4,21 +4,24 @@ import '../models/admin.dart';
 import '../models/scholarship.dart';
 import '../repositories/admin_repository.dart';
 
-final adminSourcesProvider = FutureProvider.autoDispose<List<ScholarshipSource>>((ref) async {
-  final repo = ref.watch(adminRepositoryProvider);
-  return repo.getSources();
-});
+final adminSourcesProvider =
+    FutureProvider.autoDispose<List<ScholarshipSource>>((ref) async {
+      final repo = ref.watch(adminRepositoryProvider);
+      return repo.getSources();
+    });
 
-final adminCrawlRunsProvider = FutureProvider.autoDispose<CrawlRunListResponse>((ref) async {
-  final repo = ref.watch(adminRepositoryProvider);
-  return repo.getCrawlRuns(limit: 20);
-});
+final adminCrawlRunsProvider = FutureProvider.autoDispose<CrawlRunListResponse>(
+  (ref) async {
+    final repo = ref.watch(adminRepositoryProvider);
+    return repo.getCrawlRuns(limit: 20);
+  },
+);
 
-class AdminSourcesController extends StateNotifier<AsyncValue<List<ScholarshipSource>>> {
+class AdminSourcesController
+    extends StateNotifier<AsyncValue<List<ScholarshipSource>>> {
   final AdminRepository _repo;
-  final Ref _ref;
 
-  AdminSourcesController(this._repo, this._ref) : super(const AsyncValue.loading()) {
+  AdminSourcesController(this._repo) : super(const AsyncValue.loading()) {
     _load();
   }
 
@@ -34,10 +37,12 @@ class AdminSourcesController extends StateNotifier<AsyncValue<List<ScholarshipSo
   Future<void> toggleSource(String sourceId) async {
     try {
       final updatedSource = await _repo.toggleSource(sourceId);
-      
+
       // Update local state
       state = state.whenData((sources) {
-        return sources.map((s) => s.id == sourceId ? updatedSource : s).toList();
+        return sources
+            .map((s) => s.id == sourceId ? updatedSource : s)
+            .toList();
       });
     } catch (e) {
       // Re-throw to handle in UI (e.g. snackbar)
@@ -46,8 +51,11 @@ class AdminSourcesController extends StateNotifier<AsyncValue<List<ScholarshipSo
   }
 }
 
-final adminSourcesControllerProvider = 
-    StateNotifierProvider.autoDispose<AdminSourcesController, AsyncValue<List<ScholarshipSource>>>((ref) {
-  final repo = ref.watch(adminRepositoryProvider);
-  return AdminSourcesController(repo, ref);
-});
+final adminSourcesControllerProvider =
+    StateNotifierProvider.autoDispose<
+      AdminSourcesController,
+      AsyncValue<List<ScholarshipSource>>
+    >((ref) {
+      final repo = ref.watch(adminRepositoryProvider);
+      return AdminSourcesController(repo);
+    });

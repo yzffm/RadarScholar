@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:radarscholar/controllers/scholarship_controller.dart';
 import 'package:radarscholar/models/scholarship.dart';
 import 'package:radarscholar/repositories/scholarship_repository.dart';
 import 'package:radarscholar/views/discovery/discovery_page.dart';
