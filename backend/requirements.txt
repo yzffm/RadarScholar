@@ -13,7 +13,6 @@ pydantic-settings>=2.0
 # --- Database ---
 sqlalchemy>=2.0
 alembic>=1.13
-psycopg2-binary>=2.9
 psycopg[binary]>=3.1
 
 # --- Authentication ---
@@ -37,7 +36,4 @@ pytest>=8.0
 pytest-asyncio>=0.24
 
 # --- Code Quality ---
-# NOTE: Install ruff separately via `pip install ruff` or system package manager.
-# The [standard] extras for uvicorn (watchfiles) and ruff require Rust toolchain
-# to build from source on some platforms. If pre-built wheels are unavailable,
-# install ruff globally: `pip install ruff`
+ruff>=0.9

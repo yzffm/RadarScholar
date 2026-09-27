@@ -14,11 +14,11 @@ import logging
 import httpx
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.orm import Session
 
 from app.auth.models import AuthUser
 from app.core.config import settings
 from app.database.session import get_db
-from sqlalchemy.orm import Session
 from app.users.models import UserProfile
 
 _bearer_scheme = HTTPBearer(auto_error=False)
@@ -84,7 +84,7 @@ async def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Gagal menghubungi layanan autentikasi.",
-        )
+        ) from e
 
 async def get_admin_user(
     user: AuthUser = Depends(get_current_user),
@@ -98,4 +98,3 @@ async def get_admin_user(
             detail="Akses ditolak. Endpoint ini memerlukan hak akses administrator.",
         )
     return user
-

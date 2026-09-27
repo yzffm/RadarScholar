@@ -31,8 +31,8 @@ def db_session():
     """Create an in-memory SQLite database session for testing."""
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
+    session_factory = sessionmaker(bind=engine)
+    session = session_factory()
     try:
         yield session
     finally:
@@ -125,6 +125,10 @@ class TestNormalization:
         # It has exactly 3 slashes so trailing slash is kept
         assert url == "https://example.com/"
 
+    def test_normalize_url_lowercases_authority_and_preserves_query(self):
+        url = _normalize_url(" HTTPS://Example.COM/Path/?year=2027#details ")
+        assert url == "https://example.com/Path?year=2027#details"
+
 
 # ---------------------------------------------------------------------------
 # Pipeline integration tests
@@ -157,6 +161,7 @@ class TestPipelineNewRecord:
         scholarships = db_session.query(Scholarship).all()
         assert len(scholarships) == 1
         assert scholarships[0].title == "Test Scholarship"
+        assert scholarships[0].data_origin == "CRAWLER_LIVE"
 
         # Verify requirements
         reqs = db_session.query(ScholarshipRequirement).all()
@@ -260,6 +265,25 @@ class TestPipelineDryRun:
         scholarships = db_session.query(Scholarship).all()
         assert len(scholarships) == 0
 
+    def test_baseline_fallback_is_not_marked_live_verified(self, db_session: Session):
+        baseline = _make_scraped()
+        baseline.is_live_verified = False
+        registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([baseline]),
+                enabled=True,
+            ),
+        }
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        assert scholarship.data_origin == "CRAWLER_BASELINE"
+        assert scholarship.last_verified_live_at is None
+
 
 class TestPipelineUpdate:
     """Test: scholarship data changes → update reflects."""
@@ -299,6 +323,7 @@ class TestPipelineUpdate:
 
         scholarship = db_session.query(Scholarship).first()
         assert scholarship.title == "Updated Title"
+        assert scholarship.data_origin == "CRAWLER_LIVE"
 
 
 class TestSourcePolicy:

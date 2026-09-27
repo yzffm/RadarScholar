@@ -168,9 +168,12 @@ class ApplicationTaskRepository:
         self.session.refresh(db_obj)
         return db_obj
 
-    def delete(self, task_id: uuid.UUID) -> bool:
-        """Delete a task by ID."""
-        stmt = delete(ApplicationTask).where(ApplicationTask.id == task_id)
+    def delete(self, task_id: uuid.UUID, application_id: uuid.UUID) -> bool:
+        """Delete a task only when it belongs to the requested application."""
+        stmt = delete(ApplicationTask).where(
+            ApplicationTask.id == task_id,
+            ApplicationTask.application_id == application_id,
+        )
         result = self.session.execute(stmt)
         self.session.commit()
         return result.rowcount > 0

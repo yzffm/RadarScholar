@@ -8,6 +8,7 @@ from sqlalchemy import JSON, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.time import utc_now
 from app.database.base import Base
 
 
@@ -33,5 +34,5 @@ class CrawlRun(Base):
         JSON().with_variant(JSONB, "postgresql"), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime, default=utc_now, nullable=False
     )

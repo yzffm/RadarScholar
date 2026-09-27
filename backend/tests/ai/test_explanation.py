@@ -1,11 +1,14 @@
-from app.ai.tasks.explanation import ExplanationTask
-from app.users.schemas import UserProfileResponse, DegreeLevelSchema
-from app.scholarships.schemas import ScholarshipResponse
-from app.matching.schemas import MatchResult, RelevanceTier, CriterionEvaluation, CriterionState
-from datetime import datetime
 import uuid
-import pytest
+from datetime import datetime
 from unittest.mock import AsyncMock
+
+import pytest
+
+from app.ai.tasks.explanation import ExplanationTask
+from app.matching.schemas import CriterionEvaluation, CriterionState, MatchResult, RelevanceTier
+from app.scholarships.schemas import ScholarshipResponse
+from app.users.schemas import DegreeLevelSchema, UserProfileResponse
+
 
 @pytest.fixture
 def dummy_profile():
@@ -66,20 +69,20 @@ def dummy_match():
 def test_explanation_prompt_contains_data(dummy_profile, dummy_scholarship, dummy_match):
     task = ExplanationTask(ai_service=None)
     prompt = task._build_prompt(dummy_profile, dummy_scholarship, dummy_match)
-    
+
     # Verify user profile data is present
     assert "GPA: 3.5" in prompt
     assert "Semester: 3" in prompt
-    
+
     # Verify scholarship data is present
     assert dummy_scholarship.title in prompt
     assert dummy_scholarship.description in prompt
-    
+
     # Verify match data is present
     assert "Overall Relevance: SANGAT_RELEVAN" in prompt
     assert "IPK: MATCH" in prompt
     assert "Semester: NOT_MATCH" in prompt
-    
+
     # Verify prompt injection defense constraint is present
     assert "untrusted user/crawled content" in prompt
 
@@ -95,10 +98,10 @@ async def test_explanation_execute(dummy_profile, dummy_scholarship, dummy_match
         unknowns=[]
     )
     mock_service.generate_structured.return_value = mock_result
-    
+
     task = ExplanationTask(ai_service=mock_service)
     result = await task.execute(dummy_profile, dummy_scholarship, dummy_match)
-    
+
     assert result.summary == "Test summary"
     assert "IPK" in result.strengths
     mock_service.generate_structured.assert_called_once()

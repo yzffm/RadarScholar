@@ -79,6 +79,7 @@ class ScholarshipBase(BaseModel):
     deadline: datetime | None = None
     application_url: str
     is_active: bool = True
+    data_origin: str = "CRAWLER"
 
 class ScholarshipCreate(ScholarshipBase):
     source_id: UUID

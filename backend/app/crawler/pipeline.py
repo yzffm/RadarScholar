@@ -18,12 +18,14 @@ import re
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
+from urllib.parse import urlsplit, urlunsplit
 
 from sqlalchemy.orm import Session
 
+from app.core.time import utc_now
 from app.crawler.base import BaseScraper, ScrapedScholarship
-from app.crawler.registry import SourceEntry, get_enabled_sources
 from app.crawler.models import CrawlRun
+from app.crawler.registry import SourceEntry, get_enabled_sources
 from app.scholarships.models import (
     Scholarship,
     ScholarshipBenefit,
@@ -55,7 +57,7 @@ class SourceResult:
 @dataclass
 class CrawlerRunResult:
     """Aggregate result for the entire crawler run."""
-    started_at: datetime = field(default_factory=datetime.utcnow)
+    started_at: datetime = field(default_factory=utc_now)
     finished_at: datetime | None = None
     sources_attempted: int = 0
     sources_succeeded: int = 0
@@ -103,10 +105,18 @@ def _normalize_text(text: str) -> str:
 def _normalize_url(url: str) -> str:
     """Basic URL normalization — strip trailing slash, lowercase scheme+host."""
     url = url.strip()
-    # Remove trailing slash for comparison consistency
-    if url.endswith("/") and url.count("/") > 3:
-        url = url.rstrip("/")
-    return url
+    parsed = urlsplit(url)
+    if not parsed.scheme or not parsed.netloc:
+        return url
+    return urlunsplit(
+        (
+            parsed.scheme.lower(),
+            parsed.netloc.lower(),
+            parsed.path.rstrip("/") or "/",
+            parsed.query,
+            parsed.fragment,
+        )
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -151,11 +161,11 @@ class CrawlerPipeline:
                 if src_result.error:
                     result.errors.append(f"[{key}] {src_result.error}")
 
-        result.finished_at = datetime.utcnow()
-        
+        result.finished_at = utc_now()
+
         if not self.dry_run:
             self._save_run_result(result)
-            
+
         return result
 
     def _save_run_result(self, result: CrawlerRunResult) -> None:
@@ -297,7 +307,7 @@ class CrawlerPipeline:
             # Update source_url if changed
             if existing.source_url != entry.source_url:
                 existing.source_url = entry.source_url
-                existing.updated_at = datetime.utcnow()
+                existing.updated_at = utc_now()
             return existing
 
         source = ScholarshipSource(
@@ -337,7 +347,7 @@ class CrawlerPipeline:
         for scholarship in active_scholarships:
             if _normalize_url(scholarship.application_url) not in seen_application_urls:
                 scholarship.is_active = False
-                scholarship.updated_at = datetime.utcnow()
+                scholarship.updated_at = utc_now()
                 stale_count += 1
 
         if stale_count:
@@ -407,7 +417,8 @@ class CrawlerPipeline:
             deadline=item.deadline,
             application_url=item.application_url,
             is_active=item.is_active,
-            last_verified_live_at=datetime.utcnow() if item.is_live_verified else None,
+            last_verified_live_at=utc_now() if item.is_live_verified else None,
+            data_origin=("CRAWLER_LIVE" if item.is_live_verified else "CRAWLER_BASELINE"),
         )
         self.db.add(scholarship)
         self.db.flush()
@@ -453,14 +464,15 @@ class CrawlerPipeline:
                 changed = True
 
         if changed:
-            existing.updated_at = datetime.utcnow()
+            existing.updated_at = utc_now()
 
         # Record fresh live confirmation independent of whether any displayed
         # field actually changed — "still accurate as of today" is itself
         # useful information, and we deliberately never move this timestamp
         # backward/blank when today's crawl fell back to baseline data.
         if item.is_live_verified:
-            existing.last_verified_live_at = datetime.utcnow()
+            existing.last_verified_live_at = utc_now()
+            existing.data_origin = "CRAWLER_LIVE"
 
         # Replace requirements (delete old, add new)
         # This is safe because requirements belong to the scholarship catalog,

@@ -1,8 +1,11 @@
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 from pydantic import BaseModel
-from app.ai.service import AIService, AIUnavailableError
+
 from app.ai.base import AIProvider
+from app.ai.service import AIService, AIUnavailableError
+
 
 class DummySchema(BaseModel):
     result: str
@@ -12,12 +15,12 @@ class MockProvider(AIProvider):
         self.name = name
         self.should_fail = should_fail
         self._result = result
-        
+
     async def generate(self, prompt: str) -> str:
         if self.should_fail:
             raise Exception(f"{self.name} failed")
         return self._result
-        
+
     async def generate_structured(self, prompt: str, schema: type[BaseModel]) -> BaseModel:
         if self.should_fail:
             raise Exception(f"{self.name} failed")
@@ -36,7 +39,7 @@ async def test_ai_service_success(mock_settings):
          patch("app.ai.service.GroqProvider") as mock_groq:
         mock_gemini.return_value = MockProvider("Gemini")
         mock_groq.return_value = MockProvider("Groq")
-        
+
         service = AIService()
         result = await service.generate_structured("test", DummySchema)
         assert result.result == "Gemini success"
@@ -47,7 +50,7 @@ async def test_ai_service_fallback(mock_settings):
          patch("app.ai.service.GroqProvider") as mock_groq:
         mock_gemini.return_value = MockProvider("Gemini", should_fail=True)
         mock_groq.return_value = MockProvider("Groq")
-        
+
         service = AIService()
         result = await service.generate_structured("test", DummySchema)
         assert result.result == "Groq success"
@@ -58,7 +61,7 @@ async def test_ai_service_total_failure(mock_settings):
          patch("app.ai.service.GroqProvider") as mock_groq:
         mock_gemini.return_value = MockProvider("Gemini", should_fail=True)
         mock_groq.return_value = MockProvider("Groq", should_fail=True)
-        
+
         service = AIService()
         with pytest.raises(AIUnavailableError):
             await service.generate_structured("test", DummySchema)

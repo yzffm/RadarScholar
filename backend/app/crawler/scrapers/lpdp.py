@@ -20,7 +20,6 @@ Limitation:
 """
 
 import logging
-import re
 from datetime import datetime
 
 import httpx
@@ -32,6 +31,7 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
+from app.crawler.date_utils import extract_contextual_deadline
 
 logger = logging.getLogger(__name__)
 
@@ -138,34 +138,9 @@ class LpdpScraper(BaseScraper):
 
     def _extract_deadline(self, soup: BeautifulSoup) -> datetime | None:
         """Attempt to extract deadline from page content."""
-        text = soup.get_text()
-        date_pattern = re.compile(
-            r"(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|"
-            r"Juli|Agustus|September|Oktober|November|Desember)\s+(\d{4})",
-            re.IGNORECASE,
-        )
-        months = {
-            "januari": 1, "februari": 2, "maret": 3, "april": 4,
-            "mei": 5, "juni": 6, "juli": 7, "agustus": 8,
-            "september": 9, "oktober": 10, "november": 11, "desember": 12,
-        }
-
-        dates_found = []
-        for match in date_pattern.finditer(text):
-            day = int(match.group(1))
-            month = months.get(match.group(2).lower())
-            year = int(match.group(3))
-            if month:
-                try:
-                    dates_found.append(datetime(year, month, day))
-                except ValueError:
-                    continue
-
-        if dates_found:
-            now = datetime.utcnow()
-            future_dates = [d for d in dates_found if d > now]
-            if future_dates:
-                return max(future_dates)
+        deadline = extract_contextual_deadline(soup.get_text(" ", strip=True))
+        if deadline:
+            return deadline
 
         logger.info("No deadline found on LPDP page")
         return None

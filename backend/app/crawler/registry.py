@@ -26,8 +26,10 @@ class SourceEntry:
 
     provider_name: str
     source_url: str
-    scraper_factory: type  # Class reference, instantiated at run time
+    scraper_factory: type | None  # Class reference, instantiated at run time
     enabled: bool = True
+    crawl_status: str = "ACTIVE"
+    crawl_method: str = "HTTP_HTML"
 
 
 def _build_registry() -> dict[str, SourceEntry]:
@@ -38,19 +40,61 @@ def _build_registry() -> dict[str, SourceEntry]:
     """
     from app.crawler.scrapers.djarum import DjarumScraper
     from app.crawler.scrapers.lpdp import LpdpScraper
+    from app.crawler.scrapers.teladan import TeladanScraper
 
     return {
         "djarum": SourceEntry(
             provider_name="Djarum Beasiswa Plus",
             source_url="https://djarumbeasiswaplus.org/our-program/regulation-djarum-beasiswa-plus",
             scraper_factory=DjarumScraper,
-            enabled=True,
+            enabled=False,
+            crawl_status="ANTI_BOT_BLOCKED",
         ),
         "lpdp": SourceEntry(
             provider_name="LPDP",
             source_url="https://lpdp.kemenkeu.go.id/beasiswa",
             scraper_factory=LpdpScraper,
+            enabled=False,
+            crawl_status="WAF_BLOCKED",
+        ),
+        "teladan": SourceEntry(
+            provider_name="Tanoto Foundation TELADAN",
+            source_url="https://www.tanotofoundation.org/initiative/teladan/",
+            scraper_factory=TeladanScraper,
             enabled=True,
+            crawl_status="ACTIVE",
+        ),
+        "beasiswa_unggulan": SourceEntry(
+            provider_name="Beasiswa Unggulan Kemendikbudristek",
+            source_url="https://beasiswaunggulan.kemdikbud.go.id/",
+            scraper_factory=None,
+            enabled=False,
+            crawl_status="NEEDS_REVIEW",
+            crawl_method="MANUAL_OFFICIAL",
+        ),
+        "kip_kuliah": SourceEntry(
+            provider_name="KIP Kuliah",
+            source_url="https://kip-kuliah.kemdikbud.go.id/",
+            scraper_factory=None,
+            enabled=False,
+            crawl_status="NEEDS_REVIEW",
+            crawl_method="MANUAL_OFFICIAL",
+        ),
+        "bank_indonesia_genbi": SourceEntry(
+            provider_name="Bank Indonesia / GenBI",
+            source_url="https://www.bi.go.id/id/edukasi/",
+            scraper_factory=None,
+            enabled=False,
+            crawl_status="MANUAL_ONLY",
+            crawl_method="MANUAL_OFFICIAL",
+        ),
+        "baznas": SourceEntry(
+            provider_name="Beasiswa BAZNAS",
+            source_url="https://beasiswa.baznas.go.id/program",
+            scraper_factory=None,
+            enabled=False,
+            crawl_status="MANUAL_ONLY",
+            crawl_method="MANUAL_OFFICIAL",
         ),
     }
 
@@ -77,4 +121,6 @@ def get_scraper(key: str) -> BaseScraper:
     entry = registry[key]
     if not entry.enabled:
         raise ValueError(f"Source '{key}' is disabled")
+    if entry.scraper_factory is None:
+        raise ValueError(f"Source '{key}' has no crawler adapter")
     return entry.scraper_factory()

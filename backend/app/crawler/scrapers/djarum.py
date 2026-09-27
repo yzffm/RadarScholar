@@ -23,7 +23,6 @@ Limitation:
 """
 
 import logging
-import re
 from datetime import datetime
 
 import httpx
@@ -35,6 +34,7 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
+from app.crawler.date_utils import extract_contextual_deadline
 
 logger = logging.getLogger(__name__)
 
@@ -134,8 +134,6 @@ class DjarumScraper(BaseScraper):
         soup = BeautifulSoup(html, "html.parser")
 
         # Validate we're on the right page
-        title_tag = soup.find("title")
-        page_title = title_tag.get_text(strip=True) if title_tag else ""
 
         # Extract meta description if available
         meta_desc = soup.find("meta", attrs={"name": "description"})
@@ -169,38 +167,10 @@ class DjarumScraper(BaseScraper):
         Returns None if no deadline can be deterministically identified.
         Does NOT fabricate a date.
         """
-        # Look for date patterns in the page text
-        text = soup.get_text()
-        # Common Indonesian date patterns: "31 Desember 2026", "30 September 2026"
-        date_pattern = re.compile(
-            r"(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|"
-            r"Juli|Agustus|September|Oktober|November|Desember)\s+(\d{4})",
-            re.IGNORECASE,
-        )
-        months = {
-            "januari": 1, "februari": 2, "maret": 3, "april": 4,
-            "mei": 5, "juni": 6, "juli": 7, "agustus": 8,
-            "september": 9, "oktober": 10, "november": 11, "desember": 12,
-        }
-
-        # Find the latest date mentioned (likely the deadline)
-        dates_found = []
-        for match in date_pattern.finditer(text):
-            day = int(match.group(1))
-            month = months.get(match.group(2).lower())
-            year = int(match.group(3))
-            if month:
-                try:
-                    dates_found.append(datetime(year, month, day))
-                except ValueError:
-                    continue
-
-        if dates_found:
-            # Return the latest plausible future date
-            now = datetime.utcnow()
-            future_dates = [d for d in dates_found if d > now]
-            if future_dates:
-                return max(future_dates)
+        text = soup.get_text(" ", strip=True)
+        deadline = extract_contextual_deadline(text)
+        if deadline:
+            return deadline
 
         logger.info("No deadline found on Djarum regulation page")
         return None

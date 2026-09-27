@@ -6,14 +6,13 @@ Endpoints:
     GET  /api/v1/admin/crawls          - List recent crawl runs
     GET  /api/v1/admin/crawls/{id}     - Get details of a specific crawl run
 """
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import desc
+from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_admin_user
-from app.auth.models import AuthUser
-from app.database.session import get_db
 from app.crawler.models import CrawlRun
+from app.database.session import get_db
 from app.scholarships.models import ScholarshipSource
 
 router = APIRouter(prefix="/api/v1/admin", tags=["Admin"], dependencies=[Depends(get_admin_user)])
@@ -30,7 +29,7 @@ def toggle_source(source_id: str, db: Session = Depends(get_db)):
     source = db.query(ScholarshipSource).filter(ScholarshipSource.id == source_id).first()
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
-    
+
     source.active = not source.active
     source.crawl_allowed = source.active
     db.commit()

@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from app.applications.models import SavedScholarship
 from app.auth.dependencies import get_current_user
 from app.auth.models import AuthUser
-from app.database.session import get_db
 from app.main import app
 from app.scholarships.models import Scholarship, ScholarshipSource
 
@@ -15,14 +14,6 @@ from app.scholarships.models import Scholarship, ScholarshipSource
 @pytest.fixture
 def client():
     return TestClient(app)
-
-
-@pytest.fixture
-def db_session():
-    # Use the same generator FastAPI uses
-    db = next(get_db())
-    yield db
-    db.close()
 
 
 @pytest.fixture
@@ -59,8 +50,10 @@ def mock_auth():
         return AuthUser(id=user_id, email="test@example.com")
 
     app.dependency_overrides[get_current_user] = _mock_get_current_user
-    yield user_id
-    app.dependency_overrides.clear()
+    try:
+        yield user_id
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
 
 
 def test_save_scholarship(client: TestClient, db_session: Session, test_scholarship: Scholarship, mock_auth: str):

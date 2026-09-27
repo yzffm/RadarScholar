@@ -39,7 +39,7 @@ def readiness_check() -> dict:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Layanan belum siap.",
-        )
+        ) from None
     finally:
         if engine is not None:
             engine.dispose()

@@ -16,32 +16,41 @@ from app.users.router import router as users_router
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
+    cors_origins = settings.CORS_ORIGINS
+    if not settings.DEBUG:
+        cors_origins = [
+            origin
+            for origin in cors_origins
+            if not origin.startswith(("http://localhost", "http://127.0.0.1"))
+        ]
+
     application = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
         description="RadarScholar — Scholarship Intelligence Platform API",
     )
 
-    # CORS middleware for Flutter Web development.
-    # In production, origins should be restricted.
+    # Development localhost regex is intentionally disabled in production.
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
-        allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
+        allow_origins=cors_origins,
+        allow_origin_regex=(
+            r"http://(localhost|127\.0\.0\.1):\d+" if settings.DEBUG else None
+        ),
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "Accept"],
     )
 
     # Register routers
     application.include_router(health_router, tags=["Health"])
     application.include_router(users_router)
 
+    from app.admin.router import router as admin_router
+    from app.ai.router import applications_router as ai_applications_router
+    from app.ai.router import router as ai_router
     from app.applications.router import router as applications_router
     from app.scholarships.router import router as scholarships_router
-    from app.ai.router import router as ai_router, applications_router as ai_applications_router
-    
-    from app.admin.router import router as admin_router
 
     application.include_router(scholarships_router, prefix="/api/v1")
     application.include_router(applications_router, prefix="/api/v1")

@@ -11,7 +11,6 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-
 ProfileListItem = Annotated[str, Field(max_length=500)]
 ProfileList = Annotated[list[ProfileListItem], Field(max_length=20)]
 

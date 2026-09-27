@@ -3,8 +3,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
 from app.api import health
+from app.main import app
 
 
 @pytest.fixture
@@ -34,8 +34,11 @@ def test_health_check_response_structure(client: TestClient):
     assert set(data.keys()) == expected_keys
 
 
-def test_readiness_check_returns_ready(client: TestClient):
+def test_readiness_check_returns_ready(client: TestClient, test_engine):
+    original_get_engine = health.get_engine
+    health.get_engine = lambda: test_engine
     response = client.get("/health/ready")
+    health.get_engine = original_get_engine
 
     assert response.status_code == 200
     assert response.json()["status"] == "ready"

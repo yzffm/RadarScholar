@@ -117,6 +117,16 @@ class TestDjarumParserEdgeCases:
         results = scraper.parse_html("<html><head></head><body><p>No dates here</p></body></html>")
         assert results[0].deadline is None
 
+    def test_deadline_uses_context_not_latest_date(self, scraper: DjarumScraper):
+        html = """
+        <p>Pendaftaran dibuka 1 Januari 2027 sampai 30 September 2027.</p>
+        <p>Program dimulai 31 Desember 2028.</p>
+        """
+        result = scraper.parse_html(html)[0]
+        assert result.deadline is not None
+        assert result.deadline.year == 2027
+        assert result.deadline.month == 9
+
 
 class TestDjarumScrapeFallback:
     """scrape() must degrade gracefully to known baseline data instead of

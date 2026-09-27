@@ -1,8 +1,9 @@
 from app.ai.schemas import AssistantResponse, AssistantTaskType
 from app.ai.service import AIService
-from app.users.schemas import UserProfileResponse
-from app.scholarships.schemas import ScholarshipResponse
 from app.applications.schemas import ApplicationResponse
+from app.scholarships.schemas import ScholarshipResponse
+from app.users.schemas import UserProfileResponse
+
 
 class ApplicationAssistantTask:
     def __init__(self, ai_service: AIService):
@@ -40,7 +41,7 @@ class ApplicationAssistantTask:
             f"Benefits:\n{bens if bens else 'None specified'}\n"
         )
         return data
-        
+
     def _build_application_context(self, application: ApplicationResponse) -> str:
         data = (
             f"Status: {application.status.value}\n"
@@ -56,7 +57,7 @@ class ApplicationAssistantTask:
         task_type: AssistantTaskType,
         draft_text: str | None,
     ) -> str:
-        
+
         mode_instructions = {
             AssistantTaskType.CV: (
                 "Help tailor the user's CV toward the scholarship.\n"

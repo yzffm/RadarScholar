@@ -1,12 +1,11 @@
-import json
 from typing import TypeVar
 
-from pydantic import BaseModel
 from google import genai
 from google.genai import types
+from pydantic import BaseModel
 
-from app.core.config import settings
 from app.ai.base import AIProvider
+from app.core.config import settings
 
 T = TypeVar("T", bound=BaseModel)
 

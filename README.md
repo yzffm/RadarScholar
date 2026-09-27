@@ -56,12 +56,18 @@ RadarScholar/
 │       └── main.dart       # Entry point
 ├── backend/                # FastAPI application
 │   ├── app/
-│   │   ├── api/            # API route handlers
-│   │   ├── core/           # Configuration, settings
-│   │   ├── models/         # SQLAlchemy models
-│   │   ├── schemas/        # Pydantic schemas
-│   │   ├── repositories/   # Data access
-│   │   └── services/       # Business logic
+│   │   ├── api/            # Health and shared API routes
+│   │   ├── core/           # Configuration and settings
+│   │   ├── users/          # Profiles and user endpoints
+│   │   ├── scholarships/   # Scholarship domain and endpoints
+│   │   ├── applications/   # Saved scholarships and tracking
+│   │   ├── matching/       # Deterministic matching engine
+│   │   ├── crawler/        # Curated source registry and pipeline
+│   │   ├── ai/             # AI abstraction and tasks
+│   │   ├── auth/           # Supabase identity verification
+│   │   └── database/       # SQLAlchemy base/session
+│   ├── alembic/            # Database migrations
+│   ├── scripts/            # Idempotent seed utilities
 │   └── tests/              # Backend tests
 ├── docs/                   # Documentation
 ├── Technical Docs.md       # Technical source of truth
@@ -115,6 +121,8 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+# Or install the package with development tools
+# pip install -e ".[dev]"
 
 # Copy environment template
 cp .env.example .env
@@ -193,6 +201,22 @@ Copy `backend/.env.example` to `backend/.env` and fill in values:
 | GET | `/api/v1/scholarships/{id}` | Get single scholarship detail |
 | GET | `/api/v1/scholarships/matched` | Discover scholarships matched against authenticated user's profile |
 | GET | `/api/v1/scholarships/{id}/match` | Get match evaluation for a single scholarship against authenticated user's profile |
+
+### M6, M8 & M10
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET/POST/PUT | `/api/v1/users/me` | Read, create, or update the authenticated user's profile |
+| POST/DELETE | `/api/v1/scholarships/{id}/save` | Save or unsave a scholarship |
+| GET | `/api/v1/saved-scholarships` | List saved scholarships |
+| GET/POST | `/api/v1/applications` | List or create application trackers |
+| GET/PUT/DELETE | `/api/v1/applications/{id}` | Read, update, or delete an application tracker |
+| POST/PUT/DELETE | `/api/v1/applications/{id}/tasks` | Manage application checklist tasks |
+| GET | `/api/v1/scholarships/{id}/ai-explanation` | Generate deterministic-match explanation with AI assistance |
+| POST | `/api/v1/applications/{id}/ai-assistant` | Generate AI application preparation feedback |
+| GET | `/api/v1/admin/sources` | List curated sources for admin users |
+| POST | `/api/v1/admin/sources/{id}/toggle` | Enable or disable a curated source |
+| GET | `/api/v1/admin/crawls` | List crawler run history |
 
 ## License
 

@@ -1,9 +1,12 @@
 from uuid import uuid4
+
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app
-from app.ai.schemas import AssistantRequest, AssistantTaskType
+
+from app.ai.schemas import AssistantTaskType
 from app.ai.tasks.assistant import ApplicationAssistantTask
+from app.main import app
+
 
 @pytest.fixture
 def client():
@@ -12,11 +15,12 @@ def client():
 @pytest.mark.asyncio
 async def test_assistant_task_prompt_generation():
     # We will just test the prompt generation to make sure it includes the right context
-    from app.users.schemas import UserProfileResponse
-    from app.scholarships.schemas import ScholarshipResponse, ScholarshipBenefitResponse, ScholarshipRequirementResponse
-    from app.applications.schemas import ApplicationResponse
-    from app.applications.models import ApplicationStatus
     from datetime import datetime
+
+    from app.applications.models import ApplicationStatus
+    from app.applications.schemas import ApplicationResponse
+    from app.scholarships.schemas import ScholarshipResponse
+    from app.users.schemas import UserProfileResponse
 
     profile = UserProfileResponse(
         id=str(uuid4()),
@@ -63,7 +67,7 @@ async def test_assistant_task_prompt_generation():
     # Mock AIService just for passing into Task
     class MockAIService:
         pass
-        
+
     task = ApplicationAssistantTask(ai_service=MockAIService())
 
     # 1. Test CV Mode without draft

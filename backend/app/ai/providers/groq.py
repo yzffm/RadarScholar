@@ -1,11 +1,10 @@
-import json
 from typing import TypeVar
 
-from pydantic import BaseModel
 from groq import AsyncGroq
+from pydantic import BaseModel
 
-from app.core.config import settings
 from app.ai.base import AIProvider
+from app.core.config import settings
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -27,12 +26,12 @@ class GroqProvider(AIProvider):
         # Note: Groq supports JSON mode, but for structured outputs we often
         # need to instruct the model to follow a specific JSON schema.
         # Alternatively, we can use instructor or just prompt engineering + json response_format.
-        
+
         system_prompt = (
             "You are an API that outputs strictly in JSON format. "
             f"You must adhere exactly to the following JSON schema:\n{schema.model_json_schema()}"
         )
-        
+
         response = await self.client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_prompt},

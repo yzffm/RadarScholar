@@ -29,7 +29,7 @@ def get_scholarships(
 ):
     """
     Get a paginated list of scholarships.
-    
+
     Supports filtering by search query and active status.
     Ordered by deadline ascending (nulls last).
     """
@@ -51,7 +51,7 @@ def get_matched_scholarships(
 ):
     """
     Get a paginated list of scholarships matched against the authenticated user's profile.
-    
+
     Ordered deterministically by relevance tier, number of matched/unmatched criteria, etc.
     """
     profile = get_profile(db, user)
@@ -139,7 +139,7 @@ def get_scholarship(
 ):
     """
     Get a single scholarship by its ID.
-    
+
     Includes detailed information like source, benefits, and requirements.
     """
     scholarship = service.get_scholarship(db=db, id=scholarship_id)

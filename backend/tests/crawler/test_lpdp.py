@@ -93,6 +93,16 @@ class TestLpdpParser:
         result = scraper.parse_html(lpdp_html)[0]
         assert result.is_active is True
 
+    def test_deadline_uses_context_not_latest_date(self, scraper: LpdpScraper):
+        html = """
+        <p>Pendaftaran tahap 2 ditutup 15 Oktober 2027.</p>
+        <p>Perkuliahan dimulai 1 Januari 2029.</p>
+        """
+        result = scraper.parse_html(html)[0]
+        assert result.deadline is not None
+        assert result.deadline.year == 2027
+        assert result.deadline.month == 10
+
 
 class TestLpdpScrapeFallback:
     """scrape() must degrade gracefully to known baseline data instead of

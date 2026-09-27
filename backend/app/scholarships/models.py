@@ -6,6 +6,7 @@ from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.time import utc_now
 from app.database.base import Base
 
 
@@ -17,8 +18,8 @@ class ScholarshipSource(Base):
     source_url: Mapped[str] = mapped_column(String)
     crawl_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     scholarships: Mapped[list["Scholarship"]] = relationship(back_populates="source", cascade="all, delete-orphan")
@@ -35,12 +36,14 @@ class Scholarship(Base):
     deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     application_url: Mapped[str] = mapped_column(String)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # SEED records are baseline data and are not treated as live-verified.
+    data_origin: Mapped[str] = mapped_column(String, default="CRAWLER")
     # NULL means the record has not been verified against the live source.
     last_verified_live_at: Mapped[datetime | None] = mapped_column(
         DateTime, nullable=True
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     source: Mapped["ScholarshipSource"] = relationship(back_populates="scholarships")

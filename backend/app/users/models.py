@@ -8,7 +8,6 @@ avoid field mismatches in future milestones (M5 Matching, M9 AI Assistant).
 """
 
 import enum
-from datetime import datetime
 
 from sqlalchemy import (
     JSON,
@@ -23,6 +22,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
+from app.core.time import utc_now
 from app.database.base import Base
 
 
@@ -90,13 +90,13 @@ class UserProfile(Base):
     created_at = Column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
+        default=utc_now,
     )
     updated_at = Column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=utc_now,
+        onupdate=utc_now,
     )
 
     def __repr__(self) -> str:

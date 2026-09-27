@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.scholarships.models import Scholarship
     from app.users.models import UserProfile
 
+from app.core.time import utc_now
 from app.database.base import Base
 
 
@@ -37,7 +38,7 @@ class SavedScholarship(Base):
     # user_id maps to auth.users.id, which is string UUID in our models
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("user_profiles.id", ondelete="CASCADE"), index=True)
     scholarship_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("scholarships.id", ondelete="CASCADE"), index=True)
-    saved_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    saved_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     user: Mapped["UserProfile"] = relationship()
@@ -58,8 +59,8 @@ class Application(Base):
     status: Mapped[ApplicationStatus] = mapped_column(Enum(ApplicationStatus, name="application_status_enum"), default=ApplicationStatus.PLANNED, index=True)
     target_deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     user: Mapped["UserProfile"] = relationship()
@@ -77,8 +78,8 @@ class ApplicationTask(Base):
     title: Mapped[str] = mapped_column(String(255))
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     due_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     application: Mapped["Application"] = relationship(back_populates="tasks")

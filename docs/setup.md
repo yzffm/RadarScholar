@@ -36,6 +36,8 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+# Alternatively, install the package and development tools:
+# pip install -e ".[dev]"
 
 # Copy environment template
 cp .env.example .env
@@ -46,7 +48,8 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 The API should now be running at `http://localhost:8000`.
-Verify: `http://localhost:8000/health`
+Verify liveness: `http://localhost:8000/health`
+Verify database readiness: `http://localhost:8000/health/ready`
 
 ### 3. Frontend Setup
 
@@ -107,4 +110,15 @@ cd backend && uvicorn app.main:app --reload --port 8000
 Ensure `python --version` shows 3.11+. If multiple Python versions are installed, use `python3` or the full path to the correct interpreter.
 
 ### CORS errors in browser console
-The backend includes CORS middleware that allows common Flutter dev server origins. If your dev server runs on a different port, add it to `CORS_ORIGINS` in `backend/app/core/config.py`.
+The backend allows configured origins from `CORS_ORIGINS`. In development,
+localhost origins are supported when `DEBUG=true`. In production, configure
+explicit HTTPS origins and do not rely on the localhost defaults.
+
+### Seed baseline scholarship data
+After applying migrations, run the idempotent seed script from `backend/`:
+```bash
+python scripts/seed_scholarships.py
+```
+Running it more than once updates the same baseline records instead of creating
+duplicates. Seed records are marked with `data_origin=SEED` and are not treated
+as live-verified until the curated crawler confirms them.

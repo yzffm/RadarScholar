@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # --- Application ---
     APP_NAME: str = "RadarScholar"
     APP_VERSION: str = "0.1.0"
-    DEBUG: bool = True
+    DEBUG: bool = False
 
     # --- CORS ---
     # Default allows Flutter Web dev server origins.
@@ -41,12 +41,14 @@ class Settings(BaseSettings):
     # --- AI Providers (future milestones) ---
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.6-flash"
-    
+
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "qwen/qwen3.8-27b"
-    
+
     AI_ENABLED: bool = True
     AI_PRIMARY_PROVIDER: str = "gemini"
+    AI_RATE_LIMIT_REQUESTS: int = 10
+    AI_RATE_LIMIT_WINDOW_SECONDS: int = 60
 
     model_config = {
         "env_file": ".env",

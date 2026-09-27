@@ -133,4 +133,9 @@ class ApplicationService:
 
     def delete_task(self, application_id: uuid.UUID, task_id: uuid.UUID, user_id: str) -> None:
         self._verify_task_ownership(task_id, application_id, user_id)
-        self.task_repo.delete(task_id)
+        deleted = self.task_repo.delete(task_id, application_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tugas tidak ditemukan.",
+            )

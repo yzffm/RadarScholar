@@ -1,8 +1,9 @@
 from app.ai.schemas import MatchExplanation
 from app.ai.service import AIService
-from app.users.schemas import UserProfileResponse
-from app.scholarships.schemas import ScholarshipResponse
 from app.matching.schemas import MatchResult
+from app.scholarships.schemas import ScholarshipResponse
+from app.users.schemas import UserProfileResponse
+
 
 class ExplanationTask:
     def __init__(self, ai_service: AIService):
@@ -23,7 +24,7 @@ class ExplanationTask:
             f"Semester: {profile.semester}\n"
             f"GPA: {profile.gpa}\n"
         )
-        
+
         evaluations_text = ""
         for eval in match.criterion_evaluations:
             evaluations_text += f"- {eval.requirement_type}: {eval.state.value} (Expected: {eval.operator} {eval.required_value}, Actual: {eval.actual_value})\n"
