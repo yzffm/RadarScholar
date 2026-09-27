@@ -1,7 +1,6 @@
 /// Login form controller for RadarScholar.
 ///
 /// Manages email/password form state, validation, and submission.
-/// In M2: Connected to Supabase Auth via AuthController.
 ///
 /// CPMK 4: Controller layer between LoginPage (View) and AuthController.
 library;

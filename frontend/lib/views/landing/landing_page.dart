@@ -797,7 +797,7 @@ class LandingPage extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    'Milestone 1 — Design System & App Shell',
+                    'Sumber resmi. Keputusan yang lebih terarah.',
                     style: TextStyle(
                       color: AppTheme.brandSkyBlue.withValues(alpha: 0.8),
                       fontSize: 12,

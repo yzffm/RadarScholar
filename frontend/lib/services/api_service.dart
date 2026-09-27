@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_config.dart';
 import 'auth_interceptor.dart';
+
+final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
 /// Central API service using Dio for HTTP communication with FastAPI backend.
 ///

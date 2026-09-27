@@ -4,9 +4,7 @@ import 'package:radarscholar/models/application.dart';
 import '../services/api_service.dart';
 
 final applicationRepositoryProvider = Provider<ApplicationRepository>((ref) {
-  final apiService =
-      ApiService(); // or fetch from a provider if it exists globally
-  return ApplicationRepository(apiService);
+  return ApplicationRepository(ref.watch(apiServiceProvider));
 });
 
 class ApplicationRepository {

@@ -354,7 +354,7 @@ class AppShell extends ConsumerWidget {
                                         ),
                                       ),
                                       Text(
-                                        'M2 — Terautentikasi',
+                                        'Profil terhubung',
                                         style: TextStyle(
                                           fontSize: 11,
                                           color: colors.onSurfaceVariant,

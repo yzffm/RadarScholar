@@ -61,5 +61,5 @@ class UserProfileRepository {
 
 /// Riverpod provider for the user profile repository.
 final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
-  return UserProfileRepository(ApiService());
+  return UserProfileRepository(ref.watch(apiServiceProvider));
 });

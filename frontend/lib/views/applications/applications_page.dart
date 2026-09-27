@@ -136,7 +136,6 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
       elevation: 2,
       child: InkWell(
         onTap: () {
-          // Go to detail (will implement in next step)
           context.push('/applications/${app.id}');
         },
         borderRadius: BorderRadius.circular(AppRadius.lg),

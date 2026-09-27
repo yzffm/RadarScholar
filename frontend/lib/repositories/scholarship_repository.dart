@@ -6,8 +6,6 @@ import '../services/api_service.dart';
 /// Provider for ApiService (assuming it's either provided globally or we create a new one)
 /// Let's assume there's a global apiServiceProvider.
 /// Let me check if there's an existing one. I will use a simple Provider.
-final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
-
 final scholarshipRepositoryProvider = Provider<ScholarshipRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   return ScholarshipRepository(apiService);

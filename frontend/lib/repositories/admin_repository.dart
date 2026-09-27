@@ -4,8 +4,6 @@ import '../services/api_service.dart';
 import '../models/admin.dart';
 import '../models/scholarship.dart';
 
-final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
-
 final adminRepositoryProvider = Provider<AdminRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   return AdminRepository(apiService);
@@ -24,7 +22,9 @@ class AdminRepository {
   }
 
   Future<ScholarshipSource> toggleSource(String sourceId) async {
-    final response = await _apiService.post('/api/v1/admin/sources/$sourceId/toggle');
+    final response = await _apiService.post(
+      '/api/v1/admin/sources/$sourceId/toggle',
+    );
     return ScholarshipSource.fromJson(response.data);
   }
 
@@ -34,10 +34,7 @@ class AdminRepository {
   }) async {
     final response = await _apiService.get(
       '/api/v1/admin/crawls',
-      queryParameters: {
-        'limit': limit,
-        'offset': offset,
-      },
+      queryParameters: {'limit': limit, 'offset': offset},
     );
     return CrawlRunListResponse.fromJson(response.data);
   }

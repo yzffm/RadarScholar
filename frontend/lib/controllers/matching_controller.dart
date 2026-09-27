@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:radarscholar/models/scholarship.dart';
 import 'package:radarscholar/repositories/matching_repository.dart';
 import 'package:radarscholar/repositories/scholarship_repository.dart';
+import 'package:radarscholar/services/api_service.dart';
 
 part 'matching_controller.freezed.dart';
 

@@ -4,11 +4,6 @@ import '../models/health_response.dart';
 import '../repositories/health_repository.dart';
 import '../services/api_service.dart';
 
-/// Provider for the shared [ApiService] instance.
-final apiServiceProvider = Provider<ApiService>((ref) {
-  return ApiService();
-});
-
 /// Provider for the [HealthRepository].
 final healthRepositoryProvider = Provider<HealthRepository>((ref) {
   return HealthRepository(apiService: ref.watch(apiServiceProvider));

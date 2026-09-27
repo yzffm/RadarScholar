@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// - Consistent spacing tokens
 /// - Component theme overrides
 ///
-/// M1 deliverable: Design System & App Shell.
+/// Shared design system for the RadarScholar application.
 class AppTheme {
   AppTheme._();
 
