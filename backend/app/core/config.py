@@ -7,8 +7,11 @@ NEVER populate real secrets here. Use .env files locally
 and environment variables in production.
 """
 
+import contextlib
+import json
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -33,6 +36,29 @@ class Settings(BaseSettings):
 
     # --- Database ---
     DATABASE_URL: str = "sqlite:///./radarscholar.db"
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: object) -> list[str] | object:
+        if isinstance(v, str):
+            v_str = v.strip()
+            if v_str.startswith("[") and v_str.endswith("]"):
+                with contextlib.suppress(json.JSONDecodeError):
+                    parsed = json.loads(v_str)
+                    if isinstance(parsed, list):
+                        return [str(item).strip() for item in parsed if str(item).strip()]
+            return [origin.strip() for origin in v_str.split(",") if origin.strip()]
+        return v
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: object) -> str | object:
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                return v.replace("postgres://", "postgresql+psycopg://", 1)
+            if v.startswith("postgresql://") and not v.startswith("postgresql+"):
+                return v.replace("postgresql://", "postgresql+psycopg://", 1)
+        return v
 
     # --- Supabase ---
     SUPABASE_URL: str = ""

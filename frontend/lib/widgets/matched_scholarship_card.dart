@@ -15,176 +15,259 @@ class MatchedScholarshipCard extends StatelessWidget {
     final scholarship = matchedScholarship.scholarship;
     final match = matchedScholarship.match;
 
-    return Card(
-      elevation: 0,
+    final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderColor = _getRelevanceColor(
+      match.relevance,
+    ).withValues(alpha: AppTheme.isDark(context) ? 0.35 : 0.45);
+
+    return Container(
       margin: const EdgeInsets.only(bottom: Spacing.md),
-      shape: RoundedRectangleBorder(
+      decoration: BoxDecoration(
+        color: cardBg,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(
-          color: _getRelevanceColor(match.relevance).withValues(alpha: 0.5),
-          width: 1.5,
-        ),
+        border: Border.all(color: borderColor, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: AppTheme.isDark(context) ? 0.2 : 0.04,
+            ),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: InkWell(
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        onTap: () {
-          // Navigates to detail page. We can pass the scholarship ID
-          // The detail page will re-fetch the match details or we can use Riverpod
-          context.push('/scholarships/${scholarship.id}');
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(Spacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          onTap: () {
+            context.push('/scholarships/${scholarship.id}');
+          },
+          hoverColor: primaryColor.withValues(alpha: 0.04),
+          child: Padding(
+            padding: const EdgeInsets.all(Spacing.md + 2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            scholarship.source?.providerName ??
+                                'Penyedia Belum Tersedia',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: primaryColor,
+                              letterSpacing: 0.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            scholarship.title,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: colors.onSurface,
+                              letterSpacing: -0.2,
+                              height: 1.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildRelevanceBadge(context, match.relevance),
+                  ],
+                ),
+                const SizedBox(height: Spacing.sm + 4),
+                Text(
+                  match.explanation,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: colors.onSurfaceVariant,
+                    height: 1.45,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: Spacing.md),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: AppTheme.borderColorOf(context).withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: Spacing.sm + 4),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            size: 14,
+                            color: Color(0xFF10B981),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            '${match.matchedCount} Memenuhi',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF10B981),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (match.notMatchedCount > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFF87171,
+                          ).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.cancel_outlined,
+                              size: 14,
+                              color: Color(0xFFF87171),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              '${match.notMatchedCount} Tidak',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFFF87171),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const Spacer(),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          scholarship.title,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade900,
-                              ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          'Lihat Detail',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: primaryColor,
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          scholarship.source?.providerName ??
-                              'Penyedia Belum Tersedia',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: AppTheme.brandPrimary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: primaryColor,
                         ),
                       ],
                     ),
-                  ),
-                  _buildRelevanceBadge(match.relevance),
-                ],
-              ),
-              const SizedBox(height: Spacing.sm),
-              Text(
-                match.explanation,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade700,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: Spacing.md),
-              Row(
-                children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: 14,
-                    color: Colors.green.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${match.matchedCount} Memenuhi',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.green.shade700,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  if (match.notMatchedCount > 0) ...[
-                    Icon(
-                      Icons.cancel_outlined,
-                      size: 14,
-                      color: Colors.red.shade600,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${match.notMatchedCount} Tidak',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.red.shade700,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                   ],
-                  const Spacer(),
-                  Text(
-                    'Lihat Detail',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppTheme.brandPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 14,
-                    color: AppTheme.brandPrimary,
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildRelevanceBadge(RelevanceTier relevance) {
+  Widget _buildRelevanceBadge(BuildContext context, RelevanceTier relevance) {
+    final isDark = AppTheme.isDark(context);
     Color bgColor;
     Color textColor;
     String text;
 
     switch (relevance) {
       case RelevanceTier.sangatRelevan:
-        bgColor = Colors.green.shade50;
-        textColor = Colors.green.shade700;
+        bgColor = isDark
+            ? const Color(0xFF064E3B).withValues(alpha: 0.4)
+            : const Color(0xFFDCFCE7);
+        textColor = isDark ? const Color(0xFF34D399) : const Color(0xFF15803D);
         text = 'Sangat Relevan';
         break;
       case RelevanceTier.relevan:
-        bgColor = Colors.blue.shade50;
-        textColor = Colors.blue.shade700;
+        bgColor = isDark
+            ? const Color(0xFF0C4A6E).withValues(alpha: 0.4)
+            : const Color(0xFFE0F2FE);
+        textColor = isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7);
         text = 'Relevan';
         break;
       case RelevanceTier.mungkinRelevan:
-        bgColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade700;
+        bgColor = isDark
+            ? const Color(0xFF78350F).withValues(alpha: 0.4)
+            : const Color(0xFFFEF3C7);
+        textColor = isDark ? const Color(0xFFFBBF24) : const Color(0xFFB45309);
         text = 'Mungkin Relevan';
         break;
       case RelevanceTier.perluDicek:
-        bgColor = Colors.grey.shade100;
-        textColor = Colors.grey.shade700;
+        bgColor = isDark
+            ? const Color(0xFF334155).withValues(alpha: 0.5)
+            : const Color(0xFFF1F5F9);
+        textColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
         text = 'Perlu Dicek';
         break;
       case RelevanceTier.belumCukupInformasi:
-        bgColor = Colors.grey.shade200;
-        textColor = Colors.grey.shade800;
+        bgColor = isDark
+            ? const Color(0xFF334155).withValues(alpha: 0.5)
+            : const Color(0xFFE2E8F0);
+        textColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
         text = 'Info Kurang';
         break;
       case RelevanceTier.tidakMemenuhi:
-        bgColor = Colors.red.shade50;
-        textColor = Colors.red.shade700;
+        bgColor = isDark
+            ? const Color(0xFF7F1D1D).withValues(alpha: 0.4)
+            : const Color(0xFFFEE2E2);
+        textColor = isDark ? const Color(0xFFF87171) : const Color(0xFFB91C1C);
         text = 'Tidak Memenuhi';
         break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: textColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
         text,
         style: TextStyle(
           color: textColor,
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: FontWeight.bold,
+          letterSpacing: 0.2,
         ),
       ),
     );
@@ -193,17 +276,17 @@ class MatchedScholarshipCard extends StatelessWidget {
   Color _getRelevanceColor(RelevanceTier relevance) {
     switch (relevance) {
       case RelevanceTier.sangatRelevan:
-        return Colors.green;
+        return const Color(0xFF10B981);
       case RelevanceTier.relevan:
-        return Colors.blue;
+        return const Color(0xFF38BDF8);
       case RelevanceTier.mungkinRelevan:
-        return Colors.orange;
+        return const Color(0xFFF59E0B);
       case RelevanceTier.perluDicek:
-        return Colors.grey;
+        return const Color(0xFF94A3B8);
       case RelevanceTier.belumCukupInformasi:
-        return Colors.grey.shade400;
+        return const Color(0xFF64748B);
       case RelevanceTier.tidakMemenuhi:
-        return Colors.red;
+        return const Color(0xFFEF4444);
     }
   }
 }

@@ -162,10 +162,22 @@ class _ApplicationAssistantSheetState
               // Action Button / Result Display
               aiState.when(
                 data: (response) {
+                  final primary = AppTheme.primaryOf(context);
+                  final cardColor = AppTheme.cardColorOf(context);
+                  final borderColor = AppTheme.borderColorOf(context);
+
                   if (response == null) {
                     return ElevatedButton.icon(
                       icon: const Icon(Icons.auto_awesome),
                       label: const Text('Minta Bantuan AI'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                      ),
                       onPressed: _generateFeedback,
                     );
                   }
@@ -178,11 +190,21 @@ class _ApplicationAssistantSheetState
                         children: [
                           const Text(
                             'Hasil Analisis AI',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           TextButton.icon(
-                            icon: const Icon(Icons.refresh, size: 16),
-                            label: const Text('Buat Ulang'),
+                            icon: Icon(
+                              Icons.refresh_rounded,
+                              size: 16,
+                              color: primary,
+                            ),
+                            label: Text(
+                              'Buat Ulang',
+                              style: TextStyle(color: primary),
+                            ),
                             onPressed: () {
                               ref
                                   .read(aiAssistantControllerProvider.notifier)
@@ -191,44 +213,59 @@ class _ApplicationAssistantSheetState
                           ),
                         ],
                       ),
-                      Card(
-                        elevation: 0,
-                        margin: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Spacing.sm),
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                          ),
+                      const SizedBox(height: Spacing.xs),
+                      Container(
+                        padding: const EdgeInsets.all(Spacing.md),
+                        decoration: BoxDecoration(
+                          color: cardColor,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(color: borderColor),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(Spacing.md),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(response.feedback),
-                              if (response.actionableTips.isNotEmpty) ...[
-                                const SizedBox(height: Spacing.md),
-                                const Text(
-                                  'Langkah yang Bisa Dilakukan:',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: Spacing.sm),
-                                ...response.actionableTips.map(
-                                  (tip) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 4.0),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text('• '),
-                                        Expanded(child: Text(tip)),
-                                      ],
-                                    ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              response.feedback,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(height: 1.6),
+                            ),
+                            if (response.actionableTips.isNotEmpty) ...[
+                              const SizedBox(height: Spacing.md),
+                              Divider(color: borderColor),
+                              const SizedBox(height: Spacing.sm),
+                              const Text(
+                                'Langkah yang Bisa Dilakukan:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: Spacing.sm),
+                              ...response.actionableTips.map(
+                                (tip) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 6.0),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_outline_rounded,
+                                        size: 16,
+                                        color: primary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          tip,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
+                              ),
                             ],
-                          ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: Spacing.lg),

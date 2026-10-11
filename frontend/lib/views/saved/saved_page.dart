@@ -27,6 +27,8 @@ class _SavedPageState extends ConsumerState<SavedPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -36,17 +38,21 @@ class _SavedPageState extends ConsumerState<SavedPage> {
             children: [
               Text(
                 'Beasiswa Tersimpan',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.brandPrimary,
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: colors.onSurface,
+                  letterSpacing: -0.4,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
-                'Daftar pantauan beasiswa yang menarik minat Anda.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                'Daftar pantauan beasiswa yang menarik minat Anda untuk dipersiapkan.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: Spacing.xl),
               Expanded(child: _buildContent()),
@@ -59,6 +65,8 @@ class _SavedPageState extends ConsumerState<SavedPage> {
 
   Widget _buildContent() {
     final state = ref.watch(savedScholarshipsControllerProvider);
+    final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
 
     if (state is SavedScholarshipsLoading ||
         state is SavedScholarshipsInitial) {
@@ -66,19 +74,19 @@ class _SavedPageState extends ConsumerState<SavedPage> {
     }
 
     if (state is SavedScholarshipsError) {
-      final colors = Theme.of(context).colorScheme;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: colors.error, size: 48),
+            Icon(Icons.error_outline_rounded, color: colors.error, size: 48),
             const SizedBox(height: 16),
             Text(
               'Daftar tersimpan belum dapat dimuat. Periksa koneksi dan coba lagi.',
               textAlign: TextAlign.center,
+              style: TextStyle(color: colors.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
+            FilledButton(
               onPressed: () => ref
                   .read(savedScholarshipsControllerProvider.notifier)
                   .fetchSavedScholarships(),
@@ -91,20 +99,13 @@ class _SavedPageState extends ConsumerState<SavedPage> {
 
     if (state is SavedScholarshipsEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const EmptyState(
-              icon: Icons.bookmark_border_rounded,
-              title: 'Belum Ada Beasiswa Tersimpan',
-              message: 'Simpan beasiswa yang menarik agar Anda tidak lupa.',
-            ),
-            const SizedBox(height: Spacing.md),
-            ElevatedButton(
-              onPressed: () => context.go('/discovery'),
-              child: const Text('Cari Beasiswa'),
-            ),
-          ],
+        child: EmptyState(
+          icon: Icons.bookmark_border_rounded,
+          title: 'Belum Ada Beasiswa Tersimpan',
+          message:
+              'Simpan beasiswa yang menarik saat menjelajah agar Anda tidak melewatkan tenggat waktu.',
+          actionLabel: 'Cari Beasiswa',
+          onAction: () => context.go('/discovery'),
         ),
       );
     }
@@ -122,12 +123,13 @@ class _SavedPageState extends ConsumerState<SavedPage> {
               children: [
                 ScholarshipCard(scholarship: saved.scholarship),
                 Positioned(
-                  top: 16,
-                  right: 16,
+                  top: 14,
+                  right: 14,
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.bookmark,
-                      color: AppTheme.brandPrimary,
+                    icon: Icon(
+                      Icons.bookmark_rounded,
+                      color: primaryColor,
+                      size: 22,
                     ),
                     onPressed: () {
                       ref

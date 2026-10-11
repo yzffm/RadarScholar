@@ -12,6 +12,8 @@ class LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = AppTheme.primaryOf(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
@@ -21,11 +23,9 @@ class LoadingState extends StatelessWidget {
             SizedBox(
               width: size,
               height: size,
-              child: const CircularProgressIndicator(
+              child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  AppTheme.brandPrimary,
-                ),
+                valueColor: AlwaysStoppedAnimation<Color>(primary),
               ),
             ),
             if (message != null) ...[
@@ -33,9 +33,11 @@ class LoadingState extends StatelessWidget {
               Text(
                 message!,
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.65),
+                ),
               ),
             ],
           ],

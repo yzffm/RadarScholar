@@ -62,6 +62,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(scholarshipControllerProvider);
     final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
 
     return Scaffold(
       body: SafeArea(
@@ -70,48 +71,62 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header
               Text(
                 'Eksplorasi Beasiswa',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.brandPrimary,
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: colors.onSurface,
+                  letterSpacing: -0.4,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
-                'Jelajahi peluang beasiswa dari sumber resmi yang terverifikasi.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                'Jelajahi peluang beasiswa dari sumber resmi yang terverifikasi secara berkala.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: Spacing.lg),
 
-              // Search bar
+              // Modern Search bar
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
                 decoration: BoxDecoration(
-                  color: colors.surface,
+                  color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(color: colors.outlineVariant),
+                  border: Border.all(
+                    color: colors.outlineVariant.withValues(alpha: 0.7),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 3,
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.search_rounded, color: colors.onSurfaceVariant),
+                    Icon(Icons.search_rounded, color: primaryColor, size: 22),
                     const SizedBox(width: 12),
                     Expanded(
                       child: TextField(
                         controller: _searchController,
                         onSubmitted: _onSearchSubmit,
+                        style: TextStyle(color: colors.onSurface, fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: 'Cari beasiswa atau penyedia...',
+                          hintText:
+                              'Cari nama beasiswa, instansi, atau penyedia...',
                           hintStyle: TextStyle(
-                            color: colors.onSurfaceVariant,
+                            color: colors.onSurfaceVariant.withValues(
+                              alpha: 0.8,
+                            ),
                             fontSize: 14,
                           ),
                           border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          filled: false,
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 12,
@@ -121,7 +136,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                     ),
                     if (_searchController.text.isNotEmpty)
                       IconButton(
-                        icon: const Icon(Icons.clear, size: 20),
+                        icon: const Icon(Icons.clear_rounded, size: 18),
                         onPressed: () {
                           _searchController.clear();
                           _onSearchSubmit('');
@@ -132,37 +147,103 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
               ),
               const SizedBox(height: Spacing.md),
 
-              // Filter chips
+              // Filter chips bar
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterChip('Semua'),
+                    _buildFilterChip('Semua', Icons.grid_view_rounded),
                     const SizedBox(width: 8),
-                    _buildFilterChip('Aktif'),
+                    _buildFilterChip(
+                      'Aktif',
+                      Icons.check_circle_outline_rounded,
+                    ),
                     const SizedBox(width: 8),
-                    _buildFilterChip('Tidak Aktif'),
+                    _buildFilterChip('Tidak Aktif', Icons.history_rounded),
                   ],
                 ),
               ),
               const SizedBox(height: Spacing.md),
 
+              // AI Smart Recommendation Card (if authenticated)
               if (ref.watch(isAuthenticatedProvider)) ...[
                 Container(
                   width: double.infinity,
                   margin: const EdgeInsets.only(bottom: Spacing.md),
-                  child: ElevatedButton.icon(
-                    onPressed: () => context.push('/recommendations'),
-                    icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Lihat Rekomendasi Cerdas'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.brandPrimary.withValues(
-                        alpha: 0.1,
-                      ),
-                      foregroundColor: AppTheme.brandPrimary,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.isDark(context)
+                        ? const LinearGradient(
+                            colors: [Color(0xFF131D38), Color(0xFF1B2A4E)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : const LinearGradient(
+                            colors: [Color(0xFFEFF6FF), Color(0xFFDBEAFE)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: primaryColor.withValues(alpha: 0.3),
                     ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.auto_awesome_rounded,
+                          color: primaryColor,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Rekomendasi Cerdas AI',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: colors.onSurface,
+                              ),
+                            ),
+                            Text(
+                              'Cek kecocokan profil akademik Anda dengan beasiswa yang tersedia.',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () => context.push('/recommendations'),
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 14),
+                        label: const Text(
+                          'Buka Matcher',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -176,18 +257,48 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     );
   }
 
-  Widget _buildFilterChip(String label) {
+  Widget _buildFilterChip(String label, IconData icon) {
     final isSelected = _currentStatus == label;
-    return FilterChip(
-      selected: isSelected,
-      label: Text(label),
-      onSelected: (_) => _onFilterSelected(label),
-      selectedColor: AppTheme.brandPrimary.withValues(alpha: 0.12),
-      checkmarkColor: AppTheme.brandPrimary,
-      labelStyle: TextStyle(
-        color: isSelected ? AppTheme.brandPrimary : Colors.grey.shade700,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-        fontSize: 13,
+    final primaryColor = AppTheme.primaryOf(context);
+    final colors = Theme.of(context).colorScheme;
+
+    return InkWell(
+      onTap: () => _onFilterSelected(label),
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? primaryColor.withValues(alpha: 0.15)
+              : colors.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? primaryColor
+                : colors.outlineVariant.withValues(alpha: 0.6),
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? primaryColor : colors.onSurfaceVariant,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? primaryColor : colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

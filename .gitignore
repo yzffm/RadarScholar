@@ -74,6 +74,8 @@ frontend/web/favicon.png.bak
 .project
 .classpath
 .settings/
+AGENTS.md
+Technical Docs.md
 
 # --- OS ---
 .DS_Store

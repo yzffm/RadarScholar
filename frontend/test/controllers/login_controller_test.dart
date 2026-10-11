@@ -94,7 +94,7 @@ void main() {
       addTearDown(container.dispose);
 
       // Retain provider during autoDispose lifecycle
-      final sub = container.listen(loginControllerProvider, (_, __) {});
+      final sub = container.listen(loginControllerProvider, (_, _) {});
       addTearDown(sub.close);
 
       final notifier = container.read(loginControllerProvider.notifier);

@@ -22,6 +22,9 @@ class ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
+    final primary = AppTheme.primaryOf(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
@@ -31,13 +34,15 @@ class ErrorState extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 80,
-                height: 80,
+                width: 72,
+                height: 72,
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: isDark
+                      ? const Color(0xFF7F1D1D).withValues(alpha: 0.3)
+                      : Colors.red.shade50,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 40, color: Colors.red.shade600),
+                child: Icon(icon, size: 36, color: const Color(0xFFEF4444)),
               ),
               const SizedBox(height: Spacing.lg),
               Text(
@@ -45,7 +50,7 @@ class ErrorState extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.red.shade900,
+                  letterSpacing: -0.2,
                 ),
               ),
               const SizedBox(height: Spacing.sm),
@@ -53,7 +58,9 @@ class ErrorState extends StatelessWidget {
                 message,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade700,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
                   height: 1.5,
                 ),
               ),
@@ -64,8 +71,15 @@ class ErrorState extends StatelessWidget {
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: Text(retryLabel),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.brandPrimary,
-                    side: const BorderSide(color: AppTheme.brandPrimary),
+                    foregroundColor: primary,
+                    side: BorderSide(color: primary.withValues(alpha: 0.5)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
                   ),
                 ),
               ],

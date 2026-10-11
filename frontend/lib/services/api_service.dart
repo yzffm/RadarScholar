@@ -13,13 +13,18 @@ String safeApiErrorMessage(
   if (error is! DioException) return fallback;
 
   final statusCode = error.response?.statusCode;
-  if (statusCode == 401)
+  if (statusCode == 401) {
     return 'Sesi Anda telah berakhir. Silakan login kembali.';
-  if (statusCode == 403)
+  }
+  if (statusCode == 403) {
     return 'Anda tidak memiliki izin untuk melakukan tindakan ini.';
-  if (statusCode == 404) return 'Data yang diminta tidak ditemukan.';
-  if (statusCode == 429)
+  }
+  if (statusCode == 404) {
+    return 'Data yang diminta tidak ditemukan.';
+  }
+  if (statusCode == 429) {
     return 'Terlalu banyak permintaan. Silakan coba lagi nanti.';
+  }
   if (statusCode != null && statusCode >= 500) {
     return 'Layanan sedang mengalami gangguan. Silakan coba lagi nanti.';
   }

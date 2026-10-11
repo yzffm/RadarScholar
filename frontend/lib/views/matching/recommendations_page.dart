@@ -5,6 +5,7 @@ import '../../controllers/matching_controller.dart';
 import '../../core/theme.dart';
 import '../../models/scholarship.dart';
 import '../../widgets/matched_scholarship_card.dart';
+import '../../widgets/empty_state.dart';
 
 class RecommendationsPage extends ConsumerStatefulWidget {
   const RecommendationsPage({super.key});
@@ -28,17 +29,15 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
     final state = ref.watch(matchingControllerProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
           'Rekomendasi Cerdas',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Segarkan',
             onPressed: () {
               ref
                   .read(matchingControllerProvider.notifier)
@@ -59,57 +58,52 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off_rounded, size: 64, color: Colors.grey.shade400),
-          const SizedBox(height: Spacing.md),
-          Text(
-            'Belum Ada Rekomendasi',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
-            ),
-          ),
-          const SizedBox(height: Spacing.sm),
-          Text(
-            'Tidak ada beasiswa yang cocok dengan profil Anda saat ini.',
-            style: TextStyle(color: Colors.grey.shade600),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: EmptyState(
+        icon: Icons.search_off_rounded,
+        title: 'Belum Ada Rekomendasi',
+        message:
+            'Tidak ada beasiswa yang cocok dengan profil akademik Anda saat ini. Coba perbarui profil Anda.',
       ),
     );
   }
 
   Widget _buildErrorState(String message) {
+    final primary = AppTheme.primaryOf(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline_rounded,
               size: 48,
-              color: Colors.red.shade400,
+              color: Color(0xFFEF4444),
             ),
             const SizedBox(height: Spacing.md),
             Text(
               'Terjadi Kesalahan',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade900,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: Spacing.sm),
             Text(
               message,
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: Spacing.lg),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primary,
+                foregroundColor: Colors.white,
+              ),
               onPressed: () {
                 ref
                     .read(matchingControllerProvider.notifier)
@@ -124,19 +118,26 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
   }
 
   Widget _buildSuccessState(MatchedScholarshipListResponse data) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref
-            .read(matchingControllerProvider.notifier)
-            .fetchMatchedScholarships();
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(Spacing.md),
-        itemCount: data.items.length,
-        itemBuilder: (context, index) {
-          final matchedScholarship = data.items[index];
-          return MatchedScholarshipCard(matchedScholarship: matchedScholarship);
-        },
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 860),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await ref
+                .read(matchingControllerProvider.notifier)
+                .fetchMatchedScholarships();
+          },
+          child: ListView.builder(
+            padding: const EdgeInsets.all(Spacing.md),
+            itemCount: data.items.length,
+            itemBuilder: (context, index) {
+              final matchedScholarship = data.items[index];
+              return MatchedScholarshipCard(
+                matchedScholarship: matchedScholarship,
+              );
+            },
+          ),
+        ),
       ),
     );
   }

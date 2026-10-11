@@ -52,7 +52,7 @@ class ApplicationRepository {
         'scholarship_id': scholarshipId,
         if (targetDeadline != null)
           'target_deadline': targetDeadline.toIso8601String(),
-        if (notes != null) 'notes': notes,
+        'notes': ?notes,
       },
     );
     return Application.fromJson(response.data as Map<String, dynamic>);
@@ -85,10 +85,10 @@ class ApplicationRepository {
     final response = await _apiService.patch(
       '/api/v1/applications/$applicationId',
       data: {
-        if (statusStr != null) 'status': statusStr,
+        'status': ?statusStr,
         if (targetDeadline != null)
           'target_deadline': targetDeadline.toIso8601String(),
-        if (notes != null) 'notes': notes,
+        'notes': ?notes,
       },
     );
     return Application.fromJson(response.data as Map<String, dynamic>);
@@ -125,8 +125,8 @@ class ApplicationRepository {
     final response = await _apiService.patch(
       '/api/v1/applications/$applicationId/tasks/$taskId',
       data: {
-        if (title != null) 'title': title,
-        if (isCompleted != null) 'is_completed': isCompleted,
+        'title': ?title,
+        'is_completed': ?isCompleted,
         if (dueDate != null) 'due_date': dueDate.toIso8601String(),
       },
     );

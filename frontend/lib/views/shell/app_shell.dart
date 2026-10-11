@@ -70,25 +70,44 @@ class AppShell extends ConsumerWidget {
     int selectedIndex,
     List<NavigationDestinationItem> destinations,
   ) {
+    final themeMode = ref.watch(themeModeProvider);
+    final primaryColor = AppTheme.primaryOf(context);
+
     return Scaffold(
       appBar: AppBar(
         title: AppLogo(
           mode: AppLogoMode.full,
-          height: 32,
+          height: 30,
           onTap: () => context.go('/'),
         ),
         actions: [
+          IconButton(
+            tooltip: themeMode == ThemeMode.dark ? 'Mode Terang' : 'Mode Gelap',
+            icon: Icon(
+              themeMode == ThemeMode.dark
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
+              size: 20,
+            ),
+            onPressed: () {
+              ref
+                  .read(themeModeProvider.notifier)
+                  .state = themeMode == ThemeMode.dark
+                  ? ThemeMode.light
+                  : ThemeMode.dark;
+            },
+          ),
           if (ref.watch(isAuthenticatedProvider))
             IconButton(
               tooltip: 'Keluar',
-              icon: const Icon(Icons.logout_rounded),
+              icon: const Icon(Icons.logout_rounded, size: 20),
               onPressed: () =>
                   ref.read(authControllerProvider.notifier).signOut(),
             )
           else
             IconButton(
               tooltip: 'Masuk ke Akun',
-              icon: const Icon(Icons.account_circle_outlined),
+              icon: const Icon(Icons.account_circle_outlined, size: 22),
               onPressed: () => context.go('/login'),
             ),
           const SizedBox(width: 8),
@@ -104,7 +123,7 @@ class AppShell extends ConsumerWidget {
             icon: Icon(IconData(d.iconCodePoint, fontFamily: 'MaterialIcons')),
             selectedIcon: Icon(
               IconData(d.selectedIconCodePoint, fontFamily: 'MaterialIcons'),
-              color: AppTheme.brandPrimary,
+              color: primaryColor,
             ),
             label: d.label,
           );
@@ -120,6 +139,9 @@ class AppShell extends ConsumerWidget {
     int selectedIndex,
     List<NavigationDestinationItem> destinations,
   ) {
+    final primaryColor = AppTheme.primaryOf(context);
+    final themeMode = ref.watch(themeModeProvider);
+
     return Scaffold(
       body: Row(
         children: [
@@ -130,26 +152,49 @@ class AppShell extends ConsumerWidget {
             labelType: NavigationRailLabelType.all,
             leading: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              child: AppLogo.icon(height: 40, onTap: () => context.go('/')),
+              child: AppLogo.icon(height: 38, onTap: () => context.go('/')),
             ),
             trailing: Expanded(
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: ref.watch(isAuthenticatedProvider)
-                      ? IconButton(
-                          tooltip: 'Keluar',
-                          icon: const Icon(Icons.logout_rounded),
-                          onPressed: () => ref
-                              .read(authControllerProvider.notifier)
-                              .signOut(),
-                        )
-                      : IconButton(
-                          tooltip: 'Masuk ke Akun',
-                          icon: const Icon(Icons.login_rounded),
-                          onPressed: () => context.go('/login'),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: themeMode == ThemeMode.dark
+                            ? 'Mode Terang'
+                            : 'Mode Gelap',
+                        icon: Icon(
+                          themeMode == ThemeMode.dark
+                              ? Icons.light_mode_rounded
+                              : Icons.dark_mode_rounded,
                         ),
+                        onPressed: () {
+                          ref
+                              .read(themeModeProvider.notifier)
+                              .state = themeMode == ThemeMode.dark
+                              ? ThemeMode.light
+                              : ThemeMode.dark;
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      ref.watch(isAuthenticatedProvider)
+                          ? IconButton(
+                              tooltip: 'Keluar',
+                              icon: const Icon(Icons.logout_rounded),
+                              onPressed: () => ref
+                                  .read(authControllerProvider.notifier)
+                                  .signOut(),
+                            )
+                          : IconButton(
+                              tooltip: 'Masuk ke Akun',
+                              icon: const Icon(Icons.login_rounded),
+                              onPressed: () => context.go('/login'),
+                            ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -163,7 +208,7 @@ class AppShell extends ConsumerWidget {
                     d.selectedIconCodePoint,
                     fontFamily: 'MaterialIcons',
                   ),
-                  color: AppTheme.brandPrimary,
+                  color: primaryColor,
                 ),
                 label: Text(d.label),
               );
@@ -184,10 +229,13 @@ class AppShell extends ConsumerWidget {
     List<NavigationDestinationItem> destinations,
   ) {
     final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
+    final themeMode = ref.watch(themeModeProvider);
+
     return Scaffold(
       body: Row(
         children: [
-          // Persistent Sidebar
+          // Persistent Modern Sidebar
           Container(
             width: 260,
             decoration: BoxDecoration(
@@ -199,29 +247,58 @@ class AppShell extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo Header
+                // Logo Header with Theme Switcher
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                  child: AppLogo(
-                    mode: AppLogoMode.full,
-                    height: 38,
-                    onTap: () => context.go('/'),
+                  padding: const EdgeInsets.fromLTRB(18, 20, 14, 18),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: AppLogo(
+                          mode: AppLogoMode.full,
+                          height: 34,
+                          onTap: () => context.go('/'),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: themeMode == ThemeMode.dark
+                            ? 'Mode Terang'
+                            : 'Mode Gelap',
+                        icon: Icon(
+                          themeMode == ThemeMode.dark
+                              ? Icons.light_mode_outlined
+                              : Icons.dark_mode_outlined,
+                          size: 18,
+                          color: colors.onSurfaceVariant,
+                        ),
+                        onPressed: () {
+                          ref
+                              .read(themeModeProvider.notifier)
+                              .state = themeMode == ThemeMode.dark
+                              ? ThemeMode.light
+                              : ThemeMode.dark;
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                const Divider(height: 1, thickness: 1),
-                const SizedBox(height: 16),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: colors.outlineVariant.withValues(alpha: 0.6),
+                ),
+                const SizedBox(height: 14),
 
                 // Navigation Items
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     itemCount: destinations.length,
                     itemBuilder: (context, index) {
                       final item = destinations[index];
                       final isSelected = index == selectedIndex;
 
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.only(bottom: 4),
                         child: InkWell(
                           onTap: () => _onDestinationSelected(
                             context,
@@ -233,17 +310,40 @@ class AppShell extends ConsumerWidget {
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 180),
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                              horizontal: 14,
+                              vertical: 10,
                             ),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? AppTheme.brandPrimary.withValues(alpha: 0.1)
+                                  ? primaryColor.withValues(alpha: 0.12)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(AppRadius.md),
+                              border: Border.all(
+                                color: isSelected
+                                    ? primaryColor.withValues(alpha: 0.25)
+                                    : Colors.transparent,
+                              ),
                             ),
                             child: Row(
                               children: [
+                                if (isSelected)
+                                  Container(
+                                    width: 3,
+                                    height: 16,
+                                    margin: const EdgeInsets.only(right: 10),
+                                    decoration: BoxDecoration(
+                                      color: primaryColor,
+                                      borderRadius: BorderRadius.circular(2),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: primaryColor.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                          blurRadius: 6,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 Icon(
                                   IconData(
                                     isSelected
@@ -251,24 +351,47 @@ class AppShell extends ConsumerWidget {
                                         : item.iconCodePoint,
                                     fontFamily: 'MaterialIcons',
                                   ),
-                                  size: 22,
+                                  size: 20,
                                   color: isSelected
-                                      ? AppTheme.brandPrimary
+                                      ? primaryColor
                                       : colors.onSurfaceVariant,
                                 ),
-                                const SizedBox(width: 14),
-                                Text(
-                                  item.label,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w500,
-                                    color: isSelected
-                                        ? AppTheme.brandPrimary
-                                        : colors.onSurface,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    item.label,
+                                    style: TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? (AppTheme.isDark(context)
+                                                ? Colors.white
+                                                : primaryColor)
+                                          : colors.onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
+                                if (item.label == 'Asisten AI')
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: AppTheme.accentGradient,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Text(
+                                      'AI',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -278,16 +401,18 @@ class AppShell extends ConsumerWidget {
                   ),
                 ),
 
-                // Bottom Account / Login Prompt
+                // Bottom Account / Login Card
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   child: Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppTheme.brandPrimary.withValues(alpha: 0.05),
+                      color: colors.surfaceContainerHighest.withValues(
+                        alpha: 0.5,
+                      ),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
-                        color: AppTheme.brandPrimary.withValues(alpha: 0.15),
+                        color: colors.outlineVariant.withValues(alpha: 0.7),
                       ),
                     ),
                     child: Column(
@@ -299,13 +424,19 @@ class AppShell extends ConsumerWidget {
                               width: 34,
                               height: 34,
                               decoration: BoxDecoration(
-                                color: AppTheme.brandPrimary,
-                                borderRadius: BorderRadius.circular(8),
+                                gradient: AppTheme.accentGradient,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primaryColor.withValues(alpha: 0.25),
+                                    blurRadius: 6,
+                                  ),
+                                ],
                               ),
                               child: const Icon(
                                 Icons.person_rounded,
                                 color: Colors.white,
-                                size: 20,
+                                size: 18,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -323,7 +454,7 @@ class AppShell extends ConsumerWidget {
                                               'Pengguna',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 13,
+                                            fontSize: 12.5,
                                             color: colors.onSurface,
                                           ),
                                           maxLines: 1,
@@ -332,7 +463,7 @@ class AppShell extends ConsumerWidget {
                                         Text(
                                           user.email ?? '',
                                           style: TextStyle(
-                                            fontSize: 11,
+                                            fontSize: 10.5,
                                             color: colors.onSurfaceVariant,
                                           ),
                                           maxLines: 1,
@@ -349,14 +480,14 @@ class AppShell extends ConsumerWidget {
                                         'RadarScholar',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13,
+                                          fontSize: 12.5,
                                           color: colors.onSurface,
                                         ),
                                       ),
                                       Text(
-                                        'Profil terhubung',
+                                        'Mode Eksplorasi',
                                         style: TextStyle(
-                                          fontSize: 11,
+                                          fontSize: 10.5,
                                           color: colors.onSurfaceVariant,
                                         ),
                                       ),
@@ -380,37 +511,39 @@ class AppShell extends ConsumerWidget {
                                       .signOut(),
                                   icon: const Icon(
                                     Icons.logout_rounded,
-                                    size: 16,
+                                    size: 14,
                                   ),
                                   label: const Text(
                                     'Keluar',
-                                    style: TextStyle(fontSize: 12),
+                                    style: TextStyle(fontSize: 11.5),
                                   ),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
+                                      vertical: 6,
                                     ),
-                                    foregroundColor: Colors.red.shade700,
+                                    foregroundColor: const Color(0xFFF87171),
                                     side: BorderSide(
-                                      color: Colors.red.shade200,
+                                      color: const Color(
+                                        0xFFF87171,
+                                      ).withValues(alpha: 0.3),
                                     ),
                                   ),
                                 );
                               }
                               return OutlinedButton.icon(
                                 onPressed: () => context.go('/login'),
-                                icon: const Icon(Icons.login_rounded, size: 16),
+                                icon: const Icon(Icons.login_rounded, size: 14),
                                 label: const Text(
                                   'Masuk ke Akun',
-                                  style: TextStyle(fontSize: 12),
+                                  style: TextStyle(fontSize: 11.5),
                                 ),
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
+                                    vertical: 6,
                                   ),
-                                  foregroundColor: AppTheme.brandPrimary,
-                                  side: const BorderSide(
-                                    color: AppTheme.brandPrimary,
+                                  foregroundColor: primaryColor,
+                                  side: BorderSide(
+                                    color: primaryColor.withValues(alpha: 0.4),
                                   ),
                                 ),
                               );

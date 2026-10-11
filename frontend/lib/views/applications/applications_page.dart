@@ -25,13 +25,9 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lamaran'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.grey.shade900,
-        elevation: 0.5,
-      ),
       body: SafeArea(
         child: Padding(
           padding: Spacing.pagePadding(MediaQuery.of(context).size.width),
@@ -40,17 +36,21 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
             children: [
               Text(
                 'Pelacakan Lamaran',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.brandPrimary,
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: colors.onSurface,
+                  letterSpacing: -0.4,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
-                'Pantau status aplikasi, berkas persyaratan, dan tenggat waktu pendaftaran.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                'Pantau status aplikasi, kelengkapan berkas persyaratan, dan tenggat waktu pendaftaran.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: Spacing.xl),
               Expanded(child: _buildContent()),
@@ -63,6 +63,7 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
 
   Widget _buildContent() {
     final state = ref.watch(applicationsControllerProvider);
+    final colors = Theme.of(context).colorScheme;
 
     if (state is ApplicationsLoading || state is ApplicationsInitial) {
       return const Center(child: CircularProgressIndicator());
@@ -73,11 +74,15 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            Icon(Icons.error_outline_rounded, color: colors.error, size: 48),
             const SizedBox(height: 16),
-            Text(state.message, textAlign: TextAlign.center),
+            Text(
+              state.message,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: colors.onSurfaceVariant),
+            ),
             const SizedBox(height: 16),
-            ElevatedButton(
+            FilledButton(
               onPressed: () => ref
                   .read(applicationsControllerProvider.notifier)
                   .fetchApplications(),
@@ -90,21 +95,13 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
 
     if (state is ApplicationsEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const EmptyState(
-              icon: Icons.checklist_rtl_rounded,
-              title: 'Belum Ada Lamaran',
-              message:
-                  'Mulailah melacak lamaran beasiswa Anda untuk mengatur tugas dan jadwal.',
-            ),
-            const SizedBox(height: Spacing.md),
-            ElevatedButton(
-              onPressed: () => context.go('/'),
-              child: const Text('Cari Beasiswa'),
-            ),
-          ],
+        child: EmptyState(
+          icon: Icons.checklist_rtl_rounded,
+          title: 'Belum Ada Lamaran',
+          message:
+              'Mulailah melacak lamaran beasiswa Anda untuk mengatur checklist tugas, dokumen, dan jadwal pendaftaran.',
+          actionLabel: 'Cari Beasiswa',
+          onAction: () => context.go('/discovery'),
         ),
       );
     }
@@ -128,95 +125,134 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
   }
 
   Widget _buildApplicationCard(Application app) {
-    return Card(
+    final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderColor = AppTheme.borderColorOf(context);
+
+    return Container(
       margin: const EdgeInsets.only(bottom: Spacing.md),
-      shape: RoundedRectangleBorder(
+      decoration: BoxDecoration(
+        color: cardBg,
         borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: AppTheme.isDark(context) ? 0.2 : 0.04,
+            ),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      elevation: 2,
-      child: InkWell(
-        onTap: () {
-          context.push('/applications/${app.id}');
-        },
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Padding(
-          padding: const EdgeInsets.all(Spacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      app.scholarship.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+        child: InkWell(
+          onTap: () {
+            context.push('/applications/${app.id}');
+          },
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          hoverColor: primaryColor.withValues(alpha: 0.04),
+          child: Padding(
+            padding: const EdgeInsets.all(Spacing.md + 2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (app.scholarship.source != null)
+                            Text(
+                              app.scholarship.source!.providerName,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: primaryColor,
+                              ),
+                            ),
+                          const SizedBox(height: 3),
+                          Text(
+                            app.scholarship.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: colors.onSurface,
+                              letterSpacing: -0.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(width: 8),
+                    _buildStatusBadge(app.status),
+                  ],
+                ),
+                const SizedBox(height: Spacing.md),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.checklist_rtl_rounded,
+                          size: 16,
+                          color: colors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${app.tasksCompleted}/${app.tasksTotal} Tugas',
+                          style: TextStyle(
+                            color: colors.onSurfaceVariant,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.event_outlined,
+                          size: 16,
+                          color: colors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          app.targetDeadline != null
+                              ? '${app.targetDeadline!.day}/${app.targetDeadline!.month}/${app.targetDeadline!.year}'
+                              : 'Tenggat belum diatur',
+                          style: TextStyle(
+                            color: colors.onSurfaceVariant,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Spacing.sm + 2),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: app.progress,
+                    backgroundColor: colors.surfaceContainerHighest,
+                    color: app.progress == 1.0
+                        ? const Color(0xFF10B981)
+                        : primaryColor,
+                    minHeight: 6,
                   ),
-                  _buildStatusBadge(app.status),
-                ],
-              ),
-              if (app.scholarship.source != null) ...[
-                const SizedBox(height: Spacing.xs),
-                Text(
-                  app.scholarship.source!.providerName,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                 ),
               ],
-              const SizedBox(height: Spacing.md),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.checklist_rtl,
-                        size: 16,
-                        color: Colors.grey.shade600,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${app.tasksCompleted}/${app.tasksTotal} Tugas',
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Icon(Icons.event, size: 16, color: Colors.grey.shade600),
-                      const SizedBox(width: 4),
-                      Text(
-                        app.targetDeadline != null
-                            ? '${app.targetDeadline!.day}/${app.targetDeadline!.month}/${app.targetDeadline!.year}'
-                            : 'Belum diatur',
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: Spacing.sm),
-              LinearProgressIndicator(
-                value: app.progress,
-                backgroundColor: Colors.grey.shade200,
-                color: app.progress == 1.0
-                    ? Colors.green
-                    : AppTheme.brandPrimary,
-                minHeight: 6,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -224,48 +260,62 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
   }
 
   Widget _buildStatusBadge(ApplicationStatus status) {
+    final isDark = AppTheme.isDark(context);
     Color bgColor;
     Color textColor;
     String label;
 
     switch (status) {
       case ApplicationStatus.planned:
-        bgColor = Colors.blue.shade50;
-        textColor = Colors.blue.shade700;
+        bgColor = isDark
+            ? const Color(0xFF0C4A6E).withValues(alpha: 0.4)
+            : const Color(0xFFE0F2FE);
+        textColor = isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7);
         label = 'Direncanakan';
         break;
       case ApplicationStatus.inProgress:
-        bgColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade700;
+        bgColor = isDark
+            ? const Color(0xFF78350F).withValues(alpha: 0.4)
+            : const Color(0xFFFEF3C7);
+        textColor = isDark ? const Color(0xFFFBBF24) : const Color(0xFFB45309);
         label = 'Sedang Diproses';
         break;
       case ApplicationStatus.submitted:
-        bgColor = Colors.purple.shade50;
-        textColor = Colors.purple.shade700;
+        bgColor = isDark
+            ? const Color(0xFF581C87).withValues(alpha: 0.4)
+            : const Color(0xFFF3E8FF);
+        textColor = isDark ? const Color(0xFFC084FC) : const Color(0xFF7E22CE);
         label = 'Terkirim';
         break;
       case ApplicationStatus.accepted:
-        bgColor = Colors.green.shade50;
-        textColor = Colors.green.shade700;
+        bgColor = isDark
+            ? const Color(0xFF064E3B).withValues(alpha: 0.4)
+            : const Color(0xFFDCFCE7);
+        textColor = isDark ? const Color(0xFF34D399) : const Color(0xFF15803D);
         label = 'Diterima';
         break;
       case ApplicationStatus.rejected:
-        bgColor = Colors.red.shade50;
-        textColor = Colors.red.shade700;
+        bgColor = isDark
+            ? const Color(0xFF7F1D1D).withValues(alpha: 0.4)
+            : const Color(0xFFFEE2E2);
+        textColor = isDark ? const Color(0xFFF87171) : const Color(0xFFB91C1C);
         label = 'Ditolak';
         break;
       case ApplicationStatus.withdrawn:
-        bgColor = Colors.grey.shade200;
-        textColor = Colors.grey.shade700;
+        bgColor = isDark
+            ? const Color(0xFF334155).withValues(alpha: 0.5)
+            : const Color(0xFFF1F5F9);
+        textColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
         label = 'Ditarik';
         break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: textColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
         label,
@@ -273,6 +323,7 @@ class _ApplicationsPageState extends ConsumerState<ApplicationsPage> {
           color: textColor,
           fontSize: 11,
           fontWeight: FontWeight.bold,
+          letterSpacing: 0.2,
         ),
       ),
     );

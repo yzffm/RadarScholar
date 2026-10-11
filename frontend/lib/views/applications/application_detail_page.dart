@@ -143,15 +143,18 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
       applicationDetailProvider(widget.applicationId),
     );
 
+    final primary = AppTheme.primaryOf(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Lamaran'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.grey.shade900,
-        elevation: 0.5,
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: Color(0xFFEF4444),
+            ),
+            tooltip: 'Hapus Pelacakan',
             onPressed: () {
               // Confirm delete
               showDialog(
@@ -168,7 +171,8 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: const Color(0xFFEF4444),
+                        foregroundColor: Colors.white,
                       ),
                       onPressed: () async {
                         Navigator.pop(context);
@@ -190,10 +194,7 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                           }
                         }
                       },
-                      child: const Text(
-                        'Hapus',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      child: const Text('Hapus'),
                     ),
                   ],
                 ),
@@ -209,9 +210,14 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Color(0xFFEF4444),
+                size: 48,
+              ),
               const SizedBox(height: 16),
               const Text('Gagal memuat detail aplikasi'),
+              const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () => ref.invalidate(
                   applicationDetailProvider(widget.applicationId),
@@ -231,190 +237,285 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                 ApplicationAssistantSheet(applicationId: widget.applicationId),
           );
         },
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.auto_awesome),
-        label: const Text('Asisten AI'),
+        label: const Text(
+          'Asisten AI',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
 
   Widget _buildDetail(Application application) {
-    return SingleChildScrollView(
-      padding: Spacing.pagePadding(MediaQuery.of(context).size.width),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header info
-          Text(
-            application.scholarship.title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          if (application.scholarship.source != null) ...[
-            const SizedBox(height: Spacing.xs),
-            Text(
-              application.scholarship.source!.providerName,
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-          ],
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = AppTheme.isDark(context);
+    final primary = AppTheme.primaryOf(context);
+    final cardColor = AppTheme.cardColorOf(context);
+    final borderColor = AppTheme.borderColorOf(context);
 
-          const SizedBox(height: Spacing.lg),
-
-          // Status Card
-          Card(
-            elevation: 0,
-            color: Colors.grey.shade50,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              side: BorderSide(color: Colors.grey.shade200),
-            ),
-            child: ListTile(
-              title: const Text(
-                'Status Lamaran',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-              subtitle: Text(
-                _getStatusLabel(application.status),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
-              ),
-              trailing: const Icon(
-                Icons.edit,
-                size: 20,
-                color: AppTheme.brandPrimary,
-              ),
-              onTap: () => _updateStatus(application.id, application.status),
-            ),
-          ),
-
-          const SizedBox(height: Spacing.xl),
-
-          // Tasks section
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 860),
+        child: SingleChildScrollView(
+          padding: Spacing.pagePadding(MediaQuery.of(context).size.width),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header info
               Text(
-                'Daftar Tugas',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Tambah'),
-                onPressed: () => _showAddTaskDialog(context, application.id),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: Spacing.sm),
-
-          LinearProgressIndicator(
-            value: application.progress,
-            backgroundColor: Colors.grey.shade200,
-            color: application.progress == 1.0
-                ? Colors.green
-                : AppTheme.brandPrimary,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-          ),
-
-          const SizedBox(height: Spacing.xs),
-          Text(
-            '${application.tasksCompleted} dari ${application.tasksTotal} tugas selesai',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-          ),
-
-          const SizedBox(height: Spacing.md),
-
-          if (application.tasks.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32.0),
-                child: Text(
-                  'Belum ada tugas.',
-                  style: TextStyle(color: Colors.grey),
+                application.scholarship.title,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
               ),
-            )
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: application.tasks.length,
-              itemBuilder: (context, index) {
-                final task = application.tasks[index];
-                return CheckboxListTile(
+              if (application.scholarship.source != null) ...[
+                const SizedBox(height: Spacing.xs),
+                Text(
+                  application.scholarship.source!.providerName,
+                  style: TextStyle(color: primary, fontWeight: FontWeight.w600),
+                ),
+              ],
+
+              const SizedBox(height: Spacing.lg),
+
+              // Status Card
+              Container(
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: borderColor),
+                ),
+                child: ListTile(
                   title: Text(
-                    task.title,
+                    'Status Lamaran',
                     style: TextStyle(
-                      decoration: task.isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
-                      color: task.isCompleted ? Colors.grey : Colors.black87,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: colors.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
-                  value: task.isCompleted,
-                  onChanged: (val) async {
-                    if (val == null) return;
-                    try {
-                      await ref
-                          .read(applicationRepositoryProvider)
-                          .updateTask(
-                            applicationId: application.id,
-                            taskId: task.id,
-                            isCompleted: val,
-                          );
-                      ref.invalidate(applicationDetailProvider(application.id));
-                      ref
-                          .read(applicationsControllerProvider.notifier)
-                          .fetchApplications();
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Gagal mengupdate tugas'),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      _getStatusLabel(application.status),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                  ),
+                  trailing: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.edit_outlined, size: 18, color: primary),
+                  ),
+                  onTap: () =>
+                      _updateStatus(application.id, application.status),
+                ),
+              ),
+
+              const SizedBox(height: Spacing.xl),
+
+              // Tasks section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Daftar Tugas & Checklist',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  TextButton.icon(
+                    icon: Icon(Icons.add_rounded, size: 18, color: primary),
+                    label: Text(
+                      'Tambah Tugas',
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () =>
+                        _showAddTaskDialog(context, application.id),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: Spacing.sm),
+
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: application.progress,
+                  backgroundColor: isDark
+                      ? const Color(0xFF1E293B)
+                      : Colors.grey.shade200,
+                  color: application.progress == 1.0
+                      ? const Color(0xFF10B981)
+                      : primary,
+                  minHeight: 8,
+                ),
+              ),
+
+              const SizedBox(height: Spacing.xs),
+              Text(
+                '${application.tasksCompleted} dari ${application.tasksTotal} tugas selesai (${(application.progress * 100).toInt()}%)',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: colors.onSurface.withValues(alpha: 0.65),
+                ),
+              ),
+
+              const SizedBox(height: Spacing.md),
+
+              if (application.tasks.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 36,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.checklist_rtl_rounded,
+                        size: 40,
+                        color: colors.onSurface.withValues(alpha: 0.3),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Belum ada checklist tugas',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: colors.onSurface.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tambahkan berkas atau syarat yang perlu Anda siapkan.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colors.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: application.tasks.length,
+                    separatorBuilder: (context, index) =>
+                        Divider(height: 1, color: borderColor),
+                    itemBuilder: (context, index) {
+                      final task = application.tasks[index];
+                      return CheckboxListTile(
+                        activeColor: primary,
+                        title: Text(
+                          task.title,
+                          style: TextStyle(
+                            decoration: task.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                            color: task.isCompleted
+                                ? colors.onSurface.withValues(alpha: 0.45)
+                                : colors.onSurface,
+                            fontWeight: task.isCompleted
+                                ? FontWeight.normal
+                                : FontWeight.w500,
                           ),
-                        );
-                      }
-                    }
-                  },
-                  secondary: IconButton(
-                    icon: const Icon(Icons.close, size: 20, color: Colors.grey),
-                    onPressed: () async {
-                      try {
-                        await ref
-                            .read(applicationRepositoryProvider)
-                            .deleteTask(
-                              applicationId: application.id,
-                              taskId: task.id,
+                        ),
+                        value: task.isCompleted,
+                        onChanged: (val) async {
+                          if (val == null) return;
+                          try {
+                            await ref
+                                .read(applicationRepositoryProvider)
+                                .updateTask(
+                                  applicationId: application.id,
+                                  taskId: task.id,
+                                  isCompleted: val,
+                                );
+                            ref.invalidate(
+                              applicationDetailProvider(application.id),
                             );
-                        ref.invalidate(
-                          applicationDetailProvider(application.id),
-                        );
-                        ref
-                            .read(applicationsControllerProvider.notifier)
-                            .fetchApplications();
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Gagal menghapus tugas'),
-                            ),
-                          );
-                        }
-                      }
+                            ref
+                                .read(applicationsControllerProvider.notifier)
+                                .fetchApplications();
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Gagal mengupdate tugas'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        secondary: IconButton(
+                          icon: Icon(
+                            Icons.close_rounded,
+                            size: 18,
+                            color: colors.onSurface.withValues(alpha: 0.4),
+                          ),
+                          onPressed: () async {
+                            try {
+                              await ref
+                                  .read(applicationRepositoryProvider)
+                                  .deleteTask(
+                                    applicationId: application.id,
+                                    taskId: task.id,
+                                  );
+                              ref.invalidate(
+                                applicationDetailProvider(application.id),
+                              );
+                              ref
+                                  .read(applicationsControllerProvider.notifier)
+                                  .fetchApplications();
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Gagal menghapus tugas'),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                        ),
+                      );
                     },
                   ),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                );
-              },
-            ),
-        ],
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -145,6 +145,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profil & Akademik'),
+        backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         actions: [
           if (state is ProfileLoaded && !_isEditing)
             IconButton(
@@ -152,6 +154,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               tooltip: 'Edit Profil',
               onPressed: _confirmEditProfile,
             ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(child: _buildBody(state)),
@@ -159,6 +162,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildBody(ProfileState state) {
+    final colors = Theme.of(context).colorScheme;
+
     if (state is ProfileLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -168,13 +173,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              color: Colors.red,
-              size: 48,
-            ),
+            Icon(Icons.error_outline_rounded, color: colors.error, size: 48),
             const SizedBox(height: 16),
-            Text(state.message, style: const TextStyle(color: Colors.red)),
+            Text(state.message, style: TextStyle(color: colors.error)),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () =>
@@ -204,14 +205,95 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildReadOnlyProfile(UserProfile profile) {
+    final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(Spacing.lg),
+      padding: Spacing.pagePadding(MediaQuery.of(context).size.width),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
+          constraints: const BoxConstraints(maxWidth: 820),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // User Profile Banner Card
+              Container(
+                padding: const EdgeInsets.all(Spacing.lg),
+                margin: const EdgeInsets.only(bottom: Spacing.lg),
+                decoration: BoxDecoration(
+                  color: AppTheme.cardColorOf(context),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(color: AppTheme.borderColorOf(context)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: AppTheme.isDark(context) ? 0.2 : 0.04,
+                      ),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.accentGradient,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.school_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            profile.university ??
+                                'Perguruan Tinggi Belum Diisi',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: colors.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            [
+                              if (profile.faculty != null) profile.faculty,
+                              if (profile.major != null) profile.major,
+                              if (profile.degreeLevel != null)
+                                profile.degreeLevel!.value,
+                            ].join(' • '),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FilledButton.icon(
+                      onPressed: _confirmEditProfile,
+                      icon: const Icon(Icons.edit_rounded, size: 16),
+                      label: const Text('Edit'),
+                    ),
+                  ],
+                ),
+              ),
+
               _buildSectionCard(
                 title: 'Data Akademik',
                 icon: Icons.school_rounded,
@@ -255,52 +337,88 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     required IconData icon,
     required List<Widget> children,
   }) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.cardColorOf(context),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(Spacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: AppTheme.brandPrimary),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
+        border: Border.all(color: AppTheme.borderColorOf(context)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: AppTheme.isDark(context) ? 0.2 : 0.04,
             ),
-            const Divider(height: 32),
-            ...children,
-          ],
-        ),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(Spacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: primaryColor, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: colors.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.md),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: AppTheme.borderColorOf(context).withValues(alpha: 0.6),
+          ),
+          const SizedBox(height: Spacing.md),
+          ...children,
+        ],
       ),
     );
   }
 
   Widget _buildDisplayField(String label, String? value) {
     if (value == null || value.isEmpty) return const SizedBox.shrink();
+    final colors = Theme.of(context).colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            style: TextStyle(
+              color: colors.onSurfaceVariant,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             value,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w600,
+              color: colors.onSurface,
+            ),
           ),
         ],
       ),
@@ -309,37 +427,95 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Widget _buildDisplayList(String label, List<String> items) {
     if (items.isEmpty) return const SizedBox.shrink();
-    return _buildDisplayField(label, items.join(' • '));
+    final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: colors.onSurfaceVariant,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: items.map((item) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: primaryColor.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Text(
+                  item,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildForm() {
+    final colors = Theme.of(context).colorScheme;
+    final primaryColor = AppTheme.primaryOf(context);
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(Spacing.lg),
+      padding: Spacing.pagePadding(MediaQuery.of(context).size.width),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
+          constraints: const BoxConstraints(maxWidth: 820),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Info Banner
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.brandPrimary.withValues(alpha: 0.1),
+                    color: primaryColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: primaryColor.withValues(alpha: 0.35),
+                    ),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Icon(
                         Icons.info_outline_rounded,
-                        color: AppTheme.brandPrimary,
+                        color: primaryColor,
+                        size: 22,
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Lengkapi profil Anda agar RadarScholar dapat memberikan rekomendasi beasiswa yang paling akurat.',
-                          style: TextStyle(color: AppTheme.brandPrimary),
+                          'Lengkapi profil Anda agar RadarScholar dapat memberikan rekomendasi beasiswa yang paling akurat secara real-time.',
+                          style: TextStyle(
+                            color: colors.onSurface,
+                            fontSize: 13.5,
+                            height: 1.4,
+                          ),
                         ),
                       ),
                     ],
