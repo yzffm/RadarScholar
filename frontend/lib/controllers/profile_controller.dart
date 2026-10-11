@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/user_profile.dart';
 import '../repositories/user_profile_repository.dart';
+import '../services/api_service.dart';
 import 'auth_controller.dart';
 
 /// Profile state.
@@ -55,7 +56,12 @@ class ProfileController extends StateNotifier<ProfileState> {
         state = const ProfileNotFound();
       }
     } catch (e) {
-      state = ProfileError('Gagal memuat profil: $e');
+      state = ProfileError(
+        safeApiErrorMessage(
+          e,
+          fallback: 'Gagal memuat profil. Silakan coba lagi.',
+        ),
+      );
     }
   }
 
@@ -80,7 +86,12 @@ class ProfileController extends StateNotifier<ProfileState> {
       state = ProfileLoaded(profile);
       return true;
     } catch (e) {
-      state = ProfileError('Gagal menyimpan profil: $e');
+      state = ProfileError(
+        safeApiErrorMessage(
+          e,
+          fallback: 'Gagal menyimpan profil. Silakan coba lagi.',
+        ),
+      );
       return false;
     }
   }

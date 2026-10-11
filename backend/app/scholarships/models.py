@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -12,6 +12,13 @@ from app.database.base import Base
 
 class ScholarshipSource(Base):
     __tablename__ = "scholarship_sources"
+    __table_args__ = (
+        UniqueConstraint(
+            "provider_name",
+            "source_url",
+            name="uq_scholarship_sources_provider_url",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     provider_name: Mapped[str] = mapped_column(String, index=True)
@@ -27,9 +34,19 @@ class ScholarshipSource(Base):
 
 class Scholarship(Base):
     __tablename__ = "scholarships"
+    __table_args__ = (
+        UniqueConstraint(
+            "source_id",
+            "application_url",
+            name="uq_scholarships_source_application_url",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    source_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("scholarship_sources.id", ondelete="CASCADE"))
+    source_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("scholarship_sources.id", ondelete="CASCADE"),
+        index=True,
+    )
     title: Mapped[str] = mapped_column(String, index=True)
     summary: Mapped[str] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text)
@@ -59,7 +76,10 @@ class ScholarshipBenefit(Base):
     __tablename__ = "scholarship_benefits"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    scholarship_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("scholarships.id", ondelete="CASCADE"))
+    scholarship_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("scholarships.id", ondelete="CASCADE"),
+        index=True,
+    )
     benefit_type: Mapped[str] = mapped_column(String) # e.g., LIVING_ALLOWANCE, TUITION_FEE
     description: Mapped[str] = mapped_column(Text)
 
@@ -71,7 +91,10 @@ class ScholarshipRequirement(Base):
     __tablename__ = "scholarship_requirements"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    scholarship_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("scholarships.id", ondelete="CASCADE"))
+    scholarship_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("scholarships.id", ondelete="CASCADE"),
+        index=True,
+    )
     requirement_type: Mapped[str] = mapped_column(String) # e.g., GPA, MAJOR, SEMESTER
     operator: Mapped[str] = mapped_column(String) # e.g., GTE, EQ, IN, CONTAINS
     value: Mapped[Any] = mapped_column(JSON().with_variant(JSONB, 'postgresql')) # Structured requirement data

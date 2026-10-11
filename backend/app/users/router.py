@@ -47,7 +47,6 @@ def get_my_profile(
 @router.post(
     "/me",
     response_model=UserProfileResponse,
-    status_code=status.HTTP_201_CREATED,
 )
 def create_my_profile(
     data: UserProfileCreate,

@@ -57,6 +57,7 @@ def _make_scraped(
         deadline=deadline,
         application_url=application_url,
         is_active=True,
+        is_live_verified=True,
         requirements=[
             ScrapedRequirement(
                 requirement_type="GPA",
@@ -283,6 +284,76 @@ class TestPipelineDryRun:
         scholarship = db_session.query(Scholarship).one()
         assert scholarship.data_origin == "CRAWLER_BASELINE"
         assert scholarship.last_verified_live_at is None
+
+    def test_baseline_does_not_erase_previous_live_verification(self, db_session: Session):
+        live = _make_scraped()
+        live.is_live_verified = True
+        baseline = _make_scraped(title="Baseline Refresh")
+        baseline.is_live_verified = False
+        live_registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([live]),
+                enabled=True,
+            ),
+        }
+        baseline_registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([baseline]),
+                enabled=True,
+            ),
+        }
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=live_registry):
+            CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        live_verified_at = scholarship.last_verified_live_at
+        assert scholarship.data_origin == "CRAWLER_LIVE"
+        assert live_verified_at is not None
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=baseline_registry):
+            CrawlerPipeline(db_session).run()
+
+        db_session.refresh(scholarship)
+        assert scholarship.title == "Baseline Refresh"
+        assert scholarship.data_origin == "CRAWLER_LIVE"
+        assert scholarship.last_verified_live_at == live_verified_at
+
+    def test_live_refresh_promotes_baseline_and_sets_verification(self, db_session: Session):
+        baseline = _make_scraped()
+        baseline.is_live_verified = False
+        live = _make_scraped(title="Live Refresh")
+        live.is_live_verified = True
+        baseline_registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([baseline]),
+                enabled=True,
+            ),
+        }
+        live_registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([live]),
+                enabled=True,
+            ),
+        }
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=baseline_registry):
+            CrawlerPipeline(db_session).run()
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=live_registry):
+            CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        assert scholarship.title == "Live Refresh"
+        assert scholarship.data_origin == "CRAWLER_LIVE"
+        assert scholarship.last_verified_live_at is not None
 
 
 class TestPipelineUpdate:

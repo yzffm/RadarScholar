@@ -220,12 +220,12 @@ Copy `backend/.env.example` to `backend/.env` and fill in values:
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET/POST/PUT | `/api/v1/users/me` | Read, create, or update the authenticated user's profile |
+| GET/POST/PUT | `/api/v1/users/me` | Read, create, or update the authenticated user's profile; POST returns the existing profile when already created |
 | POST/DELETE | `/api/v1/scholarships/{id}/save` | Save or unsave a scholarship |
 | GET | `/api/v1/saved-scholarships` | List saved scholarships |
 | GET/POST | `/api/v1/applications` | List or create application trackers |
-| GET/PUT/DELETE | `/api/v1/applications/{id}` | Read, update, or delete an application tracker |
-| POST/PUT/DELETE | `/api/v1/applications/{id}/tasks` | Manage application checklist tasks |
+| GET/PATCH/DELETE | `/api/v1/applications/{id}` | Read, update, or delete an application tracker |
+| POST/PATCH/DELETE | `/api/v1/applications/{id}/tasks/{task_id}` | Manage application checklist tasks |
 | GET | `/api/v1/scholarships/{id}/ai-explanation` | Generate deterministic-match explanation with AI assistance |
 | POST | `/api/v1/applications/{id}/ai-assistant` | Generate AI application preparation feedback |
 | GET | `/api/v1/admin/sources` | List curated sources for admin users |

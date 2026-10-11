@@ -6,6 +6,33 @@ import 'auth_interceptor.dart';
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
+String safeApiErrorMessage(
+  Object error, {
+  String fallback = 'Terjadi kesalahan. Silakan coba lagi.',
+}) {
+  if (error is! DioException) return fallback;
+
+  final statusCode = error.response?.statusCode;
+  if (statusCode == 401)
+    return 'Sesi Anda telah berakhir. Silakan login kembali.';
+  if (statusCode == 403)
+    return 'Anda tidak memiliki izin untuk melakukan tindakan ini.';
+  if (statusCode == 404) return 'Data yang diminta tidak ditemukan.';
+  if (statusCode == 429)
+    return 'Terlalu banyak permintaan. Silakan coba lagi nanti.';
+  if (statusCode != null && statusCode >= 500) {
+    return 'Layanan sedang mengalami gangguan. Silakan coba lagi nanti.';
+  }
+  if (error.type == DioExceptionType.connectionError ||
+      error.type == DioExceptionType.connectionTimeout ||
+      error.type == DioExceptionType.receiveTimeout ||
+      error.type == DioExceptionType.sendTimeout) {
+    return 'Tidak dapat terhubung ke server. Periksa koneksi internet.';
+  }
+  if (statusCode == 422) return 'Data yang dikirim belum valid.';
+  return fallback;
+}
+
 /// Central API service using Dio for HTTP communication with FastAPI backend.
 ///
 /// Part of the Service layer in the MVC architecture.

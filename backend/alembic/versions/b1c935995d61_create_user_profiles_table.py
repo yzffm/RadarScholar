@@ -1,7 +1,7 @@
 """create user profiles table
 
 Revision ID: b1c935995d61
-Revises: 
+Revises:
 Create Date: 2026-09-21 22:37:43.013388
 
 """

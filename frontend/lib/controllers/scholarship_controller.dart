@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/scholarship.dart';
 import '../repositories/scholarship_repository.dart';
+import '../services/api_service.dart';
 
 sealed class ScholarshipDiscoveryState {
   const ScholarshipDiscoveryState();
@@ -106,8 +107,11 @@ class ScholarshipController extends StateNotifier<ScholarshipDiscoveryState> {
         );
       }
     } catch (e) {
-      state = const ScholarshipDiscoveryError(
-        'Gagal memuat beasiswa. Periksa koneksi internet dan coba lagi.',
+      state = ScholarshipDiscoveryError(
+        safeApiErrorMessage(
+          e,
+          fallback: 'Gagal memuat beasiswa. Silakan coba lagi.',
+        ),
       );
     } finally {
       _isFetching = false;

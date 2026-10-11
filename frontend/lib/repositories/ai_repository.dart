@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_explanation.dart';
 import '../models/ai_assistant.dart';
 import '../services/api_service.dart';
-import 'scholarship_repository.dart';
 
 final aiRepositoryProvider = Provider<AiRepository>((ref) {
   return AiRepository(ref.watch(apiServiceProvider));
@@ -23,19 +22,14 @@ class AiRepository {
       );
       return MatchExplanation.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400) {
-        throw Exception(
-          e.response?.data['detail'] ?? 'Profil pengguna belum dilengkapi.',
-        );
-      }
-      if (e.response?.statusCode == 503) {
-        throw Exception(
-          e.response?.data['detail'] ?? 'Penjelasan AI sedang tidak tersedia.',
-        );
-      }
-      throw Exception('Gagal mendapatkan penjelasan AI: ${e.message}');
-    } catch (e) {
-      throw Exception('An unexpected error occurred: $e');
+      throw Exception(
+        safeApiErrorMessage(
+          e,
+          fallback: 'Penjelasan AI sedang tidak tersedia.',
+        ),
+      );
+    } catch (_) {
+      throw Exception('Penjelasan AI sedang tidak tersedia.');
     }
   }
 
@@ -50,27 +44,17 @@ class AiRepository {
       );
       return AssistantResponse.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400) {
-        throw Exception(
-          e.response?.data['detail'] ?? 'Profil pengguna belum dilengkapi.',
-        );
-      }
-      if (e.response?.statusCode == 404) {
-        throw Exception(
-          e.response?.data['detail'] ?? 'Aplikasi tidak ditemukan.',
-        );
-      }
-      if (e.response?.statusCode == 503) {
-        throw Exception(
-          e.response?.data['detail'] ??
-              'Layanan AI saat ini tidak tersedia. Silakan coba lagi nanti.',
-        );
-      }
       throw Exception(
-        'Gagal mendapatkan umpan balik AI: ${e.response?.data['detail'] ?? e.message}',
+        safeApiErrorMessage(
+          e,
+          fallback:
+              'Layanan AI saat ini tidak tersedia. Silakan coba lagi nanti.',
+        ),
       );
-    } catch (e) {
-      throw Exception('Terjadi kesalahan yang tidak terduga: $e');
+    } catch (_) {
+      throw Exception(
+        'Layanan AI saat ini tidak tersedia. Silakan coba lagi nanti.',
+      );
     }
   }
 }

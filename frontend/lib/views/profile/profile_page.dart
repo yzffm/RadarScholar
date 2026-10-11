@@ -80,6 +80,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         .toList();
   }
 
+  Future<void> _confirmEditProfile() async {
+    final shouldContinue = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit profil?'),
+        content: const Text(
+          'Perubahan profil dapat memengaruhi hasil pencocokan beasiswa Anda.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Lanjutkan'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldContinue == true && mounted) {
+      setState(() => _isEditing = true);
+    }
+  }
+
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -124,7 +150,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             IconButton(
               icon: const Icon(Icons.edit_rounded),
               tooltip: 'Edit Profil',
-              onPressed: () => setState(() => _isEditing = true),
+              onPressed: _confirmEditProfile,
             ),
         ],
       ),

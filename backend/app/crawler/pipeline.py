@@ -418,7 +418,7 @@ class CrawlerPipeline:
             application_url=item.application_url,
             is_active=item.is_active,
             last_verified_live_at=utc_now() if item.is_live_verified else None,
-            data_origin=("CRAWLER_LIVE" if item.is_live_verified else "CRAWLER_BASELINE"),
+            data_origin=self._data_origin(item),
         )
         self.db.add(scholarship)
         self.db.flush()
@@ -445,6 +445,11 @@ class CrawlerPipeline:
 
         logger.info("Created scholarship: %s", item.title)
         return "created"
+
+    @staticmethod
+    def _data_origin(item: ScrapedScholarship) -> str:
+        """Return provenance explicitly from the live-verification flag."""
+        return "CRAWLER_LIVE" if item.is_live_verified else "CRAWLER_BASELINE"
 
     def _update_scholarship(
         self, existing: Scholarship, item: ScrapedScholarship

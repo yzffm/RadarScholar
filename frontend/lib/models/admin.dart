@@ -21,7 +21,8 @@ class CrawlRun with _$CrawlRun {
     @JsonKey(name: 'source_results') @Default([]) List<dynamic> sourceResults,
   }) = _CrawlRun;
 
-  factory CrawlRun.fromJson(Map<String, dynamic> json) => _$CrawlRunFromJson(json);
+  factory CrawlRun.fromJson(Map<String, dynamic> json) =>
+      _$CrawlRunFromJson(json);
 }
 
 @freezed

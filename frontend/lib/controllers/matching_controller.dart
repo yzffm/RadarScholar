@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:radarscholar/models/scholarship.dart';
 import 'package:radarscholar/repositories/matching_repository.dart';
-import 'package:radarscholar/repositories/scholarship_repository.dart';
 import 'package:radarscholar/services/api_service.dart';
 
 part 'matching_controller.freezed.dart';
@@ -52,7 +51,12 @@ class MatchingController extends StateNotifier<MatchingState> {
         state = MatchingState.success(response);
       }
     } catch (e) {
-      state = MatchingState.error(e.toString());
+      state = MatchingState.error(
+        safeApiErrorMessage(
+          e,
+          fallback: 'Gagal memuat rekomendasi. Silakan coba lagi.',
+        ),
+      );
     }
   }
 }

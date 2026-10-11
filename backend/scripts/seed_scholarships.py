@@ -15,7 +15,6 @@ from app.scholarships.models import (
     ScholarshipSource,
 )
 
-
 SEED_SCHOLARSHIPS = (
     {
         "provider_name": "Djarum Foundation",

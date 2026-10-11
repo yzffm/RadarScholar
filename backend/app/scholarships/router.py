@@ -1,3 +1,4 @@
+from enum import Enum
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -17,14 +18,21 @@ from app.scholarships.schemas import (
 )
 from app.users.service import get_profile
 
+
+class ScholarshipStatus(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+
+
 router = APIRouter(prefix="/scholarships", tags=["Scholarships"])
+
 
 @router.get("", response_model=ScholarshipListResponse)
 def get_scholarships(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=50, description="Items per page"),
     search: str | None = Query(None, description="Search term for title, description, or provider"),
-    status: str | None = Query(None, description="Filter by status (e.g., 'active' or 'inactive')"),
+    status: ScholarshipStatus | None = Query(None, description="Filter by scholarship status"),
     db: Session = Depends(get_db),
 ):
     """
@@ -38,7 +46,7 @@ def get_scholarships(
         page=page,
         page_size=page_size,
         search=search,
-        status=status,
+        status=status.value if status else None,
     )
 
 @router.get("/matched", response_model=MatchedScholarshipListResponse)

@@ -27,11 +27,11 @@ class RouterNotifier extends ChangeNotifier {
   RouterNotifier(this._ref) {
     _ref.listen<AppAuthState>(
       authControllerProvider,
-      (_, __) => notifyListeners(),
+      (_, _) => notifyListeners(),
     );
     _ref.listen<ProfileState>(
       profileControllerProvider,
-      (_, __) => notifyListeners(),
+      (_, _) => notifyListeners(),
     );
   }
 }
@@ -77,7 +77,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (isGoingToAdmin) {
         final profileState = ref.read(profileControllerProvider);
-        if (profileState is ProfileLoaded && !profileState.profile.isAdmin) {
+        if (profileState is! ProfileLoaded) {
+          return '/profile';
+        }
+        if (!profileState.profile.isAdmin) {
           return '/discovery';
         }
       }

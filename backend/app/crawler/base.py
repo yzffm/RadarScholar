@@ -59,7 +59,7 @@ class ScrapedScholarship(BaseModel):
     # False when it's the known verified baseline used as a fallback because
     # the official page couldn't be reached. Lets the pipeline track, per
     # scholarship, when it was last actually confirmed against the live source.
-    is_live_verified: bool = True
+    is_live_verified: bool = False
 
 
 class BaseScraper(ABC):

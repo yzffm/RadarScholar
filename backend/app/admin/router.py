@@ -6,7 +6,9 @@ Endpoints:
     GET  /api/v1/admin/crawls          - List recent crawl runs
     GET  /api/v1/admin/crawls/{id}     - Get details of a specific crawl run
 """
-from fastapi import APIRouter, Depends, HTTPException
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
@@ -24,7 +26,7 @@ def list_sources(db: Session = Depends(get_db)):
     return sources
 
 @router.post("/sources/{source_id}/toggle")
-def toggle_source(source_id: str, db: Session = Depends(get_db)):
+def toggle_source(source_id: UUID, db: Session = Depends(get_db)):
     """Toggle the active status of a source."""
     source = db.query(ScholarshipSource).filter(ScholarshipSource.id == source_id).first()
     if not source:
@@ -37,7 +39,11 @@ def toggle_source(source_id: str, db: Session = Depends(get_db)):
     return source
 
 @router.get("/crawls")
-def list_crawl_runs(limit: int = 10, offset: int = 0, db: Session = Depends(get_db)):
+def list_crawl_runs(
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
     """List recent crawler runs."""
     runs = db.query(CrawlRun).order_by(desc(CrawlRun.started_at)).limit(limit).offset(offset).all()
     total = db.query(CrawlRun).count()
@@ -49,7 +55,7 @@ def list_crawl_runs(limit: int = 10, offset: int = 0, db: Session = Depends(get_
     }
 
 @router.get("/crawls/{run_id}")
-def get_crawl_run(run_id: str, db: Session = Depends(get_db)):
+def get_crawl_run(run_id: UUID, db: Session = Depends(get_db)):
     """Get details of a specific crawl run."""
     run = db.query(CrawlRun).filter(CrawlRun.id == run_id).first()
     if not run:

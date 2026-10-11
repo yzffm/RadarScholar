@@ -58,7 +58,7 @@ class UserProfile {
   // Timestamps
   final DateTime createdAt;
   final DateTime updatedAt;
-  
+
   // Admin
   final bool isAdmin;
 
