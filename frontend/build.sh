@@ -14,7 +14,7 @@ echo "=== Step 2: Fetching Dependencies ==="
 flutter pub get
 
 echo "=== Step 3: Compiling Flutter Web ==="
-flutter build web --release \
+flutter build web --release --no-tree-shake-icons \
   --dart-define=API_BASE_URL="$API_BASE_URL" \
   --dart-define=SUPABASE_URL="$SUPABASE_URL" \
   --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"

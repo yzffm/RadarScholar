@@ -120,9 +120,9 @@ class AppShell extends ConsumerWidget {
             _onDestinationSelected(context, ref, index, destinations),
         destinations: destinations.map((d) {
           return NavigationDestination(
-            icon: Icon(IconData(d.iconCodePoint, fontFamily: 'MaterialIcons')),
+            icon: Icon(d.icon),
             selectedIcon: Icon(
-              IconData(d.selectedIconCodePoint, fontFamily: 'MaterialIcons'),
+              d.selectedIcon,
               color: primaryColor,
             ),
             label: d.label,
@@ -200,14 +200,9 @@ class AppShell extends ConsumerWidget {
             ),
             destinations: destinations.map((d) {
               return NavigationRailDestination(
-                icon: Icon(
-                  IconData(d.iconCodePoint, fontFamily: 'MaterialIcons'),
-                ),
+                icon: Icon(d.icon),
                 selectedIcon: Icon(
-                  IconData(
-                    d.selectedIconCodePoint,
-                    fontFamily: 'MaterialIcons',
-                  ),
+                  d.selectedIcon,
                   color: primaryColor,
                 ),
                 label: Text(d.label),
@@ -345,12 +340,7 @@ class AppShell extends ConsumerWidget {
                                     ),
                                   ),
                                 Icon(
-                                  IconData(
-                                    isSelected
-                                        ? item.selectedIconCodePoint
-                                        : item.iconCodePoint,
-                                    fontFamily: 'MaterialIcons',
-                                  ),
+                                  isSelected ? item.selectedIcon : item.icon,
                                   size: 20,
                                   color: isSelected
                                       ? primaryColor

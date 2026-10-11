@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'profile_controller.dart';
@@ -6,14 +7,14 @@ import 'profile_controller.dart';
 class NavigationDestinationItem {
   final String label;
   final String path;
-  final int iconCodePoint;
-  final int selectedIconCodePoint;
+  final IconData icon;
+  final IconData selectedIcon;
 
   const NavigationDestinationItem({
     required this.label,
     required this.path,
-    required this.iconCodePoint,
-    required this.selectedIconCodePoint,
+    required this.icon,
+    required this.selectedIcon,
   });
 }
 
@@ -24,32 +25,32 @@ final navigationDestinationsProvider =
         const NavigationDestinationItem(
           label: 'Eksplorasi',
           path: '/discovery',
-          iconCodePoint: 0xe59a, // search / explore
-          selectedIconCodePoint: 0xe59a,
+          icon: Icons.explore_outlined,
+          selectedIcon: Icons.explore,
         ),
         const NavigationDestinationItem(
           label: 'Tersimpan',
           path: '/saved',
-          iconCodePoint: 0xe0e7, // bookmark_border
-          selectedIconCodePoint: 0xe0e6, // bookmark
+          icon: Icons.bookmark_border,
+          selectedIcon: Icons.bookmark,
         ),
         const NavigationDestinationItem(
           label: 'Pelacakan',
           path: '/applications',
-          iconCodePoint: 0xe15f, // assignment_outlined
-          selectedIconCodePoint: 0xe15e, // assignment
+          icon: Icons.assignment_outlined,
+          selectedIcon: Icons.assignment,
         ),
         const NavigationDestinationItem(
           label: 'Asisten AI',
           path: '/assistant',
-          iconCodePoint: 0xe0b4, // auto_awesome_outlined
-          selectedIconCodePoint: 0xe0b3, // auto_awesome
+          icon: Icons.auto_awesome_outlined,
+          selectedIcon: Icons.auto_awesome,
         ),
         const NavigationDestinationItem(
           label: 'Profil',
           path: '/profile',
-          iconCodePoint: 0xe491, // person_outline
-          selectedIconCodePoint: 0xe490, // person
+          icon: Icons.person_outline,
+          selectedIcon: Icons.person,
         ),
       ];
 
@@ -59,8 +60,8 @@ final navigationDestinationsProvider =
           const NavigationDestinationItem(
             label: 'Admin',
             path: '/admin',
-            iconCodePoint: 0xe871, // dashboard
-            selectedIconCodePoint: 0xe871,
+            icon: Icons.dashboard_outlined,
+            selectedIcon: Icons.dashboard,
           ),
         );
       }
