@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../controllers/application_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/scholarship_card.dart';
 
 class SavedPage extends ConsumerStatefulWidget {
@@ -27,36 +28,71 @@ class _SavedPageState extends ConsumerState<SavedPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final isDark = AppTheme.isDark(context);
+    final primaryColor = AppTheme.primaryOf(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textMuted = AppTheme.textMutedOf(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: Spacing.pagePadding(MediaQuery.of(context).size.width),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Beasiswa Tersimpan',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: colors.onSurface,
-                  letterSpacing: -0.4,
-                ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1080),
+            child: Padding(
+              padding: Spacing.pagePadding(screenWidth),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withValues(
+                        alpha: isDark ? 0.14 : 0.08,
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
+                      border: Border.all(
+                        color: primaryColor.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    child: Text(
+                      'WATCHLIST',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.1,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Beasiswa Tersimpan',
+                    style: TextStyle(
+                      fontSize: screenWidth < 600 ? 24 : 28,
+                      fontWeight: FontWeight.w800,
+                      color: textPrimary,
+                      letterSpacing: -0.6,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Daftar pantauan beasiswa yang menarik minat Anda untuk dipersiapkan.',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: textMuted,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: Spacing.lg),
+                  Expanded(child: _buildContent()),
+                ],
               ),
-              const SizedBox(height: Spacing.xs),
-              Text(
-                'Daftar pantauan beasiswa yang menarik minat Anda untuk dipersiapkan.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colors.onSurfaceVariant,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: Spacing.xl),
-              Expanded(child: _buildContent()),
-            ],
+            ),
           ),
         ),
       ),
@@ -65,7 +101,6 @@ class _SavedPageState extends ConsumerState<SavedPage> {
 
   Widget _buildContent() {
     final state = ref.watch(savedScholarshipsControllerProvider);
-    final colors = Theme.of(context).colorScheme;
     final primaryColor = AppTheme.primaryOf(context);
 
     if (state is SavedScholarshipsLoading ||
@@ -74,39 +109,23 @@ class _SavedPageState extends ConsumerState<SavedPage> {
     }
 
     if (state is SavedScholarshipsError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline_rounded, color: colors.error, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              'Daftar tersimpan belum dapat dimuat. Periksa koneksi dan coba lagi.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: colors.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => ref
-                  .read(savedScholarshipsControllerProvider.notifier)
-                  .fetchSavedScholarships(),
-              child: const Text('Coba Lagi'),
-            ),
-          ],
-        ),
+      return ErrorState(
+        message:
+            'Daftar tersimpan belum dapat dimuat. Periksa koneksi dan coba lagi.',
+        onRetry: () => ref
+            .read(savedScholarshipsControllerProvider.notifier)
+            .fetchSavedScholarships(),
       );
     }
 
     if (state is SavedScholarshipsEmpty) {
-      return Center(
-        child: EmptyState(
-          icon: Icons.bookmark_border_rounded,
-          title: 'Belum Ada Beasiswa Tersimpan',
-          message:
-              'Simpan beasiswa yang menarik saat menjelajah agar Anda tidak melewatkan tenggat waktu.',
-          actionLabel: 'Cari Beasiswa',
-          onAction: () => context.go('/discovery'),
-        ),
+      return EmptyState(
+        icon: Icons.bookmark_border_rounded,
+        title: 'Belum Ada Beasiswa Tersimpan',
+        message:
+            'Simpan beasiswa yang menarik saat menjelajah agar Anda tidak melewatkan tenggat waktu.',
+        actionLabel: 'Cari Beasiswa',
+        onAction: () => context.go('/discovery'),
       );
     }
 
@@ -116,6 +135,7 @@ class _SavedPageState extends ConsumerState<SavedPage> {
             .read(savedScholarshipsControllerProvider.notifier)
             .fetchSavedScholarships(),
         child: ListView.builder(
+          padding: const EdgeInsets.only(bottom: Spacing.xl),
           itemCount: state.savedScholarships.length,
           itemBuilder: (context, index) {
             final saved = state.savedScholarships[index];
@@ -124,24 +144,40 @@ class _SavedPageState extends ConsumerState<SavedPage> {
                 ScholarshipCard(scholarship: saved.scholarship),
                 Positioned(
                   top: 14,
-                  right: 14,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.bookmark_rounded,
-                      color: primaryColor,
-                      size: 22,
-                    ),
-                    onPressed: () {
-                      ref
-                          .read(savedScholarshipsControllerProvider.notifier)
-                          .unsaveScholarship(saved.scholarship.id);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Dihapus dari daftar tersimpan'),
+                  right: 112,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      onTap: () {
+                        ref
+                            .read(savedScholarshipsControllerProvider.notifier)
+                            .unsaveScholarship(saved.scholarship.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Dihapus dari daftar tersimpan'),
+                          ),
+                        );
+                      },
+                      child: Tooltip(
+                        message: 'Hapus dari tersimpan',
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceElevatedOf(context),
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
+                            border: Border.all(
+                              color: AppTheme.borderColorOf(context),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.bookmark_rounded,
+                            color: primaryColor,
+                            size: 16,
+                          ),
                         ),
-                      );
-                    },
-                    tooltip: 'Hapus dari tersimpan',
+                      ),
+                    ),
                   ),
                 ),
               ],

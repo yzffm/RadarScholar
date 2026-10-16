@@ -10,7 +10,7 @@ import '../../widgets/app_logo.dart';
 
 /// RadarScholar Login Page.
 ///
-/// Delivers a responsive, Material 3 authentication screen (CPMK 2)
+/// Delivers a responsive, Modern Intelligence SaaS authentication screen (CPMK 2)
 /// connected to [LoginController] via Riverpod (CPMK 4).
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -33,18 +33,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       body:
           'Temukan peluang resmi yang lebih dekat dengan profil akademik dan tujuanmu.',
       icon: Icons.explore_rounded,
+      badge: 'DISCOVERY ENGINE',
     ),
     (
       title: 'Pahami sebelum memutuskan.',
       body:
           'Bandingkan kriteria, benefit, deadline, dan status verifikasi dalam satu tempat.',
       icon: Icons.fact_check_rounded,
+      badge: 'DETERMINISTIC MATCH',
     ),
     (
       title: 'Siapkan aplikasi dengan percaya diri.',
       body:
           'Lacak progres dan gunakan AI sebagai pendamping, bukan pengganti keputusanmu.',
       icon: Icons.track_changes_rounded,
+      badge: 'PREPARATION WORKSPACE',
     ),
   ];
 
@@ -120,7 +123,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final isDesktop = Responsive.isDesktop(screenWidth);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: isDesktop
             ? _buildDesktopLayout(context, state)
@@ -138,102 +141,167 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           flex: 5,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 48),
-            decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            decoration: BoxDecoration(
+              gradient: AppTheme.heroGradient,
+              border: Border(
+                right: BorderSide(color: AppTheme.borderSubtleOf(context)),
+              ),
+            ),
+            child: Stack(
               children: [
-                // Top Brand Bar
-                Row(
-                  children: [
-                    AppLogo.icon(height: 48),
-                    const SizedBox(width: 14),
-                    Text(
-                      'RadarScholar',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(
-                  height: 300,
-                  child: PageView.builder(
-                    controller: _carouselController,
-                    itemCount: _carouselSlides.length,
-                    onPageChanged: (index) =>
-                        setState(() => _carouselIndex = index),
-                    itemBuilder: (context, index) {
-                      final slide = _carouselSlides[index];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            slide.icon,
-                            color: AppTheme.brandSecondary,
-                            size: 42,
-                          ),
-                          const SizedBox(height: Spacing.lg),
-                          Text(
-                            slide.title,
-                            style: Theme.of(context).textTheme.displaySmall
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  height: 1.15,
-                                ),
-                          ),
-                          const SizedBox(height: Spacing.md),
-                          Text(
-                            slide.body,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.82),
-                                  height: 1.55,
-                                ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-                Row(
-                  children: List.generate(
-                    _carouselSlides.length,
-                    (index) => GestureDetector(
-                      onTap: () => _carouselController.animateToPage(
-                        index,
-                        duration: const Duration(milliseconds: 260),
-                        curve: Curves.easeOut,
-                      ),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        margin: const EdgeInsets.only(right: 8),
-                        width: index == _carouselIndex ? 28 : 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: index == _carouselIndex
-                              ? AppTheme.brandSecondary
-                              : Colors.white.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(8),
+                Positioned(
+                  top: -80,
+                  left: -60,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 320,
+                      height: 320,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            AppTheme.brandPrimary.withValues(alpha: 0.25),
+                            Colors.transparent,
+                          ],
                         ),
                       ),
                     ),
                   ),
                 ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Top Brand Bar
+                    Row(
+                      children: [
+                        AppLogo.icon(height: 44),
+                        const SizedBox(width: 14),
+                        Text(
+                          'RadarScholar',
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                        ),
+                      ],
+                    ),
 
-                // Bottom academic note
-                Text(
-                  'RadarScholar © 2026 • Proyek Pengembangan Perangkat Lunak Mahasiswa',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontSize: 12,
-                  ),
+                    SizedBox(
+                      height: 320,
+                      child: PageView.builder(
+                        controller: _carouselController,
+                        itemCount: _carouselSlides.length,
+                        onPageChanged: (index) =>
+                            setState(() => _carouselIndex = index),
+                        itemBuilder: (context, index) {
+                          final slide = _carouselSlides[index];
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.brandAccent.withValues(
+                                    alpha: 0.14,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.xxl,
+                                  ),
+                                  border: Border.all(
+                                    color: AppTheme.brandAccent.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      slide.icon,
+                                      color: AppTheme.brandAccent,
+                                      size: 15,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      slide.badge,
+                                      style: const TextStyle(
+                                        color: AppTheme.brandAccent,
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.6,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: Spacing.lg),
+                              Text(
+                                slide.title,
+                                style: Theme.of(context).textTheme.displaySmall
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      height: 1.15,
+                                      letterSpacing: -0.5,
+                                    ),
+                              ),
+                              const SizedBox(height: Spacing.md),
+                              Text(
+                                slide.body,
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.80,
+                                      ),
+                                      height: 1.6,
+                                    ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    Row(
+                      children: List.generate(
+                        _carouselSlides.length,
+                        (index) => GestureDetector(
+                          onTap: () => _carouselController.animateToPage(
+                            index,
+                            duration: const Duration(milliseconds: 260),
+                            curve: Curves.easeOut,
+                          ),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            margin: const EdgeInsets.only(right: 8),
+                            width: index == _carouselIndex ? 28 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: index == _carouselIndex
+                                  ? AppTheme.brandAccent
+                                  : Colors.white.withValues(alpha: 0.30),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Bottom academic note
+                    Text(
+                      'RadarScholar © 2026 • Proyek Pengembangan Perangkat Lunak Mahasiswa',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -270,7 +338,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               // Top Logo
               AppLogo(
                 mode: AppLogoMode.full,
-                height: 48,
+                height: 44,
                 onTap: () => context.go('/'),
               ),
               const SizedBox(height: Spacing.xl),
@@ -285,15 +353,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   // ─── Form Card (Shared) ──────────────────────────────────────────────
   Widget _buildFormCard(BuildContext context, LoginFormState state) {
     final controller = ref.read(loginControllerProvider.notifier);
-    final colors = Theme.of(context).colorScheme;
+    final cardBg = AppTheme.cardColorOf(context);
+    final elevatedBg = AppTheme.surfaceElevatedOf(context);
+    final borderSubtle = AppTheme.borderSubtleOf(context);
+    final borderStrong = AppTheme.borderStrongOf(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+    final textMuted = AppTheme.textMutedOf(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        side: BorderSide(color: colors.outlineVariant, width: 1),
+        border: Border.all(color: borderSubtle, width: 1),
+        boxShadow: AppTheme.cardShadowOf(context),
       ),
-      color: colors.surface,
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
         child: Form(
@@ -314,15 +389,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       Icon(
                         Icons.arrow_back_rounded,
                         size: 16,
-                        color: Colors.grey.shade600,
+                        color: textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         'Kembali ke Beranda',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
+                          color: textSecondary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -335,16 +410,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               Text(
                 'Selamat Datang Kembali',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colors.onSurface,
+                  fontWeight: FontWeight.w800,
+                  color: textPrimary,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
                 'Masuk ke akun Anda untuk mengakses rekomendasi beasiswa.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: textSecondary),
               ),
               const SizedBox(height: Spacing.xl),
 
@@ -355,27 +430,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 child: OutlinedButton(
                   onPressed: state.isLoading ? null : _handleGoogleLogin,
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.grey.shade300, width: 1.2),
+                    side: BorderSide(color: borderStrong, width: 1.2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
-                    backgroundColor: colors.surface,
+                    backgroundColor: elevatedBg,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Google Logo G representation
                       Container(
                         width: 22,
                         height: 22,
                         decoration: const BoxDecoration(shape: BoxShape.circle),
-                        child: Center(
+                        child: const Center(
                           child: Text(
                             'G',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w900,
-                              color: Colors.red.shade600,
+                              color: Color(0xFFEA4335),
                               fontFamily: 'Roboto',
                             ),
                           ),
@@ -387,7 +461,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: colors.onSurface,
+                          color: textPrimary,
                         ),
                       ),
                     ],
@@ -400,18 +474,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               // Divider "atau masuk dengan email"
               Row(
                 children: [
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Expanded(child: Divider(color: borderSubtle)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
                       'atau masuk dengan email',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
-                      ),
+                      style: TextStyle(fontSize: 12, color: textMuted),
                     ),
                   ),
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Expanded(child: Divider(color: borderSubtle)),
                 ],
               ),
 
@@ -423,24 +494,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
+                    color: AppTheme.brandDanger.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(color: Colors.red.shade200),
+                    border: Border.all(
+                      color: AppTheme.brandDanger.withValues(alpha: 0.35),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline_rounded,
-                        color: Colors.red.shade700,
+                        color: AppTheme.brandDanger,
                         size: 18,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           state.errorMessage!,
-                          style: TextStyle(
-                            color: Colors.red.shade800,
+                          style: const TextStyle(
+                            color: AppTheme.brandDanger,
                             fontSize: 13,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -456,7 +530,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: colors.onSurface,
+                  color: textPrimary,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
@@ -464,31 +538,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 enabled: !state.isLoading,
+                style: TextStyle(color: textPrimary, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'nama@universitas.ac.id',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade400,
-                    fontSize: 14,
+                  hintStyle: TextStyle(color: textMuted, fontSize: 14),
+                  prefixIcon: Icon(
+                    Icons.mail_outline_rounded,
+                    size: 20,
+                    color: textSecondary,
                   ),
-                  prefixIcon: const Icon(Icons.mail_outline_rounded, size: 20),
                   filled: true,
-                  fillColor: colors.surfaceContainerHighest,
+                  fillColor: elevatedBg,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: colors.outlineVariant),
+                    borderSide: BorderSide(color: borderStrong),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: colors.outlineVariant),
+                    borderSide: BorderSide(color: borderStrong),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: const BorderSide(
-                      color: AppTheme.brandPrimary,
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppTheme.brandAccent
+                          : AppTheme.brandPrimary,
                       width: 1.5,
                     ),
                   ),
@@ -505,7 +583,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+                  color: textPrimary,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
@@ -513,41 +591,45 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 controller: _passwordController,
                 obscureText: !state.isPasswordVisible,
                 enabled: !state.isLoading,
+                style: TextStyle(color: textPrimary, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Minimal 6 karakter',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade400,
-                    fontSize: 14,
+                  hintStyle: TextStyle(color: textMuted, fontSize: 14),
+                  prefixIcon: Icon(
+                    Icons.lock_outline_rounded,
+                    size: 20,
+                    color: textSecondary,
                   ),
-                  prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                   suffixIcon: IconButton(
                     icon: Icon(
                       state.isPasswordVisible
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                       size: 20,
-                      color: Colors.grey.shade600,
+                      color: textSecondary,
                     ),
                     onPressed: () => controller.togglePasswordVisibility(),
                   ),
                   filled: true,
-                  fillColor: colors.surfaceContainerHighest,
+                  fillColor: elevatedBg,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: colors.outlineVariant),
+                    borderSide: BorderSide(color: borderStrong),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: colors.outlineVariant),
+                    borderSide: BorderSide(color: borderStrong),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: const BorderSide(
-                      color: AppTheme.brandPrimary,
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppTheme.brandAccent
+                          : AppTheme.brandPrimary,
                       width: 1.5,
                     ),
                   ),
@@ -584,10 +666,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(width: 8),
                       Text(
                         'Ingat saya',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade700,
-                        ),
+                        style: TextStyle(fontSize: 13, color: textSecondary),
                       ),
                     ],
                   ),
@@ -598,11 +677,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: () => context.push('/forgot-password'),
-                    child: const Text(
+                    child: Text(
                       'Lupa kata sandi?',
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppTheme.brandPrimary,
+                        color: isDark
+                            ? AppTheme.brandAccent
+                            : AppTheme.brandPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -620,6 +701,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onPressed: state.isLoading ? null : _handleEmailLogin,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.brandPrimary,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
@@ -637,7 +719,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           'Masuk ke Akun',
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                 ),
@@ -653,10 +735,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   children: [
                     Text(
                       'Belum memiliki akun? ',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: TextStyle(fontSize: 13, color: textSecondary),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
@@ -667,12 +746,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       onPressed: () {
                         context.go('/register');
                       },
-                      child: const Text(
+                      child: Text(
                         'Daftar Sekarang',
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.brandPrimary,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppTheme.brandAccent
+                              : AppTheme.brandPrimary,
                         ),
                       ),
                     ),

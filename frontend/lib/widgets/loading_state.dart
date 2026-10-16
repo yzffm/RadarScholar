@@ -20,12 +20,24 @@ class LoadingState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: size,
-              height: size,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(primary),
+            Container(
+              width: size + 24,
+              height: size + 24,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppTheme.cardColorOf(context),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: AppTheme.borderColorOf(context)),
+                boxShadow: AppTheme.cardShadowOf(context),
+              ),
+              child: SizedBox(
+                width: size,
+                height: size,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.8,
+                  strokeCap: StrokeCap.round,
+                  valueColor: AlwaysStoppedAnimation<Color>(primary),
+                ),
               ),
             ),
             if (message != null) ...[
@@ -33,10 +45,10 @@ class LoadingState extends StatelessWidget {
               Text(
                 message!,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.65),
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.textMutedOf(context),
                 ),
               ),
             ],

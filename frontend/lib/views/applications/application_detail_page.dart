@@ -6,6 +6,7 @@ import '../../controllers/application_controller.dart';
 import '../../repositories/application_repository.dart';
 import '../../core/theme.dart';
 import '../../models/application.dart';
+import '../../widgets/error_state.dart';
 import 'application_assistant_page.dart';
 
 class ApplicationDetailPage extends ConsumerStatefulWidget {
@@ -44,7 +45,7 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Batal'),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () async {
               final title = _taskController.text.trim();
               if (title.isNotEmpty) {
@@ -55,9 +56,7 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                     applicationId: applicationId,
                     title: title,
                   );
-                  // Invalidate provider to fetch updated application details
                   ref.invalidate(applicationDetailProvider(applicationId));
-                  // Refresh application list too
                   ref
                       .read(applicationsControllerProvider.notifier)
                       .fetchApplications();
@@ -79,42 +78,60 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
   }
 
   void _updateStatus(String applicationId, ApplicationStatus currentStatus) {
+    final primary = AppTheme.primaryOf(context);
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppTheme.cardColorOf(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
       builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: ApplicationStatus.values.map((status) {
-            final isSelected = status == currentStatus;
-            return ListTile(
-              title: Text(_getStatusLabel(status)),
-              trailing: isSelected
-                  ? const Icon(Icons.check, color: AppTheme.brandPrimary)
-                  : null,
-              onTap: () async {
-                Navigator.pop(context);
-                if (status != currentStatus) {
-                  final repo = ref.read(applicationRepositoryProvider);
-                  try {
-                    await repo.updateApplication(
-                      applicationId: applicationId,
-                      status: status,
-                    );
-                    ref.invalidate(applicationDetailProvider(applicationId));
-                    ref
-                        .read(applicationsControllerProvider.notifier)
-                        .fetchApplications();
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Gagal mengubah status')),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ApplicationStatus.values.map((status) {
+              final isSelected = status == currentStatus;
+              return ListTile(
+                title: Text(
+                  _getStatusLabel(status),
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected
+                        ? primary
+                        : AppTheme.textPrimaryOf(context),
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle_rounded, color: primary)
+                    : null,
+                onTap: () async {
+                  Navigator.pop(context);
+                  if (status != currentStatus) {
+                    final repo = ref.read(applicationRepositoryProvider);
+                    try {
+                      await repo.updateApplication(
+                        applicationId: applicationId,
+                        status: status,
                       );
+                      ref.invalidate(applicationDetailProvider(applicationId));
+                      ref
+                          .read(applicationsControllerProvider.notifier)
+                          .fetchApplications();
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Gagal mengubah status'),
+                          ),
+                        );
+                      }
                     }
                   }
-                }
-              },
-            );
-          }).toList(),
+                },
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -142,21 +159,24 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
     final applicationAsyncValue = ref.watch(
       applicationDetailProvider(widget.applicationId),
     );
-
-    final primary = AppTheme.primaryOf(context);
+    final borderColor = AppTheme.borderColorOf(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Lamaran'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: borderColor),
+        ),
         actions: [
           IconButton(
             icon: const Icon(
               Icons.delete_outline_rounded,
-              color: Color(0xFFEF4444),
+              color: AppTheme.statusDanger,
+              size: 20,
             ),
             tooltip: 'Hapus Pelacakan',
             onPressed: () {
-              // Confirm delete
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -169,9 +189,9 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Batal'),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEF4444),
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.statusDanger,
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () async {
@@ -184,7 +204,7 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                               .read(applicationsControllerProvider.notifier)
                               .fetchApplications();
                           if (context.mounted) {
-                            context.pop(); // Go back
+                            context.pop();
                           }
                         } catch (e) {
                           if (context.mounted) {
@@ -201,31 +221,16 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
               );
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: applicationAsyncValue.when(
         data: (application) => _buildDetail(application),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                color: Color(0xFFEF4444),
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              const Text('Gagal memuat detail aplikasi'),
-              const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(
-                  applicationDetailProvider(widget.applicationId),
-                ),
-                child: const Text('Coba Lagi'),
-              ),
-            ],
-          ),
+        error: (error, stack) => ErrorState(
+          message: 'Gagal memuat detail aplikasi',
+          onRetry: () =>
+              ref.invalidate(applicationDetailProvider(widget.applicationId)),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -233,92 +238,136 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
+            backgroundColor: AppTheme.cardColorOf(context),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppRadius.xl),
+              ),
+            ),
             builder: (context) =>
                 ApplicationAssistantSheet(applicationId: widget.applicationId),
           );
         },
-        backgroundColor: primary,
+        backgroundColor: AppTheme.brandPrimary,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.auto_awesome),
+        icon: const Icon(Icons.auto_awesome_rounded, size: 18),
         label: const Text(
           'Asisten AI',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
     );
   }
 
   Widget _buildDetail(Application application) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final isDark = AppTheme.isDark(context);
     final primary = AppTheme.primaryOf(context);
     final cardColor = AppTheme.cardColorOf(context);
     final borderColor = AppTheme.borderColorOf(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textMuted = AppTheme.textMutedOf(context);
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 860),
+        constraints: const BoxConstraints(maxWidth: 920),
         child: SingleChildScrollView(
           padding: Spacing.pagePadding(MediaQuery.of(context).size.width),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header info
-              Text(
-                application.scholarship.title,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              if (application.scholarship.source != null) ...[
-                const SizedBox(height: Spacing.xs),
-                Text(
-                  application.scholarship.source!.providerName,
-                  style: TextStyle(color: primary, fontWeight: FontWeight.w600),
-                ),
-              ],
-
-              const SizedBox(height: Spacing.lg),
-
-              // Status Card
+              // Header Card
               Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: cardColor,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
                   border: Border.all(color: borderColor),
+                  boxShadow: AppTheme.cardShadowOf(context),
                 ),
-                child: ListTile(
-                  title: Text(
-                    'Status Lamaran',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: colors.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      _getStatusLabel(application.status),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (application.scholarship.source != null) ...[
+                      Text(
+                        application.scholarship.source!.providerName,
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                    Text(
+                      application.scholarship.title,
                       style: TextStyle(
+                        fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        color: colors.onSurface,
+                        color: textPrimary,
+                        letterSpacing: -0.5,
                       ),
                     ),
-                  ),
-                  trailing: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
+                    const SizedBox(height: 16),
+                    Container(height: 1, color: borderColor),
+                    const SizedBox(height: 16),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      onTap: () =>
+                          _updateStatus(application.id, application.status),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceElevatedOf(context),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(color: borderColor),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'STATUS LAMARAN',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.8,
+                                      color: textMuted,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    _getStatusLabel(application.status),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 15.5,
+                                      color: textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: primary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: Icon(
+                                Icons.edit_outlined,
+                                size: 17,
+                                color: primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Icon(Icons.edit_outlined, size: 18, color: primary),
-                  ),
-                  onTap: () =>
-                      _updateStatus(application.id, application.status),
+                  ],
                 ),
               ),
 
@@ -330,18 +379,28 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                 children: [
                   Text(
                     'Daftar Tugas & Checklist',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.2,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: textPrimary,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  TextButton.icon(
-                    icon: Icon(Icons.add_rounded, size: 18, color: primary),
+                  FilledButton.tonalIcon(
+                    icon: Icon(Icons.add_rounded, size: 17, color: primary),
                     label: Text(
                       'Tambah Tugas',
                       style: TextStyle(
                         color: primary,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: primary.withValues(alpha: 0.12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
                       ),
                     ),
                     onPressed: () =>
@@ -350,29 +409,27 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                 ],
               ),
 
-              const SizedBox(height: Spacing.sm),
+              const SizedBox(height: 12),
 
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppRadius.full),
                 child: LinearProgressIndicator(
                   value: application.progress,
-                  backgroundColor: isDark
-                      ? const Color(0xFF1E293B)
-                      : Colors.grey.shade200,
+                  backgroundColor: AppTheme.surfaceElevatedOf(context),
                   color: application.progress == 1.0
-                      ? const Color(0xFF10B981)
+                      ? AppTheme.statusSuccess
                       : primary,
                   minHeight: 8,
                 ),
               ),
 
-              const SizedBox(height: Spacing.xs),
+              const SizedBox(height: 6),
               Text(
                 '${application.tasksCompleted} dari ${application.tasksTotal} tugas selesai (${(application.progress * 100).toInt()}%)',
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: colors.onSurface.withValues(alpha: 0.65),
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: textMuted,
                 ),
               ),
 
@@ -382,36 +439,33 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
-                    vertical: 36,
-                    horizontal: 16,
+                    vertical: 40,
+                    horizontal: 20,
                   ),
                   decoration: BoxDecoration(
                     color: cardColor,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
                     border: Border.all(color: borderColor),
                   ),
                   child: Column(
                     children: [
                       Icon(
                         Icons.checklist_rtl_rounded,
-                        size: 40,
-                        color: colors.onSurface.withValues(alpha: 0.3),
+                        size: 38,
+                        color: textMuted.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         'Belum ada checklist tugas',
                         style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: colors.onSurface.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w700,
+                          color: textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Tambahkan berkas atau syarat yang perlu Anda siapkan.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colors.onSurface.withValues(alpha: 0.5),
-                        ),
+                        style: TextStyle(fontSize: 12.5, color: textMuted),
                       ),
                     ],
                   ),
@@ -420,8 +474,9 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                 Container(
                   decoration: BoxDecoration(
                     color: cardColor,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
                     border: Border.all(color: borderColor),
+                    boxShadow: AppTheme.cardShadowOf(context),
                   ),
                   child: ListView.separated(
                     shrinkWrap: true,
@@ -439,12 +494,11 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                             decoration: task.isCompleted
                                 ? TextDecoration.lineThrough
                                 : null,
-                            color: task.isCompleted
-                                ? colors.onSurface.withValues(alpha: 0.45)
-                                : colors.onSurface,
+                            color: task.isCompleted ? textMuted : textPrimary,
                             fontWeight: task.isCompleted
-                                ? FontWeight.normal
-                                : FontWeight.w500,
+                                ? FontWeight.w400
+                                : FontWeight.w600,
+                            fontSize: 14,
                           ),
                         ),
                         value: task.isCompleted,
@@ -478,7 +532,7 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                           icon: Icon(
                             Icons.close_rounded,
                             size: 18,
-                            color: colors.onSurface.withValues(alpha: 0.4),
+                            color: textMuted,
                           ),
                           onPressed: () async {
                             try {
@@ -507,12 +561,14 @@ class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
                         ),
                         controlAffinity: ListTileControlAffinity.leading,
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
+                          horizontal: 14,
+                          vertical: 2,
                         ),
                       );
                     },
                   ),
                 ),
+              const SizedBox(height: Spacing.xxxl),
             ],
           ),
         ),

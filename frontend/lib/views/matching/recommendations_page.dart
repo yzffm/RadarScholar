@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../models/scholarship.dart';
 import '../../widgets/matched_scholarship_card.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 
 class RecommendationsPage extends ConsumerStatefulWidget {
   const RecommendationsPage({super.key});
@@ -27,16 +28,18 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(matchingControllerProvider);
+    final borderColor = AppTheme.borderColorOf(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Rekomendasi Cerdas',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: const Text('Rekomendasi Cerdas'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: borderColor),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded, size: 20),
             tooltip: 'Segarkan',
             onPressed: () {
               ref
@@ -44,6 +47,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
                   .fetchMatchedScholarships();
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: state.when(
@@ -57,70 +61,30 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: EmptyState(
-        icon: Icons.search_off_rounded,
-        title: 'Belum Ada Rekomendasi',
-        message:
-            'Tidak ada beasiswa yang cocok dengan profil akademik Anda saat ini. Coba perbarui profil Anda.',
-      ),
+    return const EmptyState(
+      icon: Icons.search_off_rounded,
+      title: 'Belum Ada Rekomendasi',
+      message:
+          'Tidak ada beasiswa yang cocok dengan profil akademik Anda saat ini. Coba perbarui profil Anda.',
     );
   }
 
   Widget _buildErrorState(String message) {
-    final primary = AppTheme.primaryOf(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(Spacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 48,
-              color: Color(0xFFEF4444),
-            ),
-            const SizedBox(height: Spacing.md),
-            Text(
-              'Terjadi Kesalahan',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              message,
-              style: TextStyle(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: Spacing.lg),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                ref
-                    .read(matchingControllerProvider.notifier)
-                    .fetchMatchedScholarships();
-              },
-              child: const Text('Coba Lagi'),
-            ),
-          ],
-        ),
-      ),
+    return ErrorState(
+      title: 'Terjadi Kesalahan',
+      message: message,
+      onRetry: () {
+        ref
+            .read(matchingControllerProvider.notifier)
+            .fetchMatchedScholarships();
+      },
     );
   }
 
   Widget _buildSuccessState(MatchedScholarshipListResponse data) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 860),
+        constraints: const BoxConstraints(maxWidth: 920),
         child: RefreshIndicator(
           onRefresh: () async {
             await ref
@@ -128,7 +92,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
                 .fetchMatchedScholarships();
           },
           child: ListView.builder(
-            padding: const EdgeInsets.all(Spacing.md),
+            padding: const EdgeInsets.all(Spacing.lg),
             itemCount: data.items.length,
             itemBuilder: (context, index) {
               final matchedScholarship = data.items[index];

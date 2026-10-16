@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../controllers/ai_assistant_controller.dart';
 import '../../models/ai_assistant.dart';
 import '../../core/theme.dart';
-import 'package:go_router/go_router.dart';
 
 class ApplicationAssistantSheet extends ConsumerStatefulWidget {
   final String applicationId;
@@ -53,15 +54,18 @@ class _ApplicationAssistantSheetState
   @override
   Widget build(BuildContext context) {
     final aiState = ref.watch(aiAssistantControllerProvider);
-    // Determine bottom padding for keyboard
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textMuted = AppTheme.textMutedOf(context);
+    final borderColor = AppTheme.borderColorOf(context);
+    final primary = AppTheme.primaryOf(context);
 
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(
           bottom: bottomInset,
-          left: Spacing.md,
-          right: Spacing.md,
+          left: Spacing.lg,
+          right: Spacing.lg,
           top: Spacing.md,
         ),
         child: SingleChildScrollView(
@@ -76,7 +80,7 @@ class _ApplicationAssistantSheetState
                   height: 4,
                   margin: const EdgeInsets.only(bottom: Spacing.md),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: borderColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -84,21 +88,42 @@ class _ApplicationAssistantSheetState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Asisten AI',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          gradient: AppTheme.accentGradient,
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Asisten AI',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: textPrimary,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: Icon(Icons.close_rounded, color: textMuted),
                     onPressed: () => context.pop(),
                   ),
                 ],
               ),
-              const Text(
+              const SizedBox(height: 4),
+              Text(
                 'Bantuan AI untuk mempersiapkan aplikasi beasiswa ini.',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: textMuted, fontSize: 13.5),
               ),
               const SizedBox(height: Spacing.md),
 
@@ -137,7 +162,7 @@ class _ApplicationAssistantSheetState
                   decoration: InputDecoration(
                     hintText: 'Tempel draft di sini (opsional)',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(Spacing.sm),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                   ),
                 ),
@@ -146,13 +171,16 @@ class _ApplicationAssistantSheetState
                 Container(
                   padding: const EdgeInsets.all(Spacing.md),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(Spacing.sm),
+                    color: primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: primary.withValues(alpha: 0.28)),
                   ),
                   child: Text(
                     'Mode ini akan membangkitkan simulasi pertanyaan wawancara berdasarkan gabungan profil Anda dan detail beasiswa.',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      color: AppTheme.textSecondaryOf(context),
+                      fontSize: 13,
+                      height: 1.45,
                     ),
                   ),
                 ),
@@ -162,16 +190,14 @@ class _ApplicationAssistantSheetState
               // Action Button / Result Display
               aiState.when(
                 data: (response) {
-                  final primary = AppTheme.primaryOf(context);
-                  final cardColor = AppTheme.cardColorOf(context);
-                  final borderColor = AppTheme.borderColorOf(context);
+                  final cardColor = AppTheme.surfaceElevatedOf(context);
 
                   if (response == null) {
-                    return ElevatedButton.icon(
-                      icon: const Icon(Icons.auto_awesome),
+                    return FilledButton.icon(
+                      icon: const Icon(Icons.auto_awesome_rounded, size: 17),
                       label: const Text('Minta Bantuan AI'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.brandPrimary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -188,11 +214,12 @@ class _ApplicationAssistantSheetState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Hasil Analisis AI',
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15.5,
+                              color: textPrimary,
                             ),
                           ),
                           TextButton.icon(
@@ -218,7 +245,7 @@ class _ApplicationAssistantSheetState
                         padding: const EdgeInsets.all(Spacing.md),
                         decoration: BoxDecoration(
                           color: cardColor,
-                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                           border: Border.all(color: borderColor),
                         ),
                         child: Column(
@@ -226,17 +253,23 @@ class _ApplicationAssistantSheetState
                           children: [
                             Text(
                               response.feedback,
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium?.copyWith(height: 1.6),
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                color: textPrimary,
+                                height: 1.6,
+                              ),
                             ),
                             if (response.actionableTips.isNotEmpty) ...[
                               const SizedBox(height: Spacing.md),
                               Divider(color: borderColor),
                               const SizedBox(height: Spacing.sm),
-                              const Text(
+                              Text(
                                 'Langkah yang Bisa Dilakukan:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                  color: textPrimary,
+                                ),
                               ),
                               const SizedBox(height: Spacing.sm),
                               ...response.actionableTips.map(
@@ -255,9 +288,13 @@ class _ApplicationAssistantSheetState
                                       Expanded(
                                         child: Text(
                                           tip,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: AppTheme.textSecondaryOf(
+                                              context,
+                                            ),
+                                            height: 1.45,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -287,22 +324,23 @@ class _ApplicationAssistantSheetState
                 error: (err, stack) => Container(
                   padding: const EdgeInsets.all(Spacing.md),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(Spacing.sm),
+                    color: AppTheme.statusDanger.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: AppTheme.statusDanger.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline,
-                        color: Theme.of(context).colorScheme.onErrorContainer,
+                        color: AppTheme.statusDanger,
                       ),
                       const SizedBox(height: Spacing.sm),
                       Text(
                         'Asisten AI belum dapat memproses permintaan ini. Periksa profil, aplikasi, dan koneksi lalu coba lagi.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                        ),
+                        style: TextStyle(color: textPrimary, fontSize: 13),
                       ),
                       TextButton(
                         onPressed: _generateFeedback,

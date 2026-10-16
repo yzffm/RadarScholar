@@ -17,9 +17,10 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final primaryColor = AppTheme.primaryOf(context);
     final isDark = AppTheme.isDark(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textMuted = AppTheme.textMutedOf(context);
 
     if (!_showExplanation) {
       return SizedBox(
@@ -30,8 +31,11 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
               _showExplanation = true;
             });
           },
-          icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-          label: const Text('Jelaskan dengan AI'),
+          icon: const Icon(Icons.auto_awesome_rounded, size: 17),
+          label: const Text(
+            'Jelaskan dengan AI',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+          ),
           style: FilledButton.styleFrom(
             backgroundColor: isDark
                 ? const Color(0xFF1E1B4B)
@@ -42,7 +46,7 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
             elevation: 0,
             side: BorderSide(
               color: isDark
-                  ? const Color(0xFF6366F1).withValues(alpha: 0.4)
+                  ? const Color(0xFF6366F1).withValues(alpha: 0.45)
                   : const Color(0xFFC7D2FE),
             ),
             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -58,25 +62,19 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
       aiExplanationProvider(widget.scholarshipId),
     );
 
-    final cardBg = isDark ? const Color(0xFF121B33) : const Color(0xFFF5F7FF);
+    final cardBg = isDark ? const Color(0xFF10182E) : const Color(0xFFF5F8FF);
     final borderColor = isDark
-        ? const Color(0xFF3B82F6).withValues(alpha: 0.35)
+        ? primaryColor.withValues(alpha: 0.35)
         : const Color(0xFFBFDBFE);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(Spacing.md + 2),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppTheme.cardShadowOf(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,24 +82,25 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: primaryColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
+                  gradient: AppTheme.accentGradient,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.auto_awesome_rounded,
-                  color: primaryColor,
-                  size: 16,
+                  color: Colors.white,
+                  size: 15,
                 ),
               ),
-              const SizedBox(width: Spacing.sm + 2),
+              const SizedBox(width: 10),
               Text(
                 'Analisis AI Intelligence',
                 style: TextStyle(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   fontSize: 14.5,
-                  color: colors.onSurface,
+                  color: textPrimary,
+                  letterSpacing: -0.2,
                 ),
               ),
               const Spacer(),
@@ -114,7 +113,7 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
                 },
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                color: colors.onSurfaceVariant,
+                color: textMuted,
               ),
             ],
           ),
@@ -126,9 +125,9 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
                 Text(
                   explanation.summary,
                   style: TextStyle(
-                    color: colors.onSurface,
+                    color: textPrimary,
                     fontSize: 13.5,
-                    height: 1.5,
+                    height: 1.55,
                   ),
                 ),
                 if (explanation.strengths.isNotEmpty) ...[
@@ -143,10 +142,10 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
                           : const Color(0xFF059669),
                     ),
                   ),
-                  const SizedBox(height: Spacing.xs),
+                  const SizedBox(height: 6),
                   ...explanation.strengths.map(
                     (s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
+                      padding: const EdgeInsets.only(bottom: 5),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -155,15 +154,16 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
                             color: isDark
                                 ? const Color(0xFF34D399)
                                 : const Color(0xFF059669),
-                            size: 14,
+                            size: 15,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               s,
                               style: TextStyle(
-                                fontSize: 12.5,
-                                color: colors.onSurfaceVariant,
+                                fontSize: 13,
+                                color: AppTheme.textSecondaryOf(context),
+                                height: 1.45,
                               ),
                             ),
                           ),
@@ -184,10 +184,10 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
                           : const Color(0xFFDC2626),
                     ),
                   ),
-                  const SizedBox(height: Spacing.xs),
+                  const SizedBox(height: 6),
                   ...explanation.weaknesses.map(
                     (s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
+                      padding: const EdgeInsets.only(bottom: 5),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -196,15 +196,16 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
                             color: isDark
                                 ? const Color(0xFFF87171)
                                 : const Color(0xFFDC2626),
-                            size: 14,
+                            size: 15,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               s,
                               style: TextStyle(
-                                fontSize: 12.5,
-                                color: colors.onSurfaceVariant,
+                                fontSize: 13,
+                                color: AppTheme.textSecondaryOf(context),
+                                height: 1.45,
                               ),
                             ),
                           ),
@@ -225,10 +226,10 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
                           : const Color(0xFFD97706),
                     ),
                   ),
-                  const SizedBox(height: Spacing.xs),
+                  const SizedBox(height: 6),
                   ...explanation.unknowns.map(
                     (s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
+                      padding: const EdgeInsets.only(bottom: 5),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -237,15 +238,16 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
                             color: isDark
                                 ? const Color(0xFFFBBF24)
                                 : const Color(0xFFD97706),
-                            size: 14,
+                            size: 15,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               s,
                               style: TextStyle(
-                                fontSize: 12.5,
-                                color: colors.onSurfaceVariant,
+                                fontSize: 13,
+                                color: AppTheme.textSecondaryOf(context),
+                                height: 1.45,
                               ),
                             ),
                           ),
@@ -264,12 +266,18 @@ class _AiExplanationCardState extends ConsumerState<AiExplanationCard> {
             ),
             error: (error, stack) => Row(
               children: [
-                Icon(Icons.error_outline_rounded, color: colors.error),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppTheme.statusDanger,
+                ),
                 const SizedBox(width: Spacing.sm),
                 Expanded(
                   child: Text(
                     error.toString().replaceAll('Exception: ', ''),
-                    style: TextStyle(color: colors.error, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppTheme.statusDanger,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ],

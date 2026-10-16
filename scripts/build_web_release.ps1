@@ -2,7 +2,7 @@
 # RadarScholar - Script Build Flutter Web Release untuk Vercel
 # =============================================================================
 # Usage:
-#   .\scripts\build_web_release.ps1 -ApiBaseUrl "https://radarscholar-api.onrender.com"
+#   .\scripts\build_web_release.ps1 -ApiBaseUrl "https://username-radarscholar-api.hf.space"
 # =============================================================================
 
 param (
@@ -27,6 +27,27 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $RootDir = Split-Path -Parent $ScriptDir
 $FrontendDir = Join-Path $RootDir "frontend"
 
+# Auto-load Supabase credentials from backend/.env if not provided
+$BackendEnvPath = Join-Path $RootDir "backend\.env"
+if (Test-Path $BackendEnvPath) {
+    Get-Content $BackendEnvPath | ForEach-Object {
+        $line = $_.Trim()
+        if ($line -and -not $line.StartsWith("#")) {
+            if ($line -match "^SUPABASE_URL=(.*)$" -and -not $SupabaseUrl) {
+                $SupabaseUrl = $matches[1].Trim()
+            }
+            if ($line -match "^SUPABASE_ANON_KEY=(.*)$" -and -not $SupabaseAnonKey) {
+                $SupabaseAnonKey = $matches[1].Trim()
+            }
+        }
+    }
+}
+
+# Default API URL to live HF Space if not specified
+if (-not $ApiBaseUrl) {
+    $ApiBaseUrl = "https://yzffm-radarscholar-api.hf.space"
+}
+
 Set-Location $FrontendDir
 
 # Cek argumen API_BASE_URL
@@ -38,8 +59,6 @@ if ($ApiBaseUrl) {
     }
     $dartDefines += "--dart-define=API_BASE_URL=$ApiBaseUrl"
     Write-Host "-> Menggunakan API_BASE_URL: $ApiBaseUrl" -ForegroundColor Green
-} else {
-    Write-Host "-> Peringatan: API_BASE_URL tidak diisi. Pastikan Anda menyertakannya jika backend sudah online." -ForegroundColor Yellow
 }
 
 if ($SupabaseUrl) {
@@ -54,7 +73,12 @@ Write-Host "-> Menjalankan flutter pub get..." -ForegroundColor Gray
 flutter pub get
 
 Write-Host "-> Mengompilasi Flutter Web Release..." -ForegroundColor Gray
-flutter build web --release @dartDefines
+flutter build web --release --no-tree-shake-icons @dartDefines
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Gagal mengompilasi Flutter Web! Periksa pesan error di atas."
+    exit 1
+}
 
 # Salin vercel.json ke build/web
 $VercelJsonSource = Join-Path $FrontendDir "vercel.json"

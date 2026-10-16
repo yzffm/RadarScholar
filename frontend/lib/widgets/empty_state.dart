@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 
-/// Standardized empty state widget for RadarScholar.
+/// Standardized empty state widget for RadarScholar — Modern SaaS Aesthetic.
 ///
 /// Follows UI/UX rules (§18) for representing empty or initial states cleanly.
 class EmptyState extends StatelessWidget {
@@ -24,8 +24,10 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final isDark = AppTheme.isDark(context);
     final primaryColor = AppTheme.primaryOf(context);
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderColor = AppTheme.borderColorOf(context);
 
     return Center(
       child: SingleChildScrollView(
@@ -33,100 +35,109 @@ class EmptyState extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: Spacing.lg,
-            vertical: Spacing.md,
+            vertical: Spacing.lg,
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (customIllustration != null)
-                  customIllustration!
-                else
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Ambient radial glow
-                      Container(
-                        width: 96,
-                        height: 96,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              primaryColor.withValues(alpha: 0.20),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Inner icon container
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withValues(
-                            alpha: 0.7,
-                          ),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: primaryColor.withValues(alpha: 0.35),
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryColor.withValues(alpha: 0.2),
-                              blurRadius: 14,
-                              offset: const Offset(0, 3),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.xl,
+                vertical: Spacing.xl + 4,
+              ),
+              decoration: BoxDecoration(
+                color: cardBg.withValues(alpha: isDark ? 0.65 : 0.9),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                border: Border.all(color: borderColor),
+                boxShadow: AppTheme.cardShadowOf(context),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (customIllustration != null)
+                    customIllustration!
+                  else
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: 88,
+                          height: 88,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                primaryColor.withValues(
+                                  alpha: isDark ? 0.22 : 0.14,
+                                ),
+                                Colors.transparent,
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                        child: Icon(icon, size: 30, color: primaryColor),
-                      ),
-                    ],
-                  ),
-                const SizedBox(height: Spacing.md),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: colors.onSurface,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const SizedBox(height: Spacing.xs),
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: colors.onSurfaceVariant,
-                    height: 1.5,
-                  ),
-                ),
-                if (actionLabel != null && onAction != null) ...[
-                  const SizedBox(height: Spacing.lg),
-                  FilledButton.icon(
-                    onPressed: onAction,
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                    label: Text(
-                      actionLabel!,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                        Container(
+                          width: 58,
+                          height: 58,
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceElevatedOf(context),
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                            border: Border.all(
+                              color: primaryColor.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                            boxShadow: AppTheme.glowShadowOf(
+                              primaryColor,
+                              intensity: isDark ? 0.2 : 0.1,
+                            ),
+                          ),
+                          child: Icon(icon, size: 26, color: primaryColor),
+                        ),
+                      ],
                     ),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 22,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                      ),
+                  const SizedBox(height: Spacing.md),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimaryOf(context),
+                      letterSpacing: -0.3,
                     ),
                   ),
+                  const SizedBox(height: Spacing.sm),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: AppTheme.textMutedOf(context),
+                      height: 1.55,
+                    ),
+                  ),
+                  if (actionLabel != null && onAction != null) ...[
+                    const SizedBox(height: Spacing.lg),
+                    FilledButton.icon(
+                      onPressed: onAction,
+                      icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                      label: Text(
+                        actionLabel!,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.brandPrimary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 22,
+                          vertical: 13,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

@@ -8,7 +8,8 @@ import '../../widgets/app_logo.dart';
 
 /// Forgot Password page — sends a magic link via Supabase.
 ///
-/// Uses Supabase's built-in password reset email (magic link).
+/// Uses Supabase's built-in password reset email (magic link) with full
+/// Dark & Light mode Modern Intelligence SaaS surfaces.
 class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -71,7 +72,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     final isDesktop = Responsive.isDesktop(screenWidth);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -83,7 +84,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 children: [
                   AppLogo(
                     mode: AppLogoMode.full,
-                    height: 48,
+                    height: 44,
                     onTap: () => context.go('/'),
                   ),
                   const SizedBox(height: Spacing.xl),
@@ -98,13 +99,16 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 
   Widget _buildContent(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderSubtle = AppTheme.borderSubtleOf(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+        border: Border.all(color: borderSubtle, width: 1),
+        boxShadow: AppTheme.cardShadowOf(context),
       ),
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
         child: _isSent
@@ -115,6 +119,14 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 
   Widget _buildFormContent(BuildContext context) {
+    final elevatedBg = AppTheme.surfaceElevatedOf(context);
+    final borderStrong = AppTheme.borderStrongOf(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+    final textMuted = AppTheme.textMutedOf(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = isDark ? AppTheme.brandAccent : AppTheme.brandPrimary;
+
     return Form(
       key: _formKey,
       child: Column(
@@ -133,15 +145,15 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   Icon(
                     Icons.arrow_back_rounded,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: textSecondary,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     'Kembali ke Login',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
+                      color: textSecondary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -156,13 +168,14 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppTheme.brandPrimary.withValues(alpha: 0.1),
+                color: accentColor.withValues(alpha: 0.14),
                 shape: BoxShape.circle,
+                border: Border.all(color: accentColor.withValues(alpha: 0.28)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.lock_reset_rounded,
                 size: 32,
-                color: AppTheme.brandPrimary,
+                color: accentColor,
               ),
             ),
           ),
@@ -173,8 +186,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             child: Text(
               'Lupa Kata Sandi?',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade900,
+                fontWeight: FontWeight.w800,
+                color: textPrimary,
               ),
             ),
           ),
@@ -185,7 +198,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+              ).textTheme.bodyMedium?.copyWith(color: textSecondary),
             ),
           ),
           const SizedBox(height: Spacing.xl),
@@ -196,24 +209,27 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.shade50,
+                color: AppTheme.brandDanger.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(color: Colors.red.shade200),
+                border: Border.all(
+                  color: AppTheme.brandDanger.withValues(alpha: 0.35),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.error_outline_rounded,
-                    color: Colors.red.shade700,
+                    color: AppTheme.brandDanger,
                     size: 18,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: TextStyle(
-                        color: Colors.red.shade800,
+                      style: const TextStyle(
+                        color: AppTheme.brandDanger,
                         fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -229,7 +245,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.grey.shade800,
+              color: textPrimary,
             ),
           ),
           const SizedBox(height: Spacing.xs),
@@ -237,30 +253,32 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             enabled: !_isLoading,
+            style: TextStyle(color: textPrimary, fontSize: 14),
             decoration: InputDecoration(
               hintText: 'nama@universitas.ac.id',
-              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-              prefixIcon: const Icon(Icons.mail_outline_rounded, size: 20),
+              hintStyle: TextStyle(color: textMuted, fontSize: 14),
+              prefixIcon: Icon(
+                Icons.mail_outline_rounded,
+                size: 20,
+                color: textSecondary,
+              ),
               filled: true,
-              fillColor: Colors.grey.shade50,
+              fillColor: elevatedBg,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 14,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: borderStrong),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: borderStrong),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: const BorderSide(
-                  color: AppTheme.brandPrimary,
-                  width: 1.5,
-                ),
+                borderSide: BorderSide(color: accentColor, width: 1.5),
               ),
             ),
             validator: _validateEmail,
@@ -275,6 +293,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               onPressed: _isLoading ? null : _handleSubmit,
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.brandPrimary,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
@@ -292,7 +311,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                       'Kirim Link Pemulihan',
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
             ),
@@ -303,6 +322,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 
   Widget _buildSuccessContent(BuildContext context) {
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -310,21 +332,24 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           width: 72,
           height: 72,
           decoration: BoxDecoration(
-            color: Colors.green.shade50,
+            color: AppTheme.brandTertiary.withValues(alpha: 0.14),
             shape: BoxShape.circle,
+            border: Border.all(
+              color: AppTheme.brandTertiary.withValues(alpha: 0.3),
+            ),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.mark_email_read_rounded,
             size: 36,
-            color: Colors.green.shade600,
+            color: AppTheme.brandTertiary,
           ),
         ),
         const SizedBox(height: Spacing.lg),
         Text(
           'Link Terkirim!',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade900,
+            fontWeight: FontWeight.w800,
+            color: textPrimary,
           ),
         ),
         const SizedBox(height: Spacing.sm),
@@ -334,7 +359,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
-          ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+          ).textTheme.bodyMedium?.copyWith(color: textSecondary),
         ),
         const SizedBox(height: Spacing.xl),
         SizedBox(
@@ -344,13 +369,14 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             onPressed: () => context.go('/login'),
             style: FilledButton.styleFrom(
               backgroundColor: AppTheme.brandPrimary,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
             ),
             child: const Text(
               'Kembali ke Login',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             ),
           ),
         ),

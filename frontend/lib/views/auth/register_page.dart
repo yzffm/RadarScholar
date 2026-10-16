@@ -8,7 +8,7 @@ import '../../widgets/app_logo.dart';
 
 /// RadarScholar Registration Page.
 ///
-/// Premium split-screen design matching the Login page style (CPMK 2).
+/// Modern Intelligence SaaS split-screen design matching the Login page style (CPMK 2).
 /// Connected to [RegisterController] via Riverpod (CPMK 4).
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -56,27 +56,38 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   void _showEmailConfirmationDialog() {
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderSubtle = AppTheme.borderSubtleOf(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
+        backgroundColor: cardBg,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: BorderSide(color: borderSubtle),
         ),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.mail_outline_rounded,
-              color: AppTheme.brandPrimary,
-              size: 28,
+              color: AppTheme.brandAccent,
+              size: 26,
             ),
-            SizedBox(width: 12),
-            Text('Verifikasi Email'),
+            const SizedBox(width: 12),
+            Text(
+              'Verifikasi Email',
+              style: TextStyle(color: textPrimary, fontWeight: FontWeight.w700),
+            ),
           ],
         ),
-        content: const Text(
+        content: Text(
           'Kami telah mengirimkan link konfirmasi ke email Anda. '
           'Silakan periksa inbox (dan folder spam) untuk mengaktifkan akun.',
+          style: TextStyle(color: textSecondary),
         ),
         actions: [
           FilledButton(
@@ -98,7 +109,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final isDesktop = Responsive.isDesktop(screenWidth);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: isDesktop
             ? _buildDesktopLayout(context, state)
@@ -116,22 +127,27 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           flex: 5,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 48),
-            decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
+            decoration: BoxDecoration(
+              gradient: AppTheme.heroGradient,
+              border: Border(
+                right: BorderSide(color: AppTheme.borderSubtleOf(context)),
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    AppLogo.icon(height: 48),
+                    AppLogo.icon(height: 44),
                     const SizedBox(width: 14),
                     Text(
                       'RadarScholar',
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
                           ),
                     ),
                   ],
@@ -145,10 +161,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: AppTheme.brandAccent.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(AppRadius.xxl),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: AppTheme.brandAccent.withValues(alpha: 0.3),
                         ),
                       ),
                       child: const Row(
@@ -156,66 +172,68 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         children: [
                           Icon(
                             Icons.school_rounded,
-                            color: AppTheme.brandSecondary,
+                            color: AppTheme.brandAccent,
                             size: 16,
                           ),
-                          SizedBox(width: 6),
+                          SizedBox(width: 8),
                           Text(
-                            'Mulai Perjalanan Beasiswamu',
+                            'Bergabung Sekarang',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppTheme.brandAccent,
                               fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: Spacing.xl),
+                    const SizedBox(height: Spacing.lg),
                     Text(
-                      'Daftar dan Temukan\nBeasiswa yang Tepat.',
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        height: 1.2,
-                      ),
+                      'Mulai Perjalanan\nBeasiswa Anda.',
+                      style: Theme.of(context).textTheme.displayMedium
+                          ?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            height: 1.15,
+                            letterSpacing: -0.5,
+                          ),
                     ),
                     const SizedBox(height: Spacing.md),
                     Text(
-                      'Buat profil akademikmu, dan biarkan RadarScholar '
-                      'mencocokanmu dengan beasiswa dari sumber terkurasi resmi.',
+                      'Buat akun untuk mendapatkan rekomendasi beasiswa yang sesuai dengan profil akademik, jenjang studi, dan minat bidang Anda.',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: Colors.white.withValues(alpha: 0.8),
                         height: 1.6,
                       ),
                     ),
-                    const SizedBox(height: Spacing.xxl),
+                    const SizedBox(height: Spacing.xl),
                     _buildPillarItem(
-                      icon: Icons.verified_user_outlined,
-                      title: 'Profil Sekali, Cocokkan Berkali-kali',
+                      icon: Icons.person_search_rounded,
+                      title: 'Profil Akademik Terstruktur',
                       subtitle:
-                          'Lengkapi profil akademik dan sistem otomatis mencarikan yang relevan.',
+                          'Isi IPK, jurusan, dan jenjang untuk pencocokan akurat.',
                     ),
                     const SizedBox(height: Spacing.md),
                     _buildPillarItem(
-                      icon: Icons.notifications_active_outlined,
-                      title: 'Pantau Deadline Secara Otomatis',
+                      icon: Icons.bookmark_added_rounded,
+                      title: 'Simpan & Lacak Lamaran',
                       subtitle:
-                          'Tidak lagi terlewat — semua deadline penting di satu tempat.',
+                          'Kelola daftar beasiswa incaran dan checklist dokumen.',
                     ),
                     const SizedBox(height: Spacing.md),
                     _buildPillarItem(
-                      icon: Icons.security_outlined,
-                      title: 'Data Aman & Privasi Terjaga',
+                      icon: Icons.auto_awesome_rounded,
+                      title: 'Pendamping AI Berintegritas',
                       subtitle:
-                          'Informasi pribadimu tidak akan dibagikan tanpa izin.',
+                          'Bantuan review CV dan draf esai tanpa fabrikasi.',
                     ),
                   ],
                 ),
                 Text(
                   'RadarScholar © 2026 • Proyek Pengembangan Perangkat Lunak Mahasiswa',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: Colors.white.withValues(alpha: 0.55),
                     fontSize: 12,
                   ),
                 ),
@@ -223,6 +241,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
           ),
         ),
+
         // Right Column: Register Form
         Expanded(
           flex: 4,
@@ -255,7 +274,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             children: [
               AppLogo(
                 mode: AppLogoMode.full,
-                height: 48,
+                height: 44,
                 onTap: () => context.go('/'),
               ),
               const SizedBox(height: Spacing.xl),
@@ -270,14 +289,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   // ─── Form Card ───────────────────────────────────────────────────────
   Widget _buildFormCard(BuildContext context, RegisterFormState state) {
     final controller = ref.read(registerControllerProvider.notifier);
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderSubtle = AppTheme.borderSubtleOf(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+        border: Border.all(color: borderSubtle, width: 1),
+        boxShadow: AppTheme.cardShadowOf(context),
       ),
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
         child: Form(
@@ -286,9 +310,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Back Button
+              // Back link
               InkWell(
-                onTap: () => context.go('/'),
+                onTap: () => context.go('/login'),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -298,15 +322,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       Icon(
                         Icons.arrow_back_rounded,
                         size: 16,
-                        color: Colors.grey.shade600,
+                        color: textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Kembali ke Beranda',
+                        'Kembali ke Login',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
+                          color: textSecondary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -315,47 +339,49 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               ),
               const SizedBox(height: Spacing.md),
 
-              // Title & Subtitle
               Text(
                 'Buat Akun Baru',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade900,
+                  fontWeight: FontWeight.w800,
+                  color: textPrimary,
                 ),
               ),
               const SizedBox(height: Spacing.xs),
               Text(
-                'Daftar untuk mulai menjelajahi beasiswa yang sesuai profilmu.',
+                'Isi data di bawah untuk mendaftar ke RadarScholar.',
                 style: Theme.of(
                   context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                ).textTheme.bodyMedium?.copyWith(color: textSecondary),
               ),
-              const SizedBox(height: Spacing.xl),
+              const SizedBox(height: Spacing.lg),
 
-              // Error Message
+              // Error Banner
               if (state.errorMessage != null) ...[
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
+                    color: AppTheme.brandDanger.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(color: Colors.red.shade200),
+                    border: Border.all(
+                      color: AppTheme.brandDanger.withValues(alpha: 0.35),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline_rounded,
-                        color: Colors.red.shade700,
+                        color: AppTheme.brandDanger,
                         size: 18,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           state.errorMessage!,
-                          style: TextStyle(
-                            color: Colors.red.shade800,
+                          style: const TextStyle(
+                            color: AppTheme.brandDanger,
                             fontSize: 13,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -366,12 +392,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               ],
 
               // Display Name
-              _buildFieldLabel('Nama Lengkap'),
+              _buildFieldLabel(context, 'Nama Lengkap'),
               const SizedBox(height: Spacing.xs),
               TextFormField(
                 controller: _nameController,
                 enabled: !state.isLoading,
+                style: TextStyle(color: textPrimary, fontSize: 14),
                 decoration: _inputDecoration(
+                  context: context,
                   hint: 'Nama lengkap Anda',
                   icon: Icons.person_outline_rounded,
                 ),
@@ -381,13 +409,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               const SizedBox(height: Spacing.md),
 
               // Email
-              _buildFieldLabel('Alamat Email'),
+              _buildFieldLabel(context, 'Alamat Email'),
               const SizedBox(height: Spacing.xs),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 enabled: !state.isLoading,
+                style: TextStyle(color: textPrimary, fontSize: 14),
                 decoration: _inputDecoration(
+                  context: context,
                   hint: 'nama@universitas.ac.id',
                   icon: Icons.mail_outline_rounded,
                 ),
@@ -397,13 +427,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               const SizedBox(height: Spacing.md),
 
               // Password
-              _buildFieldLabel('Kata Sandi'),
+              _buildFieldLabel(context, 'Kata Sandi'),
               const SizedBox(height: Spacing.xs),
               TextFormField(
                 controller: _passwordController,
                 obscureText: !state.isPasswordVisible,
                 enabled: !state.isLoading,
+                style: TextStyle(color: textPrimary, fontSize: 14),
                 decoration: _inputDecoration(
+                  context: context,
                   hint: 'Minimal 6 karakter',
                   icon: Icons.lock_outline_rounded,
                   suffixIcon: IconButton(
@@ -412,7 +444,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                       size: 20,
-                      color: Colors.grey.shade600,
+                      color: textSecondary,
                     ),
                     onPressed: () => controller.togglePasswordVisibility(),
                   ),
@@ -423,13 +455,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               const SizedBox(height: Spacing.md),
 
               // Confirm Password
-              _buildFieldLabel('Konfirmasi Kata Sandi'),
+              _buildFieldLabel(context, 'Konfirmasi Kata Sandi'),
               const SizedBox(height: Spacing.xs),
               TextFormField(
                 controller: _confirmPasswordController,
                 obscureText: !state.isConfirmPasswordVisible,
                 enabled: !state.isLoading,
+                style: TextStyle(color: textPrimary, fontSize: 14),
                 decoration: _inputDecoration(
+                  context: context,
                   hint: 'Ulangi kata sandi',
                   icon: Icons.lock_outline_rounded,
                   suffixIcon: IconButton(
@@ -438,7 +472,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                       size: 20,
-                      color: Colors.grey.shade600,
+                      color: textSecondary,
                     ),
                     onPressed: () =>
                         controller.toggleConfirmPasswordVisibility(),
@@ -457,6 +491,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   onPressed: state.isLoading ? null : _handleRegister,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.brandPrimary,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
@@ -474,7 +509,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           'Daftar Sekarang',
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                 ),
@@ -489,10 +524,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   children: [
                     Text(
                       'Sudah memiliki akun? ',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: TextStyle(fontSize: 13, color: textSecondary),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
@@ -501,12 +533,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       onPressed: () => context.go('/login'),
-                      child: const Text(
+                      child: Text(
                         'Masuk di sini',
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.brandPrimary,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppTheme.brandAccent
+                              : AppTheme.brandPrimary,
                         ),
                       ),
                     ),
@@ -520,41 +554,51 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  Widget _buildFieldLabel(String label) {
+  Widget _buildFieldLabel(BuildContext context, String label) {
     return Text(
       label,
       style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: Colors.grey.shade800,
+        color: AppTheme.textPrimaryOf(context),
       ),
     );
   }
 
   InputDecoration _inputDecoration({
+    required BuildContext context,
     required String hint,
     required IconData icon,
     Widget? suffixIcon,
   }) {
+    final elevatedBg = AppTheme.surfaceElevatedOf(context);
+    final borderStrong = AppTheme.borderStrongOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+    final textMuted = AppTheme.textMutedOf(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-      prefixIcon: Icon(icon, size: 20),
+      hintStyle: TextStyle(color: textMuted, fontSize: 14),
+      prefixIcon: Icon(icon, size: 20, color: textSecondary),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: elevatedBg,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderSide: BorderSide(color: borderStrong),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderSide: BorderSide(color: borderStrong),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        borderSide: const BorderSide(color: AppTheme.brandPrimary, width: 1.5),
+        borderSide: BorderSide(
+          color: isDark ? AppTheme.brandAccent : AppTheme.brandPrimary,
+          width: 1.5,
+        ),
       ),
     );
   }
@@ -570,10 +614,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
+            color: AppTheme.brandAccent.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(
+              color: AppTheme.brandAccent.withValues(alpha: 0.25),
+            ),
           ),
-          child: Icon(icon, color: Colors.white, size: 20),
+          child: Icon(icon, color: AppTheme.brandAccent, size: 20),
         ),
         const SizedBox(width: 14),
         Expanded(
@@ -584,7 +631,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 title,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   fontSize: 14,
                 ),
               ),

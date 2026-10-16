@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 
-/// Standardized error state widget for RadarScholar.
+/// Standardized error state widget for RadarScholar — Modern SaaS Aesthetic.
 ///
 /// Follows UI/UX (§18) and Error Handling (§20) rules.
 class ErrorState extends StatelessWidget {
@@ -23,67 +23,83 @@ class ErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppTheme.isDark(context);
-    final primary = AppTheme.primaryOf(context);
+    final dangerColor = AppTheme.statusDanger;
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderColor = AppTheme.borderColorOf(context);
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.xl),
+        padding: const EdgeInsets.all(Spacing.lg),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF7F1D1D).withValues(alpha: 0.3)
-                      : Colors.red.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 36, color: const Color(0xFFEF4444)),
+          child: Container(
+            padding: const EdgeInsets.all(Spacing.xl),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(
+                color: dangerColor.withValues(alpha: isDark ? 0.3 : 0.25),
               ),
-              const SizedBox(height: Spacing.lg),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.2,
-                ),
-              ),
-              const SizedBox(height: Spacing.sm),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  height: 1.5,
-                ),
-              ),
-              if (onRetry != null) ...[
-                const SizedBox(height: Spacing.xl),
-                OutlinedButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: Text(retryLabel),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: primary,
-                    side: BorderSide(color: primary.withValues(alpha: 0.5)),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.md),
+              boxShadow: AppTheme.cardShadowOf(context),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: dangerColor.withValues(alpha: isDark ? 0.14 : 0.08),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(
+                      color: dangerColor.withValues(alpha: 0.25),
                     ),
                   ),
+                  child: Icon(icon, size: 28, color: dangerColor),
                 ),
+                const SizedBox(height: Spacing.md),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimaryOf(context),
+                    letterSpacing: -0.25,
+                  ),
+                ),
+                const SizedBox(height: Spacing.xs + 2),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: AppTheme.textMutedOf(context),
+                    height: 1.55,
+                  ),
+                ),
+                if (onRetry != null) ...[
+                  const SizedBox(height: Spacing.lg),
+                  OutlinedButton.icon(
+                    onPressed: onRetry,
+                    icon: const Icon(Icons.refresh_rounded, size: 17),
+                    label: Text(retryLabel),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.textPrimaryOf(context),
+                      backgroundColor: AppTheme.surfaceElevatedOf(context),
+                      side: BorderSide(color: borderColor),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

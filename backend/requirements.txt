@@ -37,3 +37,6 @@ pytest-asyncio>=0.24
 
 # --- Code Quality ---
 ruff>=0.9
+
+# --- Hugging Face Spaces Deployment ---
+gradio>=5.0.0
