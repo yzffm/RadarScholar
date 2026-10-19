@@ -1,5 +1,7 @@
 """BCA PPBP/PPTI scholarship scraper."""
 
+from datetime import datetime
+
 from bs4 import BeautifulSoup
 
 from app.crawler.base import (
@@ -8,7 +10,7 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
-from app.crawler.date_utils import extract_contextual_deadline
+from app.crawler.date_utils import extract_contextual_dates, extract_contextual_deadline
 
 
 class BcaScholarshipScraper(BaseScraper):
@@ -22,10 +24,17 @@ class BcaScholarshipScraper(BaseScraper):
         response = self.fetch(self.source_url)
         return self.parse_html(response.text)
 
-    def parse_html(self, html: str) -> list[ScrapedScholarship]:
+    def parse_html(
+        self,
+        html: str,
+        reference_time: datetime | None = None,
+    ) -> list[ScrapedScholarship]:
         text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
         if "Beasiswa BCA" not in text or "PPBP" not in text or "PPTI" not in text:
             raise ValueError("BCA scholarship program markers were not found")
+
+        deadline = extract_contextual_deadline(text, reference_time=reference_time)
+        historical_deadlines = extract_contextual_dates(text)
 
         return [
             ScrapedScholarship(
@@ -40,7 +49,7 @@ class BcaScholarshipScraper(BaseScraper):
                     "Program pendidikan BCA untuk lulusan SMA/SMK berprestasi, "
                     "dengan dukungan pendidikan, uang saku, dan peluang pengembangan karier."
                 ),
-                deadline=extract_contextual_deadline(text),
+                deadline=deadline,
                 application_url=self.application_url,
                 requirements=[
                     ScrapedRequirement(
@@ -80,7 +89,8 @@ class BcaScholarshipScraper(BaseScraper):
                         description="Kesempatan magang dan penawaran kerja BCA.",
                     ),
                 ],
-                is_active=True,
+                is_active=deadline is not None,
+                has_contextual_dates=bool(historical_deadlines),
                 is_live_verified=True,
             )
         ]

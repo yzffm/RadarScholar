@@ -52,7 +52,12 @@ class ScrapedScholarship(BaseModel):
     description: str
     deadline: datetime | None = None
     application_url: str
-    is_active: bool = True
+    is_active: bool = False
+    # True when at least one contextual deadline date (past or future) was
+    # extracted from the source page; False when no date was found at all.
+    # Allows the pipeline to distinguish "dates found and all expired"
+    # (deactivate) from "no date present on page" (preserve existing state).
+    has_contextual_dates: bool = True
     requirements: list[ScrapedRequirement] = Field(default_factory=list)
     benefits: list[ScrapedBenefit] = Field(default_factory=list)
     # True when this data came from a successfully fetched live page just now;
@@ -138,11 +143,16 @@ class BaseScraper(ABC):
         """
         ...
 
-    def parse_html(self, html: str) -> list[ScrapedScholarship]:
+    def parse_html(
+        self,
+        html: str,
+        reference_time: datetime | None = None,
+    ) -> list[ScrapedScholarship]:
         """Parse raw HTML into ScrapedScholarship objects.
 
         Separated from ``scrape()`` so tests can call this
-        directly with fixture HTML without network access.
+        directly with fixture HTML and a deterministic ``reference_time``
+        without network access or wall-clock dependence.
         """
         raise NotImplementedError(
             f"{self.__class__.__name__} does not implement parse_html"

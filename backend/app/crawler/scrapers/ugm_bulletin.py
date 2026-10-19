@@ -1,5 +1,7 @@
 """UGM Directorate of Student Affairs scholarship bulletin scraper."""
 
+from datetime import datetime
+
 from bs4 import BeautifulSoup
 
 from app.crawler.base import (
@@ -25,13 +27,17 @@ class UgmScholarshipBulletinScraper(BaseScraper):
         response = self.fetch(self.source_url)
         return self.parse_html(response.text)
 
-    def parse_html(self, html: str) -> list[ScrapedScholarship]:
+    def parse_html(
+        self,
+        html: str,
+        reference_time: datetime | None = None,
+    ) -> list[ScrapedScholarship]:
         soup = BeautifulSoup(html, "html.parser")
         text = soup.get_text(" ", strip=True)
         if "Beasiswa Cendekia BAZNAS" not in text:
             raise ValueError("UGM BAZNAS bulletin marker was not found")
 
-        deadline = extract_contextual_deadline(text)
+        deadline = extract_contextual_deadline(text, reference_time=reference_time)
         historical_deadlines = extract_contextual_dates(text)
         return [
             ScrapedScholarship(
@@ -89,7 +95,8 @@ class UgmScholarshipBulletinScraper(BaseScraper):
                         description="Pengembangan diri bersama mentor beasiswa BAZNAS.",
                     ),
                 ],
-                is_active=not historical_deadlines or deadline is not None,
+                is_active=deadline is not None,
+                has_contextual_dates=bool(historical_deadlines),
                 is_live_verified=True,
             )
         ]

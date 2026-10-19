@@ -369,6 +369,7 @@ class CrawlerPipeline:
             deadline=item.deadline,
             application_url=_normalize_url(item.application_url),
             is_active=item.is_active,
+            has_contextual_dates=item.has_contextual_dates,
             requirements=item.requirements,
             benefits=item.benefits,
             is_live_verified=item.is_live_verified,
@@ -458,10 +459,16 @@ class CrawlerPipeline:
 
         Only updates crawler-managed fields. Does NOT touch
         user-owned state (saved_scholarships, applications, etc.).
+        If no contextual dates were found on the page at all
+        (``not item.has_contextual_dates and item.deadline is None``),
+        the existing ``is_active`` value is preserved rather than
+        failing open to True or overwriting prior state.
         """
         changed = False
 
         for attr in ("title", "summary", "description", "deadline", "application_url", "is_active"):
+            if attr == "is_active" and not item.has_contextual_dates and item.deadline is None:
+                continue
             new_val = getattr(item, attr)
             old_val = getattr(existing, attr)
             if new_val != old_val:

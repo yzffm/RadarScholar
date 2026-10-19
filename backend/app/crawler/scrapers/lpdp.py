@@ -31,7 +31,7 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
-from app.crawler.date_utils import extract_contextual_deadline
+from app.crawler.date_utils import extract_contextual_dates, extract_contextual_deadline
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +99,11 @@ class LpdpScraper(BaseScraper):
 
         return self.parse_html(response.text)
 
-    def parse_html(self, html: str) -> list[ScrapedScholarship]:
+    def parse_html(
+        self,
+        html: str,
+        reference_time: datetime | None = None,
+    ) -> list[ScrapedScholarship]:
         """Parse LPDP page HTML.
 
         The LPDP portal layout changes frequently. This parser
@@ -107,6 +111,7 @@ class LpdpScraper(BaseScraper):
         supplements with verified baseline information.
         """
         soup = BeautifulSoup(html, "html.parser")
+        text = soup.get_text(" ", strip=True)
 
         # Extract meta info
         meta_desc = soup.find("meta", attrs={"name": "description"})
@@ -119,7 +124,8 @@ class LpdpScraper(BaseScraper):
             )
         )
 
-        deadline = self._extract_deadline(soup)
+        deadline = self._extract_deadline(soup, reference_time=reference_time)
+        historical_deadlines = extract_contextual_dates(text)
 
         scholarship = ScrapedScholarship(
             provider_name=self.provider_name,
@@ -129,16 +135,24 @@ class LpdpScraper(BaseScraper):
             description=description,
             deadline=deadline,
             application_url="https://beasiswalpdp-terintegrasi.kemenkeu.go.id",
-            is_active=True,
+            is_active=deadline is not None,
+            has_contextual_dates=bool(historical_deadlines),
             requirements=list(_LPDP_REQUIREMENTS),
             benefits=list(_LPDP_BENEFITS),
         )
 
         return [scholarship]
 
-    def _extract_deadline(self, soup: BeautifulSoup) -> datetime | None:
+    def _extract_deadline(
+        self,
+        soup: BeautifulSoup,
+        reference_time: datetime | None = None,
+    ) -> datetime | None:
         """Attempt to extract deadline from page content."""
-        deadline = extract_contextual_deadline(soup.get_text(" ", strip=True))
+        deadline = extract_contextual_deadline(
+            soup.get_text(" ", strip=True),
+            reference_time=reference_time,
+        )
         if deadline:
             return deadline
 

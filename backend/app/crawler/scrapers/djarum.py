@@ -34,7 +34,7 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
-from app.crawler.date_utils import extract_contextual_deadline
+from app.crawler.date_utils import extract_contextual_dates, extract_contextual_deadline
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +122,11 @@ class DjarumScraper(BaseScraper):
 
         return self.parse_html(response.text)
 
-    def parse_html(self, html: str) -> list[ScrapedScholarship]:
+    def parse_html(
+        self,
+        html: str,
+        reference_time: datetime | None = None,
+    ) -> list[ScrapedScholarship]:
         """Parse Djarum regulation page HTML.
 
         Because the regulation page uses Livewire and most
@@ -132,8 +136,7 @@ class DjarumScraper(BaseScraper):
         3. Extracts title/meta from server-rendered HTML where available
         """
         soup = BeautifulSoup(html, "html.parser")
-
-        # Validate we're on the right page
+        text = soup.get_text(" ", strip=True)
 
         # Extract meta description if available
         meta_desc = soup.find("meta", attrs={"name": "description"})
@@ -144,7 +147,8 @@ class DjarumScraper(BaseScraper):
         )
 
         # Try to extract deadline from page content
-        deadline = self._extract_deadline(soup)
+        deadline = self._extract_deadline(soup, reference_time=reference_time)
+        historical_deadlines = extract_contextual_dates(text)
 
         scholarship = ScrapedScholarship(
             provider_name=self.provider_name,
@@ -154,21 +158,26 @@ class DjarumScraper(BaseScraper):
             description=description,
             deadline=deadline,
             application_url="https://register.djarumbeasiswaplus.org",
-            is_active=True,
+            is_active=deadline is not None,
+            has_contextual_dates=bool(historical_deadlines),
             requirements=list(_KNOWN_REQUIREMENTS),
             benefits=list(_KNOWN_BENEFITS),
         )
 
         return [scholarship]
 
-    def _extract_deadline(self, soup: BeautifulSoup) -> datetime | None:
+    def _extract_deadline(
+        self,
+        soup: BeautifulSoup,
+        reference_time: datetime | None = None,
+    ) -> datetime | None:
         """Attempt to extract registration deadline from page text.
 
         Returns None if no deadline can be deterministically identified.
         Does NOT fabricate a date.
         """
         text = soup.get_text(" ", strip=True)
-        deadline = extract_contextual_deadline(text)
+        deadline = extract_contextual_deadline(text, reference_time=reference_time)
         if deadline:
             return deadline
 

@@ -1,6 +1,7 @@
 """Tanoto Foundation TELADAN scholarship scraper."""
 
 import logging
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 
@@ -40,13 +41,17 @@ class TeladanScraper(BaseScraper):
         response = self.fetch(self.source_url)
         return self.parse_html(response.text)
 
-    def parse_html(self, html: str) -> list[ScrapedScholarship]:
+    def parse_html(
+        self,
+        html: str,
+        reference_time: datetime | None = None,
+    ) -> list[ScrapedScholarship]:
         soup = BeautifulSoup(html, "html.parser")
         text = soup.get_text(" ", strip=True)
         if "TELADAN" not in text.upper():
             raise ValueError("TELADAN page marker was not found")
 
-        deadline = extract_contextual_deadline(text)
+        deadline = extract_contextual_deadline(text, reference_time=reference_time)
         historical_deadlines = extract_contextual_dates(text)
         requirements = [
             ScrapedRequirement(
@@ -117,7 +122,8 @@ class TeladanScraper(BaseScraper):
                 ),
                 deadline=deadline,
                 application_url=self.application_url,
-                is_active=not historical_deadlines or deadline is not None,
+                is_active=deadline is not None,
+                has_contextual_dates=bool(historical_deadlines),
                 requirements=requirements,
                 benefits=benefits,
                 is_live_verified=True,

@@ -1,5 +1,7 @@
 """Pertamina Foundation Sobat Bumi scholarship scraper."""
 
+from datetime import datetime
+
 from bs4 import BeautifulSoup
 
 from app.crawler.base import BaseScraper, ScrapedBenefit, ScrapedScholarship
@@ -17,12 +19,16 @@ class PertaminaSobatBumiScraper(BaseScraper):
         response = self.fetch(self.source_url)
         return self.parse_html(response.text)
 
-    def parse_html(self, html: str) -> list[ScrapedScholarship]:
+    def parse_html(
+        self,
+        html: str,
+        reference_time: datetime | None = None,
+    ) -> list[ScrapedScholarship]:
         text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
         if "Sobat Bumi" not in text:
             raise ValueError("Sobat Bumi marker was not found")
 
-        deadline = extract_contextual_deadline(text)
+        deadline = extract_contextual_deadline(text, reference_time=reference_time)
         historical_deadlines = extract_contextual_dates(text)
         return [
             ScrapedScholarship(
@@ -35,7 +41,8 @@ class PertaminaSobatBumiScraper(BaseScraper):
                 application_url=self.application_url,
                 requirements=[],
                 benefits=[ScrapedBenefit(benefit_type="EDUCATIONAL_SUPPORT", description="Dukungan pendidikan dari Pertamina Foundation.")],
-                is_active=not historical_deadlines or deadline is not None,
+                is_active=deadline is not None,
+                has_contextual_dates=bool(historical_deadlines),
                 is_live_verified=True,
             )
         ]
