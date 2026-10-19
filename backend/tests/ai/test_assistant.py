@@ -22,6 +22,8 @@ async def test_assistant_task_prompt_generation():
     from app.scholarships.schemas import ScholarshipResponse
     from app.users.schemas import UserProfileResponse
 
+    fixed_now = datetime(2026, 10, 20, 3, 0, 0)
+
     profile = UserProfileResponse(
         id=str(uuid4()),
         email="test@example.com",
@@ -29,8 +31,8 @@ async def test_assistant_task_prompt_generation():
         university="Universitas Indonesia",
         degree_level="S1",
         gpa=3.8,
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
+        created_at=fixed_now,
+        updated_at=fixed_now,
         profile_completed=True,
     )
 
@@ -46,8 +48,8 @@ async def test_assistant_task_prompt_generation():
         is_active=True,
         source_id=uuid4(),
         source=None,
-        created_at=datetime.now(),
-        updated_at=datetime.now()
+        created_at=fixed_now,
+        updated_at=fixed_now
     )
 
     app_id = uuid4()
@@ -60,8 +62,8 @@ async def test_assistant_task_prompt_generation():
         target_deadline=None,
         tasks=[],
         scholarship=scholarship,
-        created_at=datetime.now(),
-        updated_at=datetime.now()
+        created_at=fixed_now,
+        updated_at=fixed_now
     )
 
     # Mock AIService just for passing into Task

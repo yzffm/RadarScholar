@@ -27,6 +27,7 @@ def override_auth():
 
 @pytest.fixture
 def mock_db():
+    fixed_now = datetime(2026, 10, 20, 3, 0, 0)
     with patch("app.ai.router.get_profile") as mock_profile, \
          patch("app.ai.router.scholarship_service.get_scholarship") as mock_scholarship, \
          patch("app.ai.router.MatchingService") as mock_matching:
@@ -36,8 +37,8 @@ def mock_db():
             email="test@test.com",
             display_name="Test User",
             degree_level=DegreeLevelSchema.S1,
-            created_at=datetime.now(),
-            updated_at=datetime.now()
+            created_at=fixed_now,
+            updated_at=fixed_now
         )
 
         mock_scholarship.return_value = ScholarshipResponse(
@@ -47,8 +48,8 @@ def mock_db():
             summary="A test scholarship",
             description="Desc",
             application_url="http://test.com",
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+            created_at=fixed_now,
+            updated_at=fixed_now,
             is_active=True
         )
 

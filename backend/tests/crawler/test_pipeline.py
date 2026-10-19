@@ -512,6 +512,118 @@ class TestStaleHandling:
         assert scholarship.is_active is True
 
 
+class TestFailClosedActiveStatus:
+    """Verify A3 fail-closed active status rules in the crawler pipeline."""
+
+    def test_new_record_without_dates_is_inactive(self, db_session: Session):
+        dateless = _make_scraped()
+        dateless.deadline = None
+        dateless.is_active = False
+        dateless.has_contextual_dates = False
+        registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([dateless]),
+                enabled=True,
+            ),
+        }
+
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        assert scholarship.deadline is None
+        assert scholarship.is_active is False
+
+    def test_existing_active_record_without_dates_preserves_active_status(
+        self, db_session: Session
+    ):
+        active_item = _make_scraped(deadline=datetime(2026, 10, 20, 16, 59, 59))
+        active_item.is_active = True
+        active_item.has_contextual_dates = True
+
+        dateless_refresh = _make_scraped(deadline=None)
+        dateless_refresh.is_active = False
+        dateless_refresh.has_contextual_dates = False
+
+        registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([active_item]),
+                enabled=True,
+            ),
+        }
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        registry["test"].scraper_factory = lambda: FakeScraper([dateless_refresh])
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        assert scholarship.is_active is True
+
+    def test_existing_inactive_record_without_dates_preserves_inactive_status(
+        self, db_session: Session
+    ):
+        inactive_item = _make_scraped(deadline=None)
+        inactive_item.is_active = False
+        inactive_item.has_contextual_dates = True
+
+        dateless_refresh = _make_scraped(deadline=None)
+        dateless_refresh.is_active = False
+        dateless_refresh.has_contextual_dates = False
+
+        registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([inactive_item]),
+                enabled=True,
+            ),
+        }
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        registry["test"].scraper_factory = lambda: FakeScraper([dateless_refresh])
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        assert scholarship.is_active is False
+
+    def test_existing_active_record_with_expired_dates_becomes_inactive(
+        self, db_session: Session
+    ):
+        active_item = _make_scraped(deadline=datetime(2026, 10, 20, 16, 59, 59))
+        active_item.is_active = True
+        active_item.has_contextual_dates = True
+
+        expired_refresh = _make_scraped(deadline=None)
+        expired_refresh.is_active = False
+        expired_refresh.has_contextual_dates = True
+
+        registry = {
+            "test": SourceEntry(
+                provider_name="Test Provider",
+                source_url="https://example.com/scholarship",
+                scraper_factory=lambda: FakeScraper([active_item]),
+                enabled=True,
+            ),
+        }
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        registry["test"].scraper_factory = lambda: FakeScraper([expired_refresh])
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=registry):
+            CrawlerPipeline(db_session).run()
+
+        scholarship = db_session.query(Scholarship).one()
+        assert scholarship.is_active is False
+
+
 class TestResultSummary:
     """Test the human-readable summary output."""
 
