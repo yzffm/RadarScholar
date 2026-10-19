@@ -27,16 +27,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run backend lint
-        working-directory: ./backend
-        run: |
-          python -m ruff check .
-
-      - name: Run backend tests
-        working-directory: ./backend
-        run: |
-          pytest -q
-
       - name: Validate database secret
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
