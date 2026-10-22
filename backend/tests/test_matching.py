@@ -130,3 +130,127 @@ def test_evaluate_age(engine):
     req = create_req("AGE", "LTE", {"age": 19})
     res = engine.evaluate(profile, req)
     assert res.state == CriterionState.NEEDS_VERIFICATION
+
+
+_TELADAN_PARTNERS = [
+    "IPB University",
+    "Institut Teknologi Bandung",
+    "Universitas Brawijaya",
+    "Universitas Diponegoro",
+    "Universitas Gadjah Mada",
+    "Universitas Hasanuddin",
+    "Universitas Indonesia",
+    "Universitas Mulawarman",
+    "Universitas Riau",
+    "Universitas Sumatera Utara",
+]
+
+
+@pytest.mark.parametrize(
+    ("profile_uni", "expected_state"),
+    [
+        # Exact & case/punctuation variations -> MATCH
+        ("Universitas Gadjah Mada", CriterionState.MATCH),
+        ("universitas gadjah mada.", CriterionState.MATCH),
+        # Known alias matches -> MATCH
+        ("UGM", CriterionState.MATCH),
+        ("UI", CriterionState.MATCH),
+        ("Universitas Indonesia (UI)", CriterionState.MATCH),
+        ("Institut Pertanian Bogor", CriterionState.MATCH),
+        ("IPB", CriterionState.MATCH),
+        ("UNDIP", CriterionState.MATCH),
+        # Confident non-matches (known alias not in partner list, or specific university) -> NOT_MATCH
+        ("Universitas Negeri Surabaya", CriterionState.NOT_MATCH),
+        ("UNESA", CriterionState.NOT_MATCH),
+        ("Universitas Airlangga", CriterionState.NOT_MATCH),
+        ("UNAIR", CriterionState.NOT_MATCH),
+        ("Universitas Pancasila", CriterionState.NOT_MATCH),
+        # Missing / blank profile university -> UNKNOWN
+        (None, CriterionState.UNKNOWN),
+        ("", CriterionState.UNKNOWN),
+        ("   ", CriterionState.UNKNOWN),
+        # Ambiguous / generic / unknown single-token / partial substring -> NEEDS_VERIFICATION
+        ("Universitas", CriterionState.NEEDS_VERIFICATION),
+        ("Universitas Negeri", CriterionState.NEEDS_VERIFICATION),
+        ("Perguruan Tinggi Negeri", CriterionState.NEEDS_VERIFICATION),
+        ("PTN", CriterionState.NEEDS_VERIFICATION),
+        ("XYZ", CriterionState.NEEDS_VERIFICATION),
+        ("Universitas Sumatera", CriterionState.NEEDS_VERIFICATION),
+        ("Fakultas Teknik Universitas Indonesia", CriterionState.NEEDS_VERIFICATION),
+        ("---", CriterionState.NEEDS_VERIFICATION),
+    ],
+)
+def test_evaluate_university_in_branches(engine, profile_uni, expected_state):
+    profile = UserProfile(university=profile_uni)
+    req = create_req("UNIVERSITY", "IN", {"universities": _TELADAN_PARTNERS})
+    res = engine.evaluate(profile, req)
+    assert res.state == expected_state
+    assert res.requirement_type == "UNIVERSITY"
+
+
+def test_evaluate_university_eq_alias_match_unesa(engine):
+    profile = UserProfile(university="Universitas Negeri Surabaya")
+    req = create_req("UNIVERSITY", "EQ", {"university": "UNESA"})
+    res = engine.evaluate(profile, req)
+    assert res.state == CriterionState.MATCH
+    assert res.actual_value == "Universitas Negeri Surabaya"
+    assert res.required_value == "UNESA"
+
+
+def test_evaluate_university_eq_not_match(engine):
+    profile = UserProfile(university="UNESA")
+    req = create_req("UNIVERSITY", "EQ", {"university": "Universitas Gadjah Mada"})
+    res = engine.evaluate(profile, req)
+    assert res.state == CriterionState.NOT_MATCH
+
+
+def test_evaluate_university_malformed_and_unsupported_op(engine):
+    profile = UserProfile(university="Universitas Indonesia")
+
+    res_missing = engine.evaluate(profile, create_req("UNIVERSITY", "IN", {}))
+    assert res_missing.state == CriterionState.NEEDS_VERIFICATION
+
+    res_bad_in = engine.evaluate(
+        profile, create_req("UNIVERSITY", "IN", {"universities": "Universitas Indonesia"})
+    )
+    assert res_bad_in.state == CriterionState.NEEDS_VERIFICATION
+
+    res_bad_op = engine.evaluate(
+        profile, create_req("UNIVERSITY", "GTE", {"university": "Universitas Indonesia"})
+    )
+    assert res_bad_op.state == CriterionState.NEEDS_VERIFICATION
+
+
+def test_evaluate_nationality_without_profile_field_returns_needs_verification(engine):
+    profile = UserProfile(university="Universitas Indonesia", gpa=3.7)
+    req = create_req("NATIONALITY", "EQ", {"country": "Indonesia"})
+    res = engine.evaluate(profile, req)
+    assert res.state == CriterionState.NEEDS_VERIFICATION
+    assert res.required_value == "Indonesia"
+    assert res.actual_value is None
+    assert "kewarganegaraan" in res.explanation.lower()
+
+
+def test_evaluate_nationality_when_profile_attribute_present(engine):
+    profile_wni = UserProfile()
+    profile_wni.nationality = "WNI"
+    req = create_req("NATIONALITY", "EQ", {"country": "Indonesia"})
+    res_match = engine.evaluate(profile_wni, req)
+    assert res_match.state == CriterionState.MATCH
+
+    profile_wna = UserProfile()
+    profile_wna.nationality = "WNA"
+    res_not_match = engine.evaluate(profile_wna, req)
+    assert res_not_match.state == CriterionState.NOT_MATCH
+
+
+def test_evaluate_nationality_malformed(engine):
+    profile = UserProfile()
+    res_empty = engine.evaluate(profile, create_req("NATIONALITY", "EQ", {}))
+    assert res_empty.state == CriterionState.NEEDS_VERIFICATION
+
+    res_bad_op = engine.evaluate(
+        profile, create_req("NATIONALITY", "GTE", {"country": "Indonesia"})
+    )
+    assert res_bad_op.state == CriterionState.NEEDS_VERIFICATION
+
