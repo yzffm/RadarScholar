@@ -23,9 +23,9 @@ from urllib.parse import urlsplit, urlunsplit
 from sqlalchemy.orm import Session
 
 from app.core.time import utc_now
-from app.crawler.base import BaseScraper, ScrapedScholarship
+from app.crawler.base import BaseScraper, ScrapedScholarship, SourceUnavailableError
 from app.crawler.models import CrawlRun
-from app.crawler.registry import SourceEntry, get_enabled_sources
+from app.crawler.registry import SourceEntry, get_enabled_sources, get_registry
 from app.scholarships.models import (
     Scholarship,
     ScholarshipBenefit,
@@ -46,6 +46,7 @@ class SourceResult:
     source_key: str
     provider_name: str
     success: bool = True
+    unavailable: bool = False
     created: int = 0
     updated: int = 0
     skipped: int = 0
@@ -62,6 +63,7 @@ class CrawlerRunResult:
     sources_attempted: int = 0
     sources_succeeded: int = 0
     sources_failed: int = 0
+    sources_unavailable: int = 0
     scholarships_created: int = 0
     scholarships_updated: int = 0
     scholarships_skipped: int = 0
@@ -74,14 +76,15 @@ class CrawlerRunResult:
             "",
             "RadarScholar Crawler",
             "--------------------",
-            f"Sources attempted : {self.sources_attempted}",
-            f"Sources succeeded : {self.sources_succeeded}",
-            f"Sources failed    : {self.sources_failed}",
+            f"Sources attempted   : {self.sources_attempted}",
+            f"Sources succeeded   : {self.sources_succeeded}",
+            f"Sources unavailable : {self.sources_unavailable}",
+            f"Sources failed      : {self.sources_failed}",
             "",
-            f"Created           : {self.scholarships_created}",
-            f"Updated           : {self.scholarships_updated}",
-            f"Skipped           : {self.scholarships_skipped}",
-            f"Errors            : {len(self.errors)}",
+            f"Created             : {self.scholarships_created}",
+            f"Updated             : {self.scholarships_updated}",
+            f"Skipped             : {self.scholarships_skipped}",
+            f"Errors              : {len(self.errors)}",
         ]
         if self.errors:
             lines.append("")
@@ -140,7 +143,12 @@ class CrawlerPipeline:
             source_filter: Optional list of source keys to restrict the run.
                            If None, all enabled sources are processed.
         """
+        BaseScraper.reset_runtime_state()
         result = CrawlerRunResult()
+
+        if not self.dry_run:
+            self._sync_registry_sources()
+
         enabled = get_enabled_sources()
 
         if source_filter:
@@ -151,7 +159,9 @@ class CrawlerPipeline:
             src_result = self._process_source(key, entry)
             result.source_results.append(src_result)
 
-            if src_result.success:
+            if src_result.unavailable:
+                result.sources_unavailable += 1
+            elif src_result.success:
                 result.sources_succeeded += 1
                 result.scholarships_created += src_result.created
                 result.scholarships_updated += src_result.updated
@@ -168,24 +178,38 @@ class CrawlerPipeline:
 
         return result
 
+    def _sync_registry_sources(self) -> None:
+        """Synchronize curated registry entries to scholarship_sources at run start."""
+        try:
+            for entry in get_registry().values():
+                self._ensure_source(entry)
+            self.db.commit()
+        except Exception as exc:
+            logger.error("Failed to sync registry sources: %s", exc, exc_info=True)
+            self.db.rollback()
+
     def _save_run_result(self, result: CrawlerRunResult) -> None:
         """Persist the crawl run result to the database."""
         try:
-            status = "FAILED" if result.sources_failed > 0 else "SUCCESS"
-            if result.sources_failed > 0 and result.sources_succeeded > 0:
+            if result.sources_attempted > 0 and result.sources_succeeded == 0:
+                status = "FAILED"
+            elif result.sources_failed > 0:
                 status = "PARTIAL_SUCCESS"
+            else:
+                status = "SUCCESS"
 
             source_results_dict = [
                 {
                     "source_key": sr.source_key,
                     "provider_name": sr.provider_name,
                     "success": sr.success,
+                    "unavailable": sr.unavailable,
                     "created": sr.created,
                     "updated": sr.updated,
                     "skipped": sr.skipped,
                     "skipped_by_policy": sr.skipped_by_policy,
                     "skip_reason": sr.skip_reason,
-                    "error": sr.error
+                    "error": sr.error,
                 }
                 for sr in result.source_results
             ]
@@ -291,6 +315,17 @@ class CrawlerPipeline:
                     key, src_result.created, src_result.updated,
                 )
 
+        except SourceUnavailableError as exc:
+            logger.warning(
+                "Source '%s' is unavailable (%s) — preserving existing data.",
+                key,
+                exc,
+            )
+            src_result.success = False
+            src_result.unavailable = True
+            src_result.error = str(exc)
+            self.db.rollback()
+
         except Exception as exc:
             logger.error("Source '%s' failed: %s", key, exc, exc_info=True)
             src_result.success = False
@@ -302,27 +337,46 @@ class CrawlerPipeline:
 
     def _ensure_source(self, entry: SourceEntry) -> ScholarshipSource:
         """Get or create the ScholarshipSource record for this provider."""
+        normalized_url = _normalize_url(entry.source_url)
         existing = self._find_source(entry)
         if existing:
-            # Update source_url if changed
-            if existing.source_url != entry.source_url:
-                existing.source_url = entry.source_url
+            changed = False
+            if existing.source_url != normalized_url:
+                existing.source_url = normalized_url
+                changed = True
+            if existing.provider_name != entry.provider_name:
+                existing.provider_name = entry.provider_name
+                changed = True
+            if changed:
                 existing.updated_at = utc_now()
             return existing
 
         source = ScholarshipSource(
             id=uuid.uuid4(),
             provider_name=entry.provider_name,
-            source_url=entry.source_url,
-            crawl_allowed=True,
-            active=True,
+            source_url=normalized_url,
+            crawl_allowed=entry.enabled,
+            active=entry.enabled,
         )
         self.db.add(source)
         self.db.flush()  # Get the ID without committing
         return source
 
     def _find_source(self, entry: SourceEntry) -> ScholarshipSource | None:
-        """Find the persisted source without creating or changing it."""
+        """Find the persisted source by normalized source_url or provider_name."""
+        target_url = _normalize_url(entry.source_url)
+        exact_url = (
+            self.db.query(ScholarshipSource)
+            .filter(ScholarshipSource.source_url.in_([target_url, entry.source_url]))
+            .first()
+        )
+        if exact_url is not None:
+            return exact_url
+
+        for candidate in self.db.query(ScholarshipSource).all():
+            if _normalize_url(candidate.source_url) == target_url:
+                return candidate
+
         return (
             self.db.query(ScholarshipSource)
             .filter(ScholarshipSource.provider_name == entry.provider_name)

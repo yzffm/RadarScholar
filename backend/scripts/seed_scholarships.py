@@ -1,12 +1,11 @@
 """Idempotently seed baseline scholarship data.
 
 Seed records preserve their official source URLs and are marked ``SEED``.
-They intentionally keep ``last_verified_live_at`` empty because this script
-does not fetch or verify the live provider pages.
+They intentionally keep ``last_verified_live_at`` empty and ``deadline`` as
+``None`` because this script does not fetch or verify live provider pages.
 """
 
-from datetime import datetime
-
+from app.crawler.pipeline import _normalize_url
 from app.database.session import get_db
 from app.scholarships.models import (
     Scholarship,
@@ -17,8 +16,8 @@ from app.scholarships.models import (
 
 SEED_SCHOLARSHIPS = (
     {
-        "provider_name": "Djarum Foundation",
-        "source_url": "https://djarumbeasiswaplus.org/",
+        "provider_name": "Djarum Beasiswa Plus",
+        "source_url": "https://djarumbeasiswaplus.org/our-program/regulation-djarum-beasiswa-plus",
         "title": "Djarum Beasiswa Plus",
         "summary": "Program Djarum Beasiswa Plus merupakan beasiswa prestasi.",
         "description": (
@@ -26,49 +25,61 @@ SEED_SCHOLARSHIPS = (
             "memberikan beragam pelatihan keterampilan lunak atau soft skills "
             "serta wawasan kebangsaan kepada para mahasiswa berprestasi di Indonesia."
         ),
-        "deadline": datetime(2027, 5, 30),
-        "application_url": "https://djarumbeasiswaplus.org/",
+        "deadline": None,
+        "application_url": "https://register.djarumbeasiswaplus.org",
         "requirements": (
-            ("SEMESTER", "EQUALS", {"semester": 4}, "Sedang menempuh pendidikan Strata 1/Diploma 4 di semester IV"),
-            ("GPA", "GTE", {"gpa": 3.20}, "IPK minimum 3.20 pada semester III"),
+            ("SEMESTER", "EQ", {"semester": 4}, "Sedang menempuh pendidikan Strata 1/Diploma 4 di semester IV"),
+            ("GPA", "GTE", {"gpa": 3.00}, "IPK minimum 3.00 pada semester III"),
             ("ORGANIZATION", "EXISTS", {"required": True}, "Aktif mengikuti kegiatan organisasi baik di dalam maupun di luar kampus"),
         ),
         "benefits": (
-            ("FINANCIAL", "Dana beasiswa sebesar Rp 1.000.000,- setiap bulan selama 1 tahun"),
+            ("TUITION_FEE", "Dana beasiswa selama 1 tahun"),
             ("TRAINING", "Pelatihan Soft Skills (Nation Building, Character Building, Leadership Development, Competition Challenges, International Exposure)"),
         ),
     },
     {
-        "provider_name": "Bank Central Asia",
+        "provider_name": "Beasiswa BCA PPBP/PPTI",
         "source_url": "https://karir.bca.co.id/beasiswa-bca",
-        "title": "Beasiswa BCA",
+        "title": "Beasiswa BCA PPBP/PPTI",
         "summary": "Program Beasiswa BCA ditujukan kepada para lulusan SMA/SMK/sederajat berprestasi.",
         "description": "Program Beasiswa BCA adalah salah satu program Corporate Social Responsibility (CSR) BCA yang ditujukan kepada para lulusan SMA/SMK/sederajat yang berprestasi.",
-        "deadline": datetime(2027, 9, 15),
+        "deadline": None,
         "application_url": "https://karir.bca.co.id/beasiswa-bca",
         "requirements": (
-            ("EDUCATION_LEVEL", "EQUALS", {"level": "SMA/SMK"}, "Siswa/siswi lulusan SMA/SMK/sederajat"),
+            ("EDUCATION_LEVEL", "IN", {"levels": ["SMA", "SMK"]}, "Siswa/siswi lulusan SMA/SMK/sederajat"),
             ("AGE", "LTE", {"age": 19}, "Usia maksimum 19 tahun"),
         ),
         "benefits": (
-            ("FINANCIAL", "Bebas biaya pendidikan dan mendapatkan uang saku bulanan"),
-            ("CAREER", "Kesempatan magang dan penawaran kerja di BCA"),
-            ("LAPTOP", "Fasilitas laptop selama program"),
+            ("TUITION_FEE", "Bebas biaya pendidikan dan mendapatkan uang saku bulanan"),
+            ("INTERNSHIP", "Kesempatan magang dan penawaran kerja di BCA"),
         ),
     },
 )
 
 
 def _get_or_create_source(session, data: dict) -> ScholarshipSource:
+    target_url = _normalize_url(data["source_url"])
     source = (
         session.query(ScholarshipSource)
-        .filter(ScholarshipSource.source_url == data["source_url"])
-        .one_or_none()
+        .filter(ScholarshipSource.source_url.in_([target_url, data["source_url"]]))
+        .first()
     )
+    if source is None:
+        for candidate in session.query(ScholarshipSource).all():
+            if _normalize_url(candidate.source_url) == target_url:
+                source = candidate
+                break
+    if source is None:
+        source = (
+            session.query(ScholarshipSource)
+            .filter(ScholarshipSource.provider_name == data["provider_name"])
+            .first()
+        )
+
     if source is None:
         source = ScholarshipSource(
             provider_name=data["provider_name"],
-            source_url=data["source_url"],
+            source_url=target_url,
             crawl_allowed=True,
             active=True,
         )
@@ -76,6 +87,7 @@ def _get_or_create_source(session, data: dict) -> ScholarshipSource:
         session.flush()
     else:
         source.provider_name = data["provider_name"]
+        source.source_url = target_url
     return source
 
 
@@ -108,14 +120,24 @@ def seed_scholarships(session=None) -> int:
     try:
         for data in SEED_SCHOLARSHIPS:
             source = _get_or_create_source(session, data)
+            app_url = _normalize_url(data["application_url"])
             scholarship = (
                 session.query(Scholarship)
                 .filter(
                     Scholarship.source_id == source.id,
-                    Scholarship.application_url == data["application_url"],
+                    Scholarship.application_url == app_url,
                 )
-                .one_or_none()
+                .first()
             )
+            if scholarship is None:
+                scholarship = (
+                    session.query(Scholarship)
+                    .filter(
+                        Scholarship.source_id == source.id,
+                        Scholarship.title == data["title"],
+                    )
+                    .first()
+                )
             if scholarship is None:
                 scholarship = Scholarship(source_id=source.id)
                 session.add(scholarship)
@@ -124,7 +146,7 @@ def seed_scholarships(session=None) -> int:
             scholarship.summary = data["summary"]
             scholarship.description = data["description"]
             scholarship.deadline = data["deadline"]
-            scholarship.application_url = data["application_url"]
+            scholarship.application_url = app_url
             scholarship.is_active = True
             scholarship.data_origin = "SEED"
             # Seed data has provenance but no live verification timestamp.
