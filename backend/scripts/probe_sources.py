@@ -84,7 +84,12 @@ def probe_url(
         )
         status = str(response.status_code)
         byte_count = len(response.content)
-        server = response.headers.get("server", "-")
+        diag_parts = []
+        for hdr in ("server", "x-amzn-waf-action", "cf-mitigated"):
+            val = response.headers.get(hdr)
+            if val:
+                diag_parts.append(f"{hdr}={val}")
+        server = " ".join(diag_parts) if diag_parts else "-"
         final_url = str(response.url)
         title = _extract_title(response.text)
     except httpx.HTTPError as exc:
