@@ -2,194 +2,13 @@ import re
 from typing import Any
 
 from app.matching.schemas import CriterionEvaluation, CriterionState
+from app.matching.universities import (
+    is_similar_to_any_partner,
+    normalize_university_name,
+    resolve_university_alias,
+)
 from app.scholarships.models import ScholarshipRequirement
 from app.users.models import UserProfile
-
-_UNIVERSITY_ALIASES: dict[str, str] = {
-    # UI
-    "universitas indonesia": "universitas indonesia",
-    "ui": "universitas indonesia",
-    # UGM
-    "universitas gadjah mada": "universitas gadjah mada",
-    "universitas gajah mada": "universitas gadjah mada",
-    "ugm": "universitas gadjah mada",
-    # ITB
-    "institut teknologi bandung": "institut teknologi bandung",
-    "itb": "institut teknologi bandung",
-    # IPB
-    "institut pertanian bogor": "institut pertanian bogor",
-    "ipb university": "institut pertanian bogor",
-    "ipb": "institut pertanian bogor",
-    # UNDIP
-    "universitas diponegoro": "universitas diponegoro",
-    "undip": "universitas diponegoro",
-    # UB
-    "universitas brawijaya": "universitas brawijaya",
-    "ub": "universitas brawijaya",
-    "unibraw": "universitas brawijaya",
-    # UNHAS
-    "universitas hasanuddin": "universitas hasanuddin",
-    "unhas": "universitas hasanuddin",
-    # USU
-    "universitas sumatera utara": "universitas sumatera utara",
-    "usu": "universitas sumatera utara",
-    # UNRI
-    "universitas riau": "universitas riau",
-    "unri": "universitas riau",
-    # UNMUL
-    "universitas mulawarman": "universitas mulawarman",
-    "unmul": "universitas mulawarman",
-    # UNESA
-    "universitas negeri surabaya": "universitas negeri surabaya",
-    "unesa": "universitas negeri surabaya",
-    # UNAIR
-    "universitas airlangga": "universitas airlangga",
-    "unair": "universitas airlangga",
-    # ITS
-    "institut teknologi sepuluh nopember": "institut teknologi sepuluh nopember",
-    "institut teknologi sepuluh november": "institut teknologi sepuluh nopember",
-    "its": "institut teknologi sepuluh nopember",
-    # UNPAD
-    "universitas padjadjaran": "universitas padjadjaran",
-    "unpad": "universitas padjadjaran",
-    # UNS
-    "universitas sebelas maret": "universitas sebelas maret",
-    "uns": "universitas sebelas maret",
-    # UPI
-    "universitas pendidikan indonesia": "universitas pendidikan indonesia",
-    "upi": "universitas pendidikan indonesia",
-    # UNY
-    "universitas negeri yogyakarta": "universitas negeri yogyakarta",
-    "uny": "universitas negeri yogyakarta",
-    # UM
-    "universitas negeri malang": "universitas negeri malang",
-    "um": "universitas negeri malang",
-    # UNNES
-    "universitas negeri semarang": "universitas negeri semarang",
-    "unnes": "universitas negeri semarang",
-    # UNSOED
-    "universitas jenderal soedirman": "universitas jenderal soedirman",
-    "unsoed": "universitas jenderal soedirman",
-    # UNSRI
-    "universitas sriwijaya": "universitas sriwijaya",
-    "unsri": "universitas sriwijaya",
-    # UNAND
-    "universitas andalas": "universitas andalas",
-    "unand": "universitas andalas",
-    # USK / UNSYIAH
-    "universitas syiah kuala": "universitas syiah kuala",
-    "usk": "universitas syiah kuala",
-    "unsyiah": "universitas syiah kuala",
-    # UNUD
-    "universitas udayana": "universitas udayana",
-    "unud": "universitas udayana",
-    # UNILA
-    "universitas lampung": "universitas lampung",
-    "unila": "universitas lampung",
-    # BINUS
-    "universitas bina nusantara": "universitas bina nusantara",
-    "binus university": "universitas bina nusantara",
-    "binus": "universitas bina nusantara",
-    # Telkom University
-    "universitas telkom": "universitas telkom",
-    "telkom university": "universitas telkom",
-    "tel u": "universitas telkom",
-    # UII
-    "universitas islam indonesia": "universitas islam indonesia",
-    "uii": "universitas islam indonesia",
-    # UMY
-    "universitas muhammadiyah yogyakarta": "universitas muhammadiyah yogyakarta",
-    "umy": "universitas muhammadiyah yogyakarta",
-    # UNPAR
-    "universitas katolik parahyangan": "universitas katolik parahyangan",
-    "unpar": "universitas katolik parahyangan",
-    # UBAYA
-    "universitas surabaya": "universitas surabaya",
-    "ubaya": "universitas surabaya",
-    # UNSRAT
-    "universitas sam ratulangi": "universitas sam ratulangi",
-    "unsrat": "universitas sam ratulangi",
-    # UNTAN
-    "universitas tanjungpura": "universitas tanjungpura",
-    "untan": "universitas tanjungpura",
-    # UNEJ
-    "universitas jember": "universitas jember",
-    "unej": "universitas jember",
-    # UNRAM
-    "universitas mataram": "universitas mataram",
-    "unram": "universitas mataram",
-    # UNJ
-    "universitas negeri jakarta": "universitas negeri jakarta",
-    "unj": "universitas negeri jakarta",
-    # UNP
-    "universitas negeri padang": "universitas negeri padang",
-    "unp": "universitas negeri padang",
-    # UNIMED
-    "universitas negeri medan": "universitas negeri medan",
-    "unimed": "universitas negeri medan",
-    # UNM
-    "universitas negeri makassar": "universitas negeri makassar",
-    "unm": "universitas negeri makassar",
-    # PENS
-    "politeknik elektronika negeri surabaya": "politeknik elektronika negeri surabaya",
-    "pens": "politeknik elektronika negeri surabaya",
-    # UPN Veteran
-    "universitas pembangunan nasional veteran jakarta": "universitas pembangunan nasional veteran jakarta",
-    "upn veteran jakarta": "universitas pembangunan nasional veteran jakarta",
-    "upnvj": "universitas pembangunan nasional veteran jakarta",
-    "universitas pembangunan nasional veteran yogyakarta": "universitas pembangunan nasional veteran yogyakarta",
-    "upn veteran yogyakarta": "universitas pembangunan nasional veteran yogyakarta",
-    "upnvy": "universitas pembangunan nasional veteran yogyakarta",
-    "universitas pembangunan nasional veteran jawa timur": "universitas pembangunan nasional veteran jawa timur",
-    "upn veteran jawa timur": "universitas pembangunan nasional veteran jawa timur",
-    "upnvjt": "universitas pembangunan nasional veteran jawa timur",
-}
-
-_AMBIGUOUS_UNIVERSITY_TERMS: frozenset[str] = frozenset(
-    {
-        "universitas",
-        "institut",
-        "politeknik",
-        "sekolah tinggi",
-        "akademi",
-        "kampus",
-        "ptn",
-        "pts",
-        "perguruan tinggi",
-        "perguruan tinggi negeri",
-        "perguruan tinggi swasta",
-        "universitas negeri",
-        "universitas islam",
-        "universitas islam negeri",
-        "universitas muhammadiyah",
-        "universitas katolik",
-        "universitas kristen",
-        "universitas pembangunan nasional",
-        "institut teknologi",
-        "institut seni",
-        "institut agama islam negeri",
-        "politeknik negeri",
-        "sekolah tinggi ilmu ekonomi",
-        "sekolah tinggi teknologi",
-    }
-)
-
-_SPECIFIC_INSTITUTION_PREFIXES: tuple[str, ...] = (
-    "universitas ",
-    "institut ",
-    "politeknik ",
-    "sekolah tinggi ",
-    "akademi ",
-    "uin ",
-    "iain ",
-)
-
-_SPECIFIC_INSTITUTION_SUFFIXES: tuple[str, ...] = (
-    " university",
-    " institute",
-    " polytechnic",
-    " college",
-)
 
 _NATIONALITY_ALIASES: dict[str, str] = {
     "indonesia": "indonesia",
@@ -204,49 +23,9 @@ _NATIONALITY_ALIASES: dict[str, str] = {
 }
 
 
-def _normalize_text(value: str) -> str:
-    """Lowercase, strip punctuation, and collapse whitespace."""
-    cleaned = re.sub(r"[^a-z0-9\s]", " ", value.lower())
-    return " ".join(cleaned.split())
-
-
-def _canonicalize_university(raw_name: str) -> tuple[str, bool, bool]:
-    """Return ``(canonical_name, is_in_alias_table, is_confident_specific)``."""
-    norm = _normalize_text(raw_name)
-    if not norm:
-        return "", False, False
-
-    if norm in _UNIVERSITY_ALIASES:
-        return _UNIVERSITY_ALIASES[norm], True, True
-
-    # Support combined "Full Name (ACRONYM)" or "ACRONYM (Full Name)" inputs
-    paren_match = re.search(r"\(([^)]+)\)", raw_name)
-    if paren_match:
-        inner_norm = _normalize_text(paren_match.group(1))
-        outer_norm = _normalize_text(re.sub(r"\([^)]*\)", " ", raw_name))
-        inner_canon = _UNIVERSITY_ALIASES.get(inner_norm)
-        outer_canon = _UNIVERSITY_ALIASES.get(outer_norm)
-        if inner_canon and outer_canon and inner_canon == outer_canon:
-            return inner_canon, True, True
-        if outer_canon and not inner_norm:
-            return outer_canon, True, True
-
-    if norm in _AMBIGUOUS_UNIVERSITY_TERMS:
-        return norm, False, False
-
-    tokens = norm.split()
-    if len(tokens) < 2:
-        # Unknown single-word token/abbreviation is ambiguous
-        return norm, False, False
-
-    has_institution_marker = norm.startswith(_SPECIFIC_INSTITUTION_PREFIXES) or norm.endswith(
-        _SPECIFIC_INSTITUTION_SUFFIXES
-    )
-    return norm, False, has_institution_marker
-
-
 def _canonicalize_nationality(raw_value: str) -> str:
-    norm = _normalize_text(raw_value)
+    cleaned = re.sub(r"[^a-z0-9\s]", " ", raw_value.lower())
+    norm = " ".join(cleaned.split())
     if not norm:
         return ""
     return _NATIONALITY_ALIASES.get(norm, norm)
@@ -707,30 +486,18 @@ class MatchingEngine:
 
         req_canon_set: set[str] = set()
         for req_u in req_universities:
-            canon_u, _, _ = _canonicalize_university(req_u)
+            canon_u = resolve_university_alias(req_u) or normalize_university_name(req_u)
             if not canon_u:
                 return self._needs_verification(
                     "UNIVERSITY", op, val, "Nama perguruan tinggi pada persyaratan tidak valid."
                 )
             req_canon_set.add(canon_u)
 
-        actual_canon, is_in_alias_table, is_confident_specific = _canonicalize_university(
-            str(actual_uni)
-        )
-        if not actual_canon:
-            return CriterionEvaluation(
-                requirement_type="UNIVERSITY",
-                operator=op,
-                required_value=required_display,
-                actual_value=actual_uni,
-                state=CriterionState.NEEDS_VERIFICATION,
-                explanation=(
-                    f"Nama perguruan tinggi pada profil Anda ({actual_uni}) "
-                    "perlu diverifikasi terhadap daftar perguruan tinggi mitra."
-                ),
-            )
+        actual_uni_str = str(actual_uni)
+        resolved_actual = resolve_university_alias(actual_uni_str)
 
-        if actual_canon in req_canon_set:
+        # (a) Resolved via alias table to one of the required partners -> MATCH
+        if resolved_actual is not None and resolved_actual in req_canon_set:
             return CriterionEvaluation(
                 requirement_type="UNIVERSITY",
                 operator=op,
@@ -740,24 +507,21 @@ class MatchingEngine:
                 explanation=f"Perguruan tinggi Anda ({actual_uni}) sesuai persyaratan.",
             )
 
-        # Guard against partial/substring ambiguity when user input is not a known alias
-        if not is_in_alias_table:
-            has_partial_overlap = any(
-                actual_canon in req_c or req_c in actual_canon for req_c in req_canon_set
+        # (b) Unresolved but similar to any partner (or generic-only input) -> NEEDS_VERIFICATION
+        if resolved_actual is None and is_similar_to_any_partner(actual_uni_str, req_universities):
+            return CriterionEvaluation(
+                requirement_type="UNIVERSITY",
+                operator=op,
+                required_value=required_display,
+                actual_value=actual_uni,
+                state=CriterionState.NEEDS_VERIFICATION,
+                explanation=(
+                    f"Nama perguruan tinggi pada profil Anda ({actual_uni}) mirip dengan "
+                    "perguruan tinggi mitra namun perlu diverifikasi manual."
+                ),
             )
-            if has_partial_overlap or not is_confident_specific:
-                return CriterionEvaluation(
-                    requirement_type="UNIVERSITY",
-                    operator=op,
-                    required_value=required_display,
-                    actual_value=actual_uni,
-                    state=CriterionState.NEEDS_VERIFICATION,
-                    explanation=(
-                        f"Nama perguruan tinggi pada profil Anda ({actual_uni}) tidak dapat "
-                        "dipastikan kecocokannya secara otomatis; silakan verifikasi manual."
-                    ),
-                )
 
+        # (c) Resolved to a different known university, or unresolved and not similar -> NOT_MATCH
         return CriterionEvaluation(
             requirement_type="UNIVERSITY",
             operator=op,
