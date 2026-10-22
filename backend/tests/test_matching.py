@@ -1,7 +1,10 @@
 import uuid
+from datetime import datetime
+from pathlib import Path
 
 import pytest
 
+from app.crawler.registry import get_registry
 from app.matching.engine import MatchingEngine
 from app.matching.schemas import CriterionState
 from app.scholarships.models import ScholarshipRequirement
@@ -149,35 +152,51 @@ _TELADAN_PARTNERS = [
 @pytest.mark.parametrize(
     ("profile_uni", "expected_state"),
     [
-        # Exact & case/punctuation variations -> MATCH
-        ("Universitas Gadjah Mada", CriterionState.MATCH),
-        ("universitas gadjah mada.", CriterionState.MATCH),
-        # Known alias matches -> MATCH
-        ("UGM", CriterionState.MATCH),
-        ("UI", CriterionState.MATCH),
-        ("Universitas Indonesia (UI)", CriterionState.MATCH),
+        # (a) All 10 TELADAN partners — full names -> MATCH
+        ("IPB University", CriterionState.MATCH),
         ("Institut Pertanian Bogor", CriterionState.MATCH),
+        ("Institut Teknologi Bandung", CriterionState.MATCH),
+        ("Universitas Brawijaya", CriterionState.MATCH),
+        ("Universitas Diponegoro", CriterionState.MATCH),
+        ("Universitas Gadjah Mada", CriterionState.MATCH),
+        ("Universitas Hasanuddin", CriterionState.MATCH),
+        ("Universitas Indonesia", CriterionState.MATCH),
+        ("Universitas Mulawarman", CriterionState.MATCH),
+        ("Universitas Riau", CriterionState.MATCH),
+        ("Universitas Sumatera Utara", CriterionState.MATCH),
+        # (a) All 10 TELADAN partners — common abbreviations -> MATCH
         ("IPB", CriterionState.MATCH),
+        ("ITB", CriterionState.MATCH),
+        ("UB", CriterionState.MATCH),
         ("UNDIP", CriterionState.MATCH),
-        # Confident non-matches (known alias not in partner list, or specific university) -> NOT_MATCH
+        ("UGM", CriterionState.MATCH),
+        ("UNHAS", CriterionState.MATCH),
+        ("UI", CriterionState.MATCH),
+        ("UNMUL", CriterionState.MATCH),
+        ("UNRI", CriterionState.MATCH),
+        ("USU", CriterionState.MATCH),
+        ("Universitas Indonesia (UI)", CriterionState.MATCH),
+        # (b) Unresolved but similar to a partner -> NEEDS_VERIFICATION
+        ("Universitas Diponegoro Semarang", CriterionState.NEEDS_VERIFICATION),
+        ("Universitas Gajah Mada", CriterionState.NEEDS_VERIFICATION),
+        ("Universitas Sumatera", CriterionState.NEEDS_VERIFICATION),
+        ("Fakultas Teknik Universitas Indonesia", CriterionState.NEEDS_VERIFICATION),
+        ("Universitas", CriterionState.NEEDS_VERIFICATION),
+        ("Universitas Negeri", CriterionState.NEEDS_VERIFICATION),
+        ("Perguruan Tinggi Negeri", CriterionState.NEEDS_VERIFICATION),
+        ("PTN", CriterionState.NEEDS_VERIFICATION),
+        ("---", CriterionState.NEEDS_VERIFICATION),
+        # (c) Unresolved AND not similar (or resolved to non-partner) -> NOT_MATCH
         ("Universitas Negeri Surabaya", CriterionState.NOT_MATCH),
         ("UNESA", CriterionState.NOT_MATCH),
         ("Universitas Airlangga", CriterionState.NOT_MATCH),
         ("UNAIR", CriterionState.NOT_MATCH),
         ("Universitas Pancasila", CriterionState.NOT_MATCH),
-        # Missing / blank profile university -> UNKNOWN
+        ("XYZ", CriterionState.NOT_MATCH),
+        # (d) Empty / None -> UNKNOWN
         (None, CriterionState.UNKNOWN),
         ("", CriterionState.UNKNOWN),
         ("   ", CriterionState.UNKNOWN),
-        # Ambiguous / generic / unknown single-token / partial substring -> NEEDS_VERIFICATION
-        ("Universitas", CriterionState.NEEDS_VERIFICATION),
-        ("Universitas Negeri", CriterionState.NEEDS_VERIFICATION),
-        ("Perguruan Tinggi Negeri", CriterionState.NEEDS_VERIFICATION),
-        ("PTN", CriterionState.NEEDS_VERIFICATION),
-        ("XYZ", CriterionState.NEEDS_VERIFICATION),
-        ("Universitas Sumatera", CriterionState.NEEDS_VERIFICATION),
-        ("Fakultas Teknik Universitas Indonesia", CriterionState.NEEDS_VERIFICATION),
-        ("---", CriterionState.NEEDS_VERIFICATION),
     ],
 )
 def test_evaluate_university_in_branches(engine, profile_uni, expected_state):
@@ -186,6 +205,67 @@ def test_evaluate_university_in_branches(engine, profile_uni, expected_state):
     res = engine.evaluate(profile, req)
     assert res.state == expected_state
     assert res.requirement_type == "UNIVERSITY"
+
+
+@pytest.mark.parametrize(
+    "partner_variant",
+    [
+        # All 10 partners with "Univ." / "Inst." prefix
+        "Univ. IPB",
+        "Univ. Pertanian Bogor",
+        "Inst. Teknologi Bandung",
+        "Univ. Teknologi Bandung",
+        "Univ. Brawijaya",
+        "Univ. Diponegoro",
+        "Univ. Gadjah Mada",
+        "Univ. Hasanuddin",
+        "Univ. Indonesia",
+        "Univ. Mulawarman",
+        "Univ. Riau",
+        "Univ. Sumatera Utara",
+        # All 10 partners with uppercase and multiple spaces
+        "  IPB   UNIVERSITY  ",
+        "  INSTITUT   PERTANIAN   BOGOR  ",
+        "  INSTITUT   TEKNOLOGI   BANDUNG  ",
+        "  UNIVERSITAS   BRAWIJAYA  ",
+        "  UNIVERSITAS   DIPONEGORO  ",
+        "  UNIVERSITAS   GADJAH   MADA  ",
+        "  UNIVERSITAS   HASANUDDIN  ",
+        "  UNIVERSITAS   INDONESIA  ",
+        "  UNIVERSITAS   MULAWARMAN  ",
+        "  UNIVERSITAS   RIAU  ",
+        "  UNIVERSITAS   SUMATERA   UTARA  ",
+        # All 10 partners with city suffix
+        "Institut Pertanian Bogor Dramaga",
+        "Institut Teknologi Bandung Bandung",
+        "Universitas Brawijaya Malang",
+        "Universitas Diponegoro Semarang",
+        "Universitas Gadjah Mada Yogyakarta",
+        "Universitas Hasanuddin Makassar",
+        "Universitas Indonesia Depok",
+        "Universitas Mulawarman Samarinda",
+        "Universitas Riau Pekanbaru",
+        "Universitas Sumatera Utara Medan",
+        # All 10 partners with typos
+        "Institut Pertaniaan Bogor",
+        "Institut Tehnologi Bandung",
+        "Universitas Brawijya",
+        "Universitas Diponogoro",
+        "Universitas Gajah Mada",
+        "Universitas Hasanudin",
+        "Universitas Indoneisa",
+        "Universitas Mulawarwan",
+        "Universitas Riauu",
+        "Universitas Sumatra Utara",
+    ],
+)
+def test_teladan_all_10_partners_variants_never_not_match(engine, partner_variant):
+    profile = UserProfile(university=partner_variant)
+    req = create_req("UNIVERSITY", "IN", {"universities": _TELADAN_PARTNERS})
+    res = engine.evaluate(profile, req)
+    assert res.state in (CriterionState.MATCH, CriterionState.NEEDS_VERIFICATION)
+    assert res.state != CriterionState.NOT_MATCH
+
 
 
 def test_evaluate_university_eq_alias_match_unesa(engine):
@@ -253,4 +333,62 @@ def test_evaluate_nationality_malformed(engine):
         profile, create_req("NATIONALITY", "GTE", {"country": "Indonesia"})
     )
     assert res_bad_op.state == CriterionState.NEEDS_VERIFICATION
+
+
+_CRAWLER_FIXTURE_DIR = Path(__file__).parent / "crawler" / "fixtures"
+_FIXED_CRAWL_REF = datetime(2026, 10, 20, 3, 0, 0)
+_EXPLICITLY_UNSUPPORTED_REQ_TYPES = frozenset({"AGE"})
+_SCRAPER_FIXTURES: dict[str, str] = {
+    "djarum": "djarum.html",
+    "lpdp": "lpdp.html",
+    "teladan": "teladan_2027.html",
+    "pertamina_sobat_bumi": "pertamina.html",
+    "cimb_scholarship": "cimb.html",
+    "bca_scholarship": "bca.html",
+    "ugm_bulletin": "ugm_baznas.html",
+}
+
+
+def test_all_registry_scrapers_with_factory_are_in_contract_fixture_map():
+    registry_with_factory = {
+        key for key, entry in get_registry().items() if entry.scraper_factory is not None
+    }
+    assert set(_SCRAPER_FIXTURES.keys()) == registry_with_factory
+
+
+@pytest.mark.parametrize(("source_key", "fixture_name"), list(_SCRAPER_FIXTURES.items()))
+def test_contract_crawler_requirements_supported_by_matching_engine(
+    engine, source_key, fixture_name
+):
+    entry = get_registry()[source_key]
+    assert entry.scraper_factory is not None
+    scraper = entry.scraper_factory()
+    html = (_CRAWLER_FIXTURE_DIR / fixture_name).read_text(encoding="utf-8")
+    scraped_scholarships = scraper.parse_html(html, reference_time=_FIXED_CRAWL_REF)
+    assert scraped_scholarships
+
+    sample_profile = UserProfile(
+        university="Universitas Gadjah Mada",
+        degree_level=DegreeLevel.S1,
+        semester=4,
+        gpa=3.6,
+        major="Ilmu Komputer",
+        organizations=["BEM KM UGM"],
+    )
+
+    for scholarship in scraped_scholarships:
+        for scraped_req in scholarship.requirements:
+            req = create_req(
+                scraped_req.requirement_type,
+                scraped_req.operator,
+                scraped_req.value,
+            )
+            res = engine.evaluate(sample_profile, req)
+            if scraped_req.requirement_type.upper() not in _EXPLICITLY_UNSUPPORTED_REQ_TYPES:
+                assert "tidak dapat dievaluasi secara otomatis" not in res.explanation.lower(), (
+                    f"Scraper '{source_key}' emitted requirement_type="
+                    f"'{scraped_req.requirement_type}' which fell into generic unsupported "
+                    f"handler: {res.explanation}"
+                )
+
 
