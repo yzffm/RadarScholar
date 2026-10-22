@@ -41,6 +41,7 @@ _ABBREVIATION_PATTERN = re.compile(
 _DEADLINE_CONTEXT = re.compile(
     r"deadline|batas\s+(?:akhir\s+)?pendaftaran|"
     r"jadwal\s+pendaftaran|"
+    r"pendaftaran\s+periode(?:\s+\d+)?\s*:|"
     r"pendaftaran\s+online\s*:|"
     r"pendaftaran\s+(?:dibuka\s+)?(?:sampai|hingga|ditutup|s\.d\.)|"
     r"(?:sebelum|before)\s+|"
@@ -136,3 +137,19 @@ def extract_contextual_deadline(
         date for date in extract_contextual_dates(text) if date >= now_utc
     ]
     return max(candidates) if candidates else None
+
+
+def parse_indonesian_date(text: str) -> datetime | None:
+    """Parse the first Indonesian calendar date in ``text`` as naive UTC end-of-day."""
+    match = _DATE_PATTERN.search(text)
+    if not match:
+        return None
+    try:
+        return _deadline_end_of_day_utc(
+            int(match.group(3)),
+            _MONTHS[match.group(2).lower()],
+            int(match.group(1)),
+        )
+    except (KeyError, ValueError):
+        return None
+

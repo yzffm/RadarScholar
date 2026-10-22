@@ -23,5 +23,16 @@ def test_registry_only_enables_audited_crawlable_source():
     assert registry["lpdp"].crawl_status == "WAF_BLOCKED"
     assert registry["beasiswa_unggulan"].crawl_method == "MANUAL_OFFICIAL"
     assert registry["kip_kuliah"].crawl_method == "MANUAL_OFFICIAL"
-    assert registry["bank_indonesia_genbi"].crawl_status == "MANUAL_ONLY"
     assert registry["baznas"].crawl_status == "MANUAL_ONLY"
+
+    for wave1_key in (
+        "kse",
+        "vdmi",
+        "dataprint",
+        "bank_indonesia_genbi",
+        "ugm_ditmawa_index",
+    ):
+        assert registry[wave1_key].enabled is False
+        assert registry[wave1_key].crawl_status == "NEEDS_REVIEW"
+        assert registry[wave1_key].crawl_method == "HTTP_HTML"
+        assert registry[wave1_key].scraper_factory is not None

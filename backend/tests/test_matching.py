@@ -267,7 +267,6 @@ def test_teladan_all_10_partners_variants_never_not_match(engine, partner_varian
     assert res.state != CriterionState.NOT_MATCH
 
 
-
 def test_evaluate_university_eq_alias_match_unesa(engine):
     profile = UserProfile(university="Universitas Negeri Surabaya")
     req = create_req("UNIVERSITY", "EQ", {"university": "UNESA"})
@@ -324,7 +323,6 @@ def test_evaluate_nationality_match_and_not_match(engine):
     assert res_not_match.actual_value == "Lainnya"
 
 
-
 def test_evaluate_nationality_malformed(engine):
     profile = UserProfile()
     res_empty = engine.evaluate(profile, create_req("NATIONALITY", "EQ", {}))
@@ -347,6 +345,11 @@ _SCRAPER_FIXTURES: dict[str, str] = {
     "cimb_scholarship": "cimb.html",
     "bca_scholarship": "bca.html",
     "ugm_bulletin": "ugm_baznas.html",
+    "kse": "kse.html",
+    "vdmi": "vdmi.html",
+    "dataprint": "dataprint.html",
+    "bank_indonesia_genbi": "bank_indonesia_genbi.html",
+    "ugm_ditmawa_index": "ugm_ditmawa_index.html",
 }
 
 
@@ -391,5 +394,3 @@ def test_contract_crawler_requirements_supported_by_matching_engine(
                     f"'{scraped_req.requirement_type}' which fell into generic unsupported "
                     f"handler: {res.explanation}"
                 )
-
-

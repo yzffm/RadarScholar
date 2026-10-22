@@ -40,11 +40,16 @@ def _build_registry() -> dict[str, SourceEntry]:
     """
     from app.crawler.scrapers.bca import BcaScholarshipScraper
     from app.crawler.scrapers.cimb import CimbScholarshipScraper
+    from app.crawler.scrapers.dataprint import DataPrintScraper
     from app.crawler.scrapers.djarum import DjarumScraper
+    from app.crawler.scrapers.genbi import BankIndonesiaGenbiScraper
+    from app.crawler.scrapers.kse import KseScraper
     from app.crawler.scrapers.lpdp import LpdpScraper
     from app.crawler.scrapers.pertamina import PertaminaSobatBumiScraper
     from app.crawler.scrapers.teladan import TeladanScraper
     from app.crawler.scrapers.ugm_bulletin import UgmScholarshipBulletinScraper
+    from app.crawler.scrapers.ugm_ditmawa_index import UgmDitmawaIndexScraper
+    from app.crawler.scrapers.vdmi import VdmiScraper
 
     return {
         "djarum": SourceEntry(
@@ -97,6 +102,38 @@ def _build_registry() -> dict[str, SourceEntry]:
             enabled=True,
             crawl_status="ACTIVE",
         ),
+        "kse": SourceEntry(
+            provider_name="Karya Salemba Empat (KSE)",
+            source_url="https://kse.or.id/",
+            scraper_factory=KseScraper,
+            enabled=False,
+            crawl_status="NEEDS_REVIEW",
+            crawl_method="HTTP_HTML",
+        ),
+        "vdmi": SourceEntry(
+            provider_name="Van Deventer-Maas Indonesia (VDMI)",
+            source_url="https://vandeventermaas.or.id/",
+            scraper_factory=VdmiScraper,
+            enabled=False,
+            crawl_status="NEEDS_REVIEW",
+            crawl_method="HTTP_HTML",
+        ),
+        "dataprint": SourceEntry(
+            provider_name="Beasiswa DataPrint",
+            source_url="https://beasiswadataprint.com/",
+            scraper_factory=DataPrintScraper,
+            enabled=False,
+            crawl_status="NEEDS_REVIEW",
+            crawl_method="HTTP_HTML",
+        ),
+        "ugm_ditmawa_index": SourceEntry(
+            provider_name="UGM Direktorat Kemahasiswaan - Info Beasiswa",
+            source_url="https://ditmawa.ugm.ac.id/category/info-beasiswa/",
+            scraper_factory=UgmDitmawaIndexScraper,
+            enabled=False,
+            crawl_status="NEEDS_REVIEW",
+            crawl_method="HTTP_HTML",
+        ),
         "beasiswa_unggulan": SourceEntry(
             provider_name="Beasiswa Unggulan Kemendikbudristek",
             source_url="https://beasiswaunggulan.kemdikbud.go.id/",
@@ -116,10 +153,10 @@ def _build_registry() -> dict[str, SourceEntry]:
         "bank_indonesia_genbi": SourceEntry(
             provider_name="Bank Indonesia / GenBI",
             source_url="https://www.bi.go.id/id/edukasi/",
-            scraper_factory=None,
+            scraper_factory=BankIndonesiaGenbiScraper,
             enabled=False,
-            crawl_status="MANUAL_ONLY",
-            crawl_method="MANUAL_OFFICIAL",
+            crawl_status="NEEDS_REVIEW",
+            crawl_method="HTTP_HTML",
         ),
         "baznas": SourceEntry(
             provider_name="Beasiswa BAZNAS",
