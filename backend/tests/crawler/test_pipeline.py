@@ -11,9 +11,15 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.crawler.base import ScrapedBenefit, ScrapedRequirement, ScrapedScholarship
+from app.crawler.base import (
+    ScrapedBenefit,
+    ScrapedRequirement,
+    ScrapedScholarship,
+    SourceUnavailableError,
+)
+from app.crawler.models import CrawlRun
 from app.crawler.pipeline import CrawlerPipeline, _normalize_text, _normalize_url
-from app.crawler.registry import SourceEntry
+from app.crawler.registry import SourceEntry, get_registry
 from app.database.base import Base
 from app.scholarships.models import (
     Scholarship,
@@ -644,4 +650,114 @@ class TestResultSummary:
         summary = result.summary()
         assert "RadarScholar Crawler" in summary
         assert "Sources attempted" in summary
+        assert "Sources unavailable" in summary
         assert "Created" in summary
+
+
+class UnavailableScraper:
+    """A scraper that raises SourceUnavailableError."""
+
+    provider_name = "Unavailable Provider"
+    source_url = "https://unavailable.example.com/scholarship"
+
+    def scrape(self):
+        raise SourceUnavailableError(
+            "HTTP 403 — source is blocking access",
+            url=self.source_url,
+        )
+
+
+class TestSourceUnavailableHandling:
+    """Verify B2 and B6: SourceUnavailableError handling and registry sync."""
+
+    def test_unavailable_source_preserves_old_data_and_is_not_counted_failed(
+        self, db_session: Session
+    ):
+        # First crawl succeeds and stores a scholarship
+        initial_registry = {
+            "unavail_src": SourceEntry(
+                provider_name="Unavailable Provider",
+                source_url="https://unavailable.example.com/scholarship",
+                scraper_factory=lambda: FakeScraper(
+                    [
+                        _make_scraped(
+                            title="Existing Scholarship",
+                            provider="Unavailable Provider",
+                            source_url="https://unavailable.example.com/scholarship",
+                            application_url="https://unavailable.example.com/apply",
+                        )
+                    ]
+                ),
+                enabled=True,
+            ),
+        }
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=initial_registry):
+            CrawlerPipeline(db=db_session).run()
+
+        # Second crawl has 1 good source and 1 unavailable source
+        second_registry = {
+            "good_src": SourceEntry(
+                provider_name="Good Provider",
+                source_url="https://good.example.com/scholarship",
+                scraper_factory=lambda: FakeScraper(
+                    [
+                        _make_scraped(
+                            title="Good Scholarship",
+                            provider="Good Provider",
+                            source_url="https://good.example.com/scholarship",
+                            application_url="https://good.example.com/apply",
+                        )
+                    ]
+                ),
+                enabled=True,
+            ),
+            "unavail_src": SourceEntry(
+                provider_name="Unavailable Provider",
+                source_url="https://unavailable.example.com/scholarship",
+                scraper_factory=UnavailableScraper,
+                enabled=True,
+            ),
+        }
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value=second_registry):
+            result = CrawlerPipeline(db=db_session).run()
+
+        assert result.sources_attempted == 2
+        assert result.sources_succeeded == 1
+        assert result.sources_unavailable == 1
+        assert result.sources_failed == 0
+        assert result.errors == []
+
+        unavail_res = next(
+            sr for sr in result.source_results if sr.source_key == "unavail_src"
+        )
+        assert unavail_res.unavailable is True
+        assert unavail_res.success is False
+
+        # Old data from unavail_src is preserved alongside good_src
+        titles = {s.title for s in db_session.query(Scholarship).all()}
+        assert titles == {"Existing Scholarship", "Good Scholarship"}
+
+        # CrawlRun JSON stores unavailable=True and status=SUCCESS
+        latest_run = (
+            db_session.query(CrawlRun).order_by(CrawlRun.started_at.desc()).first()
+        )
+        assert latest_run is not None
+        assert latest_run.status == "SUCCESS"
+        unavail_json = next(
+            sr for sr in latest_run.source_results if sr["source_key"] == "unavail_src"
+        )
+        assert unavail_json["unavailable"] is True
+
+    def test_registry_is_synced_to_scholarship_sources_at_run_start(
+        self, db_session: Session
+    ):
+        with patch("app.crawler.pipeline.get_enabled_sources", return_value={}):
+            CrawlerPipeline(db=db_session, dry_run=False).run()
+
+        persisted_urls = {
+            row.source_url for row in db_session.query(ScholarshipSource).all()
+        }
+        expected_urls = {
+            _normalize_url(entry.source_url) for entry in get_registry().values()
+        }
+        assert expected_urls <= persisted_urls

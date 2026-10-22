@@ -19,11 +19,13 @@ def run_cli(monkeypatch, pipeline_result):
     return crawler_main.main(), engine, session, pipeline
 
 
-def result(attempted, succeeded, failed):
+def result(attempted, succeeded, failed, unavailable=0, source_results=None):
     return SimpleNamespace(
         sources_attempted=attempted,
         sources_succeeded=succeeded,
         sources_failed=failed,
+        sources_unavailable=unavailable,
+        source_results=source_results or [],
         summary=lambda: "summary",
     )
 
@@ -45,9 +47,37 @@ def test_cli_returns_one_when_all_sources_fail(monkeypatch):
     engine.dispose.assert_called_once()
 
 
+def test_cli_returns_one_when_all_sources_unavailable(monkeypatch):
+    exit_code, engine, session, _ = run_cli(monkeypatch, result(2, 0, 0, unavailable=2))
+
+    assert exit_code == 1
+    session.close.assert_called_once()
+    engine.dispose.assert_called_once()
+
+
 def test_cli_returns_two_for_partial_failure(monkeypatch):
     exit_code, engine, session, _ = run_cli(monkeypatch, result(2, 1, 1))
 
     assert exit_code == 2
+    session.close.assert_called_once()
+    engine.dispose.assert_called_once()
+
+
+def test_cli_returns_zero_with_github_warning_when_only_unavailable(monkeypatch, capsys):
+    unavailable_sr = SimpleNamespace(
+        source_key="cimb_scholarship",
+        provider_name="CIMB Niaga Scholarship",
+        unavailable=True,
+        error="HTTP 403 — source is blocking access",
+    )
+    exit_code, engine, session, _ = run_cli(
+        monkeypatch,
+        result(2, 1, 0, unavailable=1, source_results=[unavailable_sr]),
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "::warning::" in captured.out
+    assert "cimb_scholarship" in captured.out
     session.close.assert_called_once()
     engine.dispose.assert_called_once()
