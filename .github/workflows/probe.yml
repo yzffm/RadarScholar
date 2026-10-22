@@ -2,14 +2,6 @@ name: Probe Curated Scholarship Sources
 
 on:
   workflow_dispatch:
-  # TEMPORARY: scoped push trigger to execute probe on fix/crawler-resilience
-  # before merging to main. MUST BE REMOVED before merging to main.
-  push:
-    branches:
-      - fix/crawler-resilience
-    paths:
-      - '.github/workflows/probe.yml'
-      - 'backend/scripts/probe_sources.py'
 
 jobs:
   probe:

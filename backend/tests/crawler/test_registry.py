@@ -8,14 +8,15 @@ def test_registry_only_enables_audited_crawlable_source():
     assert set(enabled) == {
         "teladan",
         "pertamina_sobat_bumi",
-        "cimb_scholarship",
         "bca_scholarship",
         "ugm_bulletin",
     }
     assert registry["teladan"].crawl_status == "ACTIVE"
     assert registry["teladan"].crawl_method == "HTTP_HTML"
     assert registry["pertamina_sobat_bumi"].crawl_status == "ACTIVE"
-    assert registry["cimb_scholarship"].crawl_status == "ACTIVE"
+    assert registry["cimb_scholarship"].enabled is False
+    assert registry["cimb_scholarship"].crawl_status == "WAF_BLOCKED"
+    assert registry["cimb_scholarship"].crawl_method == "MANUAL_OFFICIAL"
     assert registry["bca_scholarship"].crawl_status == "ACTIVE"
     assert registry["ugm_bulletin"].crawl_status == "ACTIVE"
     assert registry["djarum"].crawl_status == "ANTI_BOT_BLOCKED"

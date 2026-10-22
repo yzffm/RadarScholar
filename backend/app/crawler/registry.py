@@ -79,8 +79,9 @@ def _build_registry() -> dict[str, SourceEntry]:
             provider_name="CIMB Niaga Scholarship",
             source_url="https://investor.cimbniaga.co.id/csr/scholarship.html",
             scraper_factory=CimbScholarshipScraper,
-            enabled=True,
-            crawl_status="ACTIVE",
+            enabled=False,
+            crawl_status="WAF_BLOCKED",
+            crawl_method="MANUAL_OFFICIAL",
         ),
         "bca_scholarship": SourceEntry(
             provider_name="Beasiswa BCA PPBP/PPTI",
