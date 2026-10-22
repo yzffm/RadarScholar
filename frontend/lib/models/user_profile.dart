@@ -34,6 +34,7 @@ class UserProfile {
   final String? avatarUrl;
 
   // Academic
+  final String? nationality;
   final String? university;
   final String? faculty;
   final String? major;
@@ -67,6 +68,7 @@ class UserProfile {
     required this.email,
     this.displayName,
     this.avatarUrl,
+    this.nationality,
     this.university,
     this.faculty,
     this.major,
@@ -94,6 +96,7 @@ class UserProfile {
       email: json['email'] as String,
       displayName: json['display_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
+      nationality: json['nationality'] as String?,
       university: json['university'] as String?,
       faculty: json['faculty'] as String?,
       major: json['major'] as String?,
@@ -119,6 +122,7 @@ class UserProfile {
   Map<String, dynamic> toJson() {
     return {
       'display_name': displayName,
+      'nationality': nationality,
       'university': university,
       'faculty': faculty,
       'major': major,
@@ -141,6 +145,7 @@ class UserProfile {
   UserProfile copyWith({
     String? displayName,
     String? avatarUrl,
+    String? nationality,
     String? university,
     String? faculty,
     String? major,
@@ -163,6 +168,7 @@ class UserProfile {
       email: email,
       displayName: displayName ?? this.displayName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      nationality: nationality ?? this.nationality,
       university: university ?? this.university,
       faculty: faculty ?? this.faculty,
       major: major ?? this.major,

@@ -26,7 +26,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   final _majorController = TextEditingController();
   final _semesterController = TextEditingController();
   final _gpaController = TextEditingController();
+  String? _selectedNationality;
   DegreeLevel? _selectedDegree;
+
+  static const List<String> _nationalityOptions = ['Indonesia', 'Lainnya'];
 
   // Experience & Interests (simplified as comma-separated for MVP)
   final _skillsController = TextEditingController();
@@ -56,6 +59,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   void _populateForm(UserProfile profile) {
     if (_initialized) return;
 
+    _selectedNationality = _nationalityOptions.contains(profile.nationality)
+        ? profile.nationality
+        : null;
     _univController.text = profile.university ?? '';
     _facultyController.text = profile.faculty ?? '';
     _majorController.text = profile.major ?? '';
@@ -111,6 +117,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     if (!_formKey.currentState!.validate()) return;
 
     final data = <String, dynamic>{
+      'nationality': _selectedNationality,
       'university': _univController.text.trim(),
       'faculty': _facultyController.text.trim(),
       'major': _majorController.text.trim(),
@@ -330,6 +337,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 title: 'Data Akademik',
                 icon: Icons.school_rounded,
                 children: [
+                  _buildDisplayField('Kewarganegaraan', profile.nationality),
                   _buildDisplayField('Universitas', profile.university),
                   _buildDisplayField('Fakultas', profile.faculty),
                   _buildDisplayField('Program Studi', profile.major),
@@ -598,6 +606,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   title: 'Data Akademik',
                   icon: Icons.school_rounded,
                   children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedNationality,
+                      decoration: const InputDecoration(
+                        labelText: 'Kewarganegaraan',
+                      ),
+                      items: _nationalityOptions.map((item) {
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item),
+                        );
+                      }).toList(),
+                      onChanged: (val) =>
+                          setState(() => _selectedNationality = val),
+                    ),
+                    const SizedBox(height: Spacing.md),
                     TextFormField(
                       controller: _univController,
                       decoration: const InputDecoration(
