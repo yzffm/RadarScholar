@@ -20,15 +20,22 @@ class DummyScraper(BaseScraper):
         return []
 
 
-def _make_response(
-    url: str,
-    status_code: int = 200,
-    text: str = "",
-    headers: dict[str, str] | None = None,
-) -> httpx.Response:
-    req = httpx.Request("GET", url)
-    hdrs = {"server": "cloudflare", **(headers or {})}
-    return httpx.Response(status_code=status_code, text=text, headers=hdrs, request=req)
+def _mount_mock_transport(monkeypatch, handler):
+    """Route httpx.get calls through an httpx.MockTransport handler."""
+    transport = httpx.MockTransport(handler)
+
+    def _get(url, **kwargs):
+        headers = kwargs.get("headers")
+        follow_redirects = kwargs.get("follow_redirects", True)
+        timeout = kwargs.get("timeout")
+        with httpx.Client(
+            transport=transport,
+            follow_redirects=follow_redirects,
+            timeout=timeout,
+        ) as client:
+            return client.get(url, headers=headers)
+
+    monkeypatch.setattr(httpx, "get", _get)
 
 
 def _valid_html(title: str = "Official Scholarship Page", body_extra: str = "") -> str:
@@ -60,17 +67,88 @@ def test_djarum_and_lpdp_fall_back_on_source_unavailable_error(monkeypatch):
     assert lpdp_items[0].is_live_verified is False
 
 
+def test_mock_transport_202_with_2183_char_body_is_unavailable_without_retry(monkeypatch):
+    calls: list[str] = []
+    waf_body_2183 = "<script>" + ("a" * (2183 - 17)) + "</script>"
+    assert len(waf_body_2183) == 2183
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        calls.append(url)
+        if url.endswith("/robots.txt"):
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(
+            202,
+            text=waf_body_2183,
+            headers={"server": "awselb/2.0", "x-amzn-waf-action": "challenge"},
+        )
+
+    _mount_mock_transport(monkeypatch, handler)
+
+    scraper = DummyScraper()
+    with pytest.raises(SourceUnavailableError, match="HTTP 202"):
+        scraper.fetch(
+            "https://investor.cimbniaga.co.id/csr/scholarship.html",
+            max_retries=2,
+            backoff_seconds=0.0,
+        )
+
+    assert calls == [
+        "https://investor.cimbniaga.co.id/robots.txt",
+        "https://investor.cimbniaga.co.id/csr/scholarship.html",
+    ]
+
+
+@pytest.mark.parametrize("status_code", [201, 202, 203, 204, 206])
+def test_non_200_2xx_statuses_are_unavailable_without_retry(monkeypatch, status_code):
+    calls: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        calls.append(url)
+        if url.endswith("/robots.txt"):
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        body = "" if status_code == 204 else _valid_html()
+        return httpx.Response(status_code, text=body)
+
+    _mount_mock_transport(monkeypatch, handler)
+
+    scraper = DummyScraper()
+    with pytest.raises(SourceUnavailableError, match=f"HTTP {status_code}"):
+        scraper.fetch("https://example.org/scholarships", max_retries=2, backoff_seconds=0.0)
+
+    assert calls == [
+        "https://example.org/robots.txt",
+        "https://example.org/scholarships",
+    ]
+
+
+def test_normal_200_passes_via_mock_transport(monkeypatch):
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        if url.endswith("/robots.txt"):
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(200, text=_valid_html(title="Beasiswa Resmi 2026"))
+
+    _mount_mock_transport(monkeypatch, handler)
+
+    scraper = DummyScraper()
+    response = scraper.fetch("https://example.org/scholarships")
+    assert response.status_code == 200
+
+
 @pytest.mark.parametrize("status_code", [401, 403, 451])
 def test_fetch_does_not_retry_on_401_403_451(monkeypatch, status_code):
     calls: list[str] = []
 
-    def fake_get(url, **kwargs):
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
         calls.append(url)
         if url.endswith("/robots.txt"):
-            return _make_response(url, 200, "User-agent: *\nAllow: /\n")
-        return _make_response(url, status_code, _valid_html())
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(status_code, text=_valid_html())
 
-    monkeypatch.setattr(httpx, "get", fake_get)
+    _mount_mock_transport(monkeypatch, handler)
 
     scraper = DummyScraper()
     with pytest.raises(SourceUnavailableError, match=f"HTTP {status_code}"):
@@ -93,12 +171,13 @@ def test_fetch_does_not_retry_on_401_403_451(monkeypatch, status_code):
     ],
 )
 def test_fetch_detects_challenge_from_title_only(monkeypatch, challenge_title):
-    def fake_get(url, **kwargs):
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
         if url.endswith("/robots.txt"):
-            return _make_response(url, 200, "User-agent: *\nAllow: /\n")
-        return _make_response(url, 200, _valid_html(title=challenge_title))
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(200, text=_valid_html(title=challenge_title))
 
-    monkeypatch.setattr(httpx, "get", fake_get)
+    _mount_mock_transport(monkeypatch, handler)
 
     scraper = DummyScraper()
     with pytest.raises(SourceUnavailableError, match="Challenge page detected"):
@@ -106,19 +185,19 @@ def test_fetch_detects_challenge_from_title_only(monkeypatch, challenge_title):
 
 
 def test_fetch_does_not_false_positive_when_keywords_appear_in_body(monkeypatch):
-    def fake_get(url, **kwargs):
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
         if url.endswith("/robots.txt"):
-            return _make_response(url, 200, "User-agent: *\nAllow: /\n")
-        return _make_response(
-            url,
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(
             200,
-            _valid_html(
+            text=_valid_html(
                 title="Beasiswa Resmi 2026",
                 body_extra=" Note: access denied for late submissions; just a moment to read.",
             ),
         )
 
-    monkeypatch.setattr(httpx, "get", fake_get)
+    _mount_mock_transport(monkeypatch, handler)
 
     scraper = DummyScraper()
     response = scraper.fetch("https://example.org/scholarships")
@@ -126,62 +205,73 @@ def test_fetch_does_not_false_positive_when_keywords_appear_in_body(monkeypatch)
 
 
 def test_fetch_rejects_response_shorter_than_500_chars(monkeypatch):
-    def fake_get(url, **kwargs):
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
         if url.endswith("/robots.txt"):
-            return _make_response(url, 200, "User-agent: *\nAllow: /\n")
-        return _make_response(
-            url,
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(
             200,
-            "<html><head><title>Beasiswa</title></head><body>Short page</body></html>",
+            text="<html><head><title>Beasiswa</title></head><body>Short page</body></html>",
         )
 
-    monkeypatch.setattr(httpx, "get", fake_get)
+    _mount_mock_transport(monkeypatch, handler)
 
     scraper = DummyScraper()
     with pytest.raises(SourceUnavailableError, match="Response too short"):
         scraper.fetch("https://example.org/scholarships")
 
 
-def test_fetch_logs_status_size_final_url_and_server(monkeypatch, caplog):
-    def fake_get(url, **kwargs):
+def test_fetch_logs_diagnostic_headers_only_when_present(monkeypatch, caplog):
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
         if url.endswith("/robots.txt"):
-            return _make_response(url, 404, "Not Found", headers={"server": "nginx"})
-        return _make_response(
-            "https://example.org/redirected-scholarships",
+            # No server, x-amzn-waf-action, or cf-mitigated headers present
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(
             200,
-            _valid_html(),
-            headers={"server": "Apache/2.4"},
+            text=_valid_html(),
+            headers={
+                "server": "awselb/2.0",
+                "x-amzn-waf-action": "challenge",
+                "cf-mitigated": "challenge",
+            },
         )
 
-    monkeypatch.setattr(httpx, "get", fake_get)
+    _mount_mock_transport(monkeypatch, handler)
 
     scraper = DummyScraper()
     with caplog.at_level(logging.INFO, logger="app.crawler.base"):
         scraper.fetch("https://example.org/scholarships")
 
-    assert any(
-        "status=200" in rec.message
-        and "final_url=https://example.org/redirected-scholarships" in rec.message
-        and "server=Apache/2.4" in rec.message
-        for rec in caplog.records
-    )
+    robots_logs = [r.message for r in caplog.records if "robots.txt" in r.message]
+    page_logs = [r.message for r in caplog.records if "/scholarships:" in r.message]
+
+    assert len(robots_logs) == 1
+    assert "server=" not in robots_logs[0]
+    assert "x-amzn-waf-action=" not in robots_logs[0]
+    assert "cf-mitigated=" not in robots_logs[0]
+
+    assert len(page_logs) == 1
+    assert "server=awselb/2.0" in page_logs[0]
+    assert "x-amzn-waf-action=challenge" in page_logs[0]
+    assert "cf-mitigated=challenge" in page_logs[0]
 
 
 def test_robots_txt_cached_per_run_and_enforces_disallow(monkeypatch):
     robots_calls = 0
 
-    def fake_get(url, **kwargs):
+    def handler(request: httpx.Request) -> httpx.Response:
         nonlocal robots_calls
+        url = str(request.url)
         if url.endswith("/robots.txt"):
             robots_calls += 1
-            return _make_response(
-                url,
+            return httpx.Response(
                 200,
-                "User-agent: *\nDisallow: /private/\nAllow: /public/\n",
+                text="User-agent: *\nDisallow: /private/\nAllow: /public/\n",
             )
-        return _make_response(url, 200, _valid_html())
+        return httpx.Response(200, text=_valid_html())
 
-    monkeypatch.setattr(httpx, "get", fake_get)
+    _mount_mock_transport(monkeypatch, handler)
 
     scraper = DummyScraper()
     resp = scraper.fetch("https://example.org/public/scholarship")
@@ -194,18 +284,26 @@ def test_robots_txt_cached_per_run_and_enforces_disallow(monkeypatch):
     assert robots_calls == 1
 
 
-@pytest.mark.parametrize("robots_status", [401, 403, 500, 503])
-def test_robots_txt_conservative_error_on_401_403_5xx(monkeypatch, robots_status):
-    def fake_get(url, **kwargs):
-        if url.endswith("/robots.txt"):
-            return _make_response(url, robots_status, "error")
-        return _make_response(url, 200, _valid_html())
+@pytest.mark.parametrize("robots_status", [202, 204, 401, 403, 404, 500, 503])
+def test_robots_txt_non_200_is_treated_as_unavailable(monkeypatch, robots_status):
+    page_called = False
 
-    monkeypatch.setattr(httpx, "get", fake_get)
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal page_called
+        url = str(request.url)
+        if url.endswith("/robots.txt"):
+            body = "" if robots_status == 204 else "non-200 robots response"
+            return httpx.Response(robots_status, text=body)
+        page_called = True
+        return httpx.Response(200, text=_valid_html())
+
+    _mount_mock_transport(monkeypatch, handler)
 
     scraper = DummyScraper()
     with pytest.raises(SourceUnavailableError, match=f"HTTP {robots_status}"):
         scraper.fetch("https://example.org/scholarships")
+
+    assert page_called is False
 
 
 def test_polite_delay_is_per_host_not_across_different_hosts(monkeypatch):
@@ -242,18 +340,18 @@ def test_polite_delay_is_per_host_not_across_different_hosts(monkeypatch):
 
 
 def test_probe_sources_formats_report(monkeypatch):
-    def fake_get(url, **kwargs):
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
         host = urlsplit(url).netloc
         if url.endswith("/robots.txt"):
-            return _make_response(url, 200, "User-agent: *\nAllow: /\n")
-        return _make_response(
-            url,
+            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
+        return httpx.Response(
             200,
-            f"<html><head><title>Portal {host}</title></head><body>Content</body></html>",
-            headers={"server": "cloudflare"},
+            text=f"<html><head><title>Portal {host}</title></head><body>Content</body></html>",
+            headers={"server": "cloudflare", "cf-mitigated": "challenge"},
         )
 
-    monkeypatch.setattr(httpx, "get", fake_get)
+    _mount_mock_transport(monkeypatch, handler)
 
     report = probe_url(
         key="test_src",
@@ -264,9 +362,8 @@ def test_probe_sources_formats_report(monkeypatch):
     formatted = format_reports([report])
 
     assert report.status == "200"
-    assert report.server == "cloudflare"
+    assert report.server == "server=cloudflare cf-mitigated=challenge"
     assert report.title == "Portal example.org"
     assert report.robots_decision == "ALLOWED"
     assert "robots.txt-compliant" in formatted
     assert "[test_src] Test Provider" in formatted
-
