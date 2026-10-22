@@ -5,7 +5,12 @@ on:
     # Run daily at 00:00 UTC (07:00 WIB)
     - cron: '0 0 * * *'
   workflow_dispatch:
-    # Allow manual triggering
+    inputs:
+      dry_run:
+        description: 'Run crawler in dry-run mode (do not write to DB)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   crawl:
@@ -37,6 +42,7 @@ jobs:
           fi
 
       - name: Run Alembic Migrations
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         working-directory: ./backend
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -48,4 +54,8 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          python -m app.crawler.main --source teladan --source pertamina_sobat_bumi --source cimb_scholarship --source bca_scholarship --source ugm_bulletin
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          python -m app.crawler.main $DRY_RUN_FLAG --source teladan --source pertamina_sobat_bumi --source cimb_scholarship --source bca_scholarship --source ugm_bulletin

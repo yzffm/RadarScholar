@@ -173,10 +173,10 @@ class BaseScraper(ABC):
 
         This check is strictly ``robots.txt-compliant``:
         - Uses ``httpx.get`` with the same User-Agent and explicit timeouts.
-        - HTTP 200-299: parses rules with ``RobotFileParser.parse()``.
-        - HTTP 404 / 410: no robots.txt exists; treats origin as ``allow_all = True``.
-        - HTTP 401 / 403 / 451 / 5xx (or any other status / network error):
-          conservatively treats the host's robots policy as unverifiable/restricted
+        - Only HTTP 200 is accepted as a valid ``robots.txt`` response; rules are
+          parsed with ``RobotFileParser.parse()``.
+        - Any non-200 HTTP status (including 201/202/203/204/206, 401/403/404/451,
+          5xx) or network error conservatively treats the source as unavailable
           and raises ``SourceUnavailableError`` (cached per run).
         """
         parsed = urlsplit(url)
@@ -208,15 +208,10 @@ class BaseScraper(ABC):
             raise SourceUnavailableError(msg, url=url) from exc
 
         status = response.status_code
-        if status in (404, 410):
-            rp = RobotFileParser()
-            rp.allow_all = True
-            cls._robots_cache[origin] = rp
-            return rp
-
-        if status in _NO_RETRY_STATUSES or status >= 500 or not (200 <= status < 300):
+        if status != 200:
             msg = (
-                f"Conservative robots.txt block: HTTP {status} when fetching {robots_url}"
+                f"Conservative robots.txt block: HTTP {status} (expected 200) "
+                f"when fetching {robots_url}"
             )
             cls._robots_cache[origin] = msg
             raise SourceUnavailableError(msg, url=url)
@@ -283,6 +278,15 @@ class BaseScraper(ABC):
 
                 response.raise_for_status()
 
+                # Only HTTP 200 is valid for static HTML GET requests; any other
+                # 2xx status (201/202/203/204/206, e.g. AWS WAF 202 interstitial)
+                # is rejected immediately without retry.
+                if response.status_code != 200:
+                    raise SourceUnavailableError(
+                        f"HTTP {response.status_code} (expected 200) — non-200 2xx response",
+                        url=url,
+                    )
+
                 # Detect challenge pages by <title> only or short body (< 500 chars).
                 self._check_challenge_page(url, response)
 
@@ -311,13 +315,18 @@ class BaseScraper(ABC):
 
     @staticmethod
     def _log_response(url: str, response: httpx.Response) -> None:
-        """Log status, size (bytes), final URL after redirect, and server header."""
+        """Log status, size (bytes), final URL, and present diagnostic headers."""
         final_url = str(response.url)
         content_len = len(response.content)
-        server = response.headers.get("server", "-")
+        diag_headers: list[str] = []
+        for header_name in ("server", "x-amzn-waf-action", "cf-mitigated"):
+            val = response.headers.get(header_name)
+            if val:
+                diag_headers.append(f"{header_name}={val}")
+        headers_suffix = (" " + " ".join(diag_headers)) if diag_headers else ""
         logger.info(
-            "Fetch %s: status=%d size=%d final_url=%s server=%s",
-            url, response.status_code, content_len, final_url, server,
+            "Fetch %s: status=%d size=%d final_url=%s%s",
+            url, response.status_code, content_len, final_url, headers_suffix,
         )
 
     @staticmethod
