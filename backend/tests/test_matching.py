@@ -301,27 +301,28 @@ def test_evaluate_university_malformed_and_unsupported_op(engine):
     assert res_bad_op.state == CriterionState.NEEDS_VERIFICATION
 
 
-def test_evaluate_nationality_without_profile_field_returns_needs_verification(engine):
-    profile = UserProfile(university="Universitas Indonesia", gpa=3.7)
+def test_evaluate_nationality_when_none_returns_unknown(engine):
+    profile = UserProfile(university="Universitas Indonesia", gpa=3.7, nationality=None)
     req = create_req("NATIONALITY", "EQ", {"country": "Indonesia"})
     res = engine.evaluate(profile, req)
-    assert res.state == CriterionState.NEEDS_VERIFICATION
+    assert res.state == CriterionState.UNKNOWN
     assert res.required_value == "Indonesia"
     assert res.actual_value is None
-    assert "kewarganegaraan" in res.explanation.lower()
+    assert res.explanation == "Kewarganegaraan belum diisi pada profil Anda"
 
 
-def test_evaluate_nationality_when_profile_attribute_present(engine):
-    profile_wni = UserProfile()
-    profile_wni.nationality = "WNI"
+def test_evaluate_nationality_match_and_not_match(engine):
+    profile_indonesia = UserProfile(nationality="Indonesia")
     req = create_req("NATIONALITY", "EQ", {"country": "Indonesia"})
-    res_match = engine.evaluate(profile_wni, req)
+    res_match = engine.evaluate(profile_indonesia, req)
     assert res_match.state == CriterionState.MATCH
+    assert res_match.actual_value == "Indonesia"
 
-    profile_wna = UserProfile()
-    profile_wna.nationality = "WNA"
-    res_not_match = engine.evaluate(profile_wna, req)
+    profile_lainnya = UserProfile(nationality="Lainnya")
+    res_not_match = engine.evaluate(profile_lainnya, req)
     assert res_not_match.state == CriterionState.NOT_MATCH
+    assert res_not_match.actual_value == "Lainnya"
+
 
 
 def test_evaluate_nationality_malformed(engine):

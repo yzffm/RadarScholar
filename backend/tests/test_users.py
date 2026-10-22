@@ -112,3 +112,21 @@ def test_profile_collection_limits():
 
     with pytest.raises(ValidationError):
         UserProfileUpdate(goals="G" * 4001)
+
+
+def test_profile_nationality_validation():
+    p_none = UserProfileCreate()
+    assert p_none.nationality is None
+
+    p_id = UserProfileCreate(nationality="Indonesia")
+    assert p_id.nationality == "Indonesia"
+
+    p_other = UserProfileUpdate(nationality="Lainnya")
+    assert p_other.nationality == "Lainnya"
+
+    with pytest.raises(ValidationError):
+        UserProfileCreate(nationality="WNA")
+
+    with pytest.raises(ValidationError):
+        UserProfileUpdate(nationality="Singapura")
+

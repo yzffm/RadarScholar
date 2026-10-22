@@ -1,9 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:radarscholar/controllers/profile_controller.dart';
 import 'package:radarscholar/models/user_profile.dart';
 import 'package:radarscholar/repositories/user_profile_repository.dart';
 import 'package:radarscholar/services/api_service.dart';
+import 'package:radarscholar/views/profile/profile_page.dart';
 
 Response<T> response<T>({int? statusCode, T? data}) {
   return Response<T>(
@@ -87,4 +90,62 @@ void main() {
     expect(repository.createCalls, 0);
     expect(controller.state, isA<ProfileError>());
   });
+
+  test('UserProfile fromJson, toJson, and copyWith preserve nationality', () {
+    final profile = UserProfile.fromJson({
+      'id': 'u-1',
+      'email': 'student@example.com',
+      'nationality': 'Indonesia',
+      'university': 'Universitas Gadjah Mada',
+      'created_at': '2026-10-20T00:00:00Z',
+      'updated_at': '2026-10-20T00:00:00Z',
+    });
+
+    expect(profile.nationality, 'Indonesia');
+    expect(profile.toJson()['nationality'], 'Indonesia');
+
+    final updated = profile.copyWith(nationality: 'Lainnya');
+    expect(updated.nationality, 'Lainnya');
+    expect(updated.toJson()['nationality'], 'Lainnya');
+  });
+
+  testWidgets('ProfilePage displays nationality in read mode and form dropdown', (
+    tester,
+  ) async {
+    final loadedProfile = UserProfile(
+      id: 'u-1',
+      email: 'student@example.com',
+      nationality: 'Indonesia',
+      university: 'Universitas Gadjah Mada',
+      createdAt: DateTime.utc(2026, 10, 20),
+      updatedAt: DateTime.utc(2026, 10, 20),
+    );
+
+    final repo = _LoadedProfileRepository(loadedProfile);
+    final controller = ProfileController(repo);
+    await controller.fetchProfile();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          profileControllerProvider.overrideWith((ref) => controller),
+        ],
+        child: const MaterialApp(home: ProfilePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kewarganegaraan'), findsOneWidget);
+    expect(find.text('Indonesia'), findsOneWidget);
+  });
 }
+
+class _LoadedProfileRepository extends UserProfileRepository {
+  _LoadedProfileRepository(this._profile) : super(ApiService());
+
+  final UserProfile _profile;
+
+  @override
+  Future<UserProfile?> getMyProfile() async => _profile;
+}
+
