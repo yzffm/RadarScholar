@@ -7,12 +7,13 @@ compatibility (M5 Matching, M9 AI Assistant).
 
 from datetime import datetime
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
 ProfileListItem = Annotated[str, Field(max_length=500)]
 ProfileList = Annotated[list[ProfileListItem], Field(max_length=20)]
+NationalityType = Literal["Indonesia", "Lainnya"]
 
 
 class DegreeLevelSchema(str, Enum):
@@ -35,6 +36,7 @@ class UserProfileCreate(BaseModel):
     display_name: str | None = Field(None, max_length=255)
 
     # Academic
+    nationality: NationalityType | None = None
     university: str | None = Field(None, max_length=255)
     faculty: str | None = Field(None, max_length=255)
     major: str | None = Field(None, max_length=255)
@@ -66,6 +68,7 @@ class UserProfileUpdate(BaseModel):
     display_name: str | None = Field(None, max_length=255)
 
     # Academic
+    nationality: NationalityType | None = None
     university: str | None = Field(None, max_length=255)
     faculty: str | None = Field(None, max_length=255)
     major: str | None = Field(None, max_length=255)
@@ -97,6 +100,7 @@ class UserProfileResponse(BaseModel):
     avatar_url: str | None = None
 
     # Academic
+    nationality: NationalityType | None = None
     university: str | None = None
     faculty: str | None = None
     major: str | None = None

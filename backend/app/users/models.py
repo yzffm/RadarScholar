@@ -60,6 +60,7 @@ class UserProfile(Base):
     is_admin = Column(Boolean, nullable=False, default=False)
 
     # === Academic (Technical Docs §4 — Academic) ===
+    nationality = Column(String(100), nullable=True)
     university = Column(String(255), nullable=True)
     faculty = Column(String(255), nullable=True)
     major = Column(String(255), nullable=True)

@@ -584,18 +584,15 @@ class MatchingEngine:
                 req_type, op, val, f"Operator '{op}' tidak didukung untuk kewarganegaraan."
             )
 
-        actual_nationality = getattr(profile, "nationality", None)
+        actual_nationality = profile.nationality
         if actual_nationality is None or str(actual_nationality).strip() == "":
             return CriterionEvaluation(
                 requirement_type=req_type,
                 operator=op,
                 required_value=required_display,
                 actual_value=None,
-                state=CriterionState.NEEDS_VERIFICATION,
-                explanation=(
-                    "Data kewarganegaraan belum tercatat pada skema profil pengguna; "
-                    f"silakan pastikan Anda memenuhi syarat kewarganegaraan ({', '.join(req_countries)})."
-                ),
+                state=CriterionState.UNKNOWN,
+                explanation="Kewarganegaraan belum diisi pada profil Anda",
             )
 
         actual_canon = _canonicalize_nationality(str(actual_nationality))
