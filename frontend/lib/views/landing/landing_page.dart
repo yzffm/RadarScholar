@@ -1,20 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../controllers/health_controller.dart';
+import '../../controllers/scholarship_controller.dart';
 import '../../core/responsive.dart';
 import '../../core/theme.dart';
+import '../../models/scholarship.dart';
 import '../../widgets/app_logo.dart';
 
-/// RadarScholar Modern Intelligence SaaS Landing Page.
+/// RadarScholar Landing Page — Professional, Simple, Elegant, and Modern.
 ///
-/// Fully supports Dark & Light mode, responsive Desktop/Tablet/Mobile layouts
-/// (CPMK 2), and live FastAPI health telemetry (CPMK 1).
-class LandingPage extends ConsumerWidget {
+/// Key UX & Architectural Principles:
+/// 1. Hero section right side is strictly a clean, minimalist visual composition
+///    using brand assets and icons only (zero data clutter or fake evaluations).
+/// 2. All internal workspace routes require authentication; unauthenticated
+///    visitors can preview real active scholarships fetched directly from the
+///    FastAPI backend (`GET /api/v1/scholarships?status=active`) and are guided
+///    to `/login` or `/register` to evaluate personal eligibility.
+/// 3. Zero hardcoded scholarship data.
+class LandingPage extends ConsumerStatefulWidget {
   const LandingPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends ConsumerState<LandingPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(scholarshipControllerProvider.notifier)
+          .fetchScholarships(refresh: true, status: 'active');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = Responsive.isDesktop(screenWidth);
     final isMobile = Responsive.isMobile(screenWidth);
@@ -22,27 +47,16 @@ class LandingPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: _buildTopNav(context, ref, isMobile, isDark),
+      appBar: _buildTopNav(context, isMobile, isDark),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildHeroSection(
-              context,
-              screenWidth,
-              isDesktop,
-              isMobile,
-              isDark,
-            ),
-            _buildProductFlowSection(context, screenWidth, isDark),
-            _buildFeaturesSection(
-              context,
-              screenWidth,
-              isDesktop,
-              isMobile,
-              isDark,
-            ),
-            _buildBackendHealthSection(context, ref, screenWidth, isDark),
-            _buildFooter(context, screenWidth, isDark),
+            _buildHeroSection(context, isDesktop, isMobile, isDark),
+            _buildDatabasePreviewSection(context, isDesktop, isMobile, isDark),
+            _buildWorkflowSection(context, isDark),
+            _buildFeaturesSection(context, isDark),
+            _buildBackendHealthSection(context, isDark),
+            _buildFooter(context, isDark),
           ],
         ),
       ),
@@ -52,7 +66,6 @@ class LandingPage extends ConsumerWidget {
   // ─── Top Navigation Bar ──────────────────────────────────────────────
   PreferredSizeWidget _buildTopNav(
     BuildContext context,
-    WidgetRef ref,
     bool isMobile,
     bool isDark,
   ) {
@@ -62,8 +75,8 @@ class LandingPage extends ConsumerWidget {
 
     return AppBar(
       backgroundColor: isDark
-          ? AppTheme.darkBackground.withValues(alpha: 0.92)
-          : Colors.white.withValues(alpha: 0.95),
+          ? AppTheme.darkBackground.withValues(alpha: 0.94)
+          : Colors.white.withValues(alpha: 0.96),
       elevation: 0,
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
@@ -80,32 +93,24 @@ class LandingPage extends ConsumerWidget {
       actions: [
         if (!isMobile) ...[
           TextButton(
-            onPressed: () => context.go('/discovery'),
+            onPressed: () => context.go('/about'),
             style: TextButton.styleFrom(foregroundColor: textSecondary),
             child: const Text(
-              'Eksplorasi Beasiswa',
+              'Tentang Kami',
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
             ),
           ),
-          const SizedBox(width: 6),
-          TextButton(
-            onPressed: () => context.go('/recommendations'),
-            style: TextButton.styleFrom(foregroundColor: textSecondary),
-            child: const Text(
-              'AI Matcher',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+          const SizedBox(width: 8),
+        ] else ...[
+          IconButton(
+            tooltip: 'Tentang Kami',
+            onPressed: () => context.go('/about'),
+            icon: Icon(
+              Icons.info_outline_rounded,
+              size: 20,
+              color: textSecondary,
             ),
           ),
-          const SizedBox(width: 6),
-          TextButton(
-            onPressed: () => context.go('/assistant'),
-            style: TextButton.styleFrom(foregroundColor: textSecondary),
-            child: const Text(
-              'Asisten AI',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
-            ),
-          ),
-          const SizedBox(width: 12),
         ],
         // Theme toggle button
         IconButton(
@@ -129,10 +134,26 @@ class LandingPage extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 10),
-        FilledButton.icon(
-          onPressed: () => context.go('/login'),
-          icon: const Icon(Icons.login_rounded, size: 17),
-          label: const Text('Masuk'),
+        if (!isMobile) ...[
+          OutlinedButton(
+            onPressed: () => context.go('/login'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: textPrimary,
+              side: BorderSide(color: borderColor),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+            ),
+            child: const Text(
+              'Masuk',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+        FilledButton(
+          onPressed: () => context.go(isMobile ? '/login' : '/register'),
           style: FilledButton.styleFrom(
             backgroundColor: AppTheme.brandPrimary,
             foregroundColor: Colors.white,
@@ -141,16 +162,19 @@ class LandingPage extends ConsumerWidget {
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
           ),
+          child: Text(
+            isMobile ? 'Masuk' : 'Daftar',
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+          ),
         ),
         SizedBox(width: isMobile ? 16 : 32),
       ],
     );
   }
 
-  // ─── Hero Section ───────────────────────────────────────────────────
+  // ─── Hero Section: Clean Typography + Pure Visual/Icon Composition ────
   Widget _buildHeroSection(
     BuildContext context,
-    double screenWidth,
     bool isDesktop,
     bool isMobile,
     bool isDark,
@@ -166,75 +190,46 @@ class LandingPage extends ConsumerWidget {
             ? const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF0B1428), Color(0xFF090D16)],
+                colors: [Color(0xFF0C1526), Color(0xFF090D16)],
               )
             : const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFFEFF6FF), Color(0xFFF8FAFC)],
+                colors: [Color(0xFFF1F5F9), Color(0xFFF8FAFC)],
               ),
         border: Border(
           bottom: BorderSide(color: AppTheme.borderSubtleOf(context)),
         ),
       ),
-      child: Stack(
-        children: [
-          // Subtle ambient radial glow
-          Positioned(
-            top: -120,
-            right: isDesktop ? 80 : -60,
-            child: IgnorePointer(
-              child: Container(
-                width: 420,
-                height: 420,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppTheme.brandPrimary.withValues(
-                        alpha: isDark ? 0.18 : 0.10,
+      child: Padding(
+        padding: padding,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1140),
+            child: isDesktop
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        flex: 6,
+                        child: _buildHeroText(context, false, isDark),
                       ),
-                      AppTheme.brandAccent.withValues(
-                        alpha: isDark ? 0.06 : 0.03,
+                      const SizedBox(width: 48),
+                      Expanded(
+                        flex: 5,
+                        child: _buildHeroVisualShowcase(context, isDark),
                       ),
-                      Colors.transparent,
+                    ],
+                  )
+                : Column(
+                    children: [
+                      _buildHeroText(context, true, isDark),
+                      const SizedBox(height: 40),
+                      _buildHeroVisualShowcase(context, isDark),
                     ],
                   ),
-                ),
-              ),
-            ),
           ),
-          Padding(
-            padding: padding,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1160),
-                child: isDesktop
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 6,
-                            child: _buildHeroText(context, false, isDark),
-                          ),
-                          const SizedBox(width: 48),
-                          Expanded(
-                            flex: 5,
-                            child: _buildHeroVisual(context, isDark),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        children: [
-                          _buildHeroText(context, true, isDark),
-                          const SizedBox(height: 36),
-                          _buildHeroVisual(context, isDark),
-                        ],
-                      ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -251,14 +246,13 @@ class LandingPage extends ConsumerWidget {
     return Column(
       crossAxisAlignment: crossAlign,
       children: [
-        // Intelligence Pill Badge
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(
             color: accentColor.withValues(alpha: isDark ? 0.14 : 0.08),
             borderRadius: BorderRadius.circular(AppRadius.xxl),
             border: Border.all(
-              color: accentColor.withValues(alpha: isDark ? 0.32 : 0.22),
+              color: accentColor.withValues(alpha: isDark ? 0.30 : 0.20),
             ),
           ),
           child: Row(
@@ -267,15 +261,9 @@ class LandingPage extends ConsumerWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppTheme.brandTertiary,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.brandTertiary.withValues(alpha: 0.5),
-                      blurRadius: 6,
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(width: 8),
@@ -285,15 +273,13 @@ class LandingPage extends ConsumerWidget {
                   color: accentColor,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 0.3,
+                  letterSpacing: 0.2,
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: Spacing.lg),
-
-        // Headline
         Text(
           'Temukan Beasiswa yang Benar-benar Relevan untuk Masa Depanmu.',
           textAlign: align,
@@ -305,10 +291,8 @@ class LandingPage extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: Spacing.md),
-
-        // Subtitle
         Text(
-          'RadarScholar bukan sekadar direktori tautan. Kami membantu mahasiswa Indonesia mengevaluasi kriteria resmi secara deterministik, memantau tenggat waktu, dan menyusun berkas dengan pendampingan AI terpercaya.',
+          'Evaluasi kriteria beasiswa resmi berdasarkan profil akademik Anda, pantau tenggat pendaftaran, dan susun berkas bersama asisten AI yang berintegritas.',
           textAlign: align,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: textSecondary,
@@ -317,17 +301,15 @@ class LandingPage extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: Spacing.xl),
-
-        // CTAs
         Wrap(
           spacing: 12,
           runSpacing: 12,
           alignment: isCentered ? WrapAlignment.center : WrapAlignment.start,
           children: [
             FilledButton.icon(
-              onPressed: () => context.go('/discovery'),
-              icon: const Icon(Icons.explore_rounded, size: 19),
-              label: const Text('Mulai Eksplorasi'),
+              onPressed: () => context.go('/register'),
+              icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+              label: const Text('Mulai Sekarang'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.brandPrimary,
                 foregroundColor: Colors.white,
@@ -342,7 +324,7 @@ class LandingPage extends ConsumerWidget {
             ),
             OutlinedButton.icon(
               onPressed: () => context.go('/login'),
-              icon: const Icon(Icons.login_rounded, size: 19),
+              icon: const Icon(Icons.login_rounded, size: 18),
               label: const Text('Masuk ke Akun'),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
@@ -362,136 +344,487 @@ class LandingPage extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: Spacing.lg),
-
-        // Trust telemetry bar
-        Wrap(
-          spacing: 20,
-          runSpacing: 8,
-          alignment: isCentered ? WrapAlignment.center : WrapAlignment.start,
-          children: [
-            _buildTrustMetric(
-              context,
-              icon: Icons.verified_rounded,
-              label: '100% Sumber Resmi Terkurasi',
-              color: AppTheme.brandTertiary,
-            ),
-            _buildTrustMetric(
-              context,
-              icon: Icons.rule_rounded,
-              label: 'Mesin Aturan Deterministik',
-              color: accentColor,
-            ),
-            _buildTrustMetric(
-              context,
-              icon: Icons.shield_outlined,
-              label: 'Bebas Halusinasi Syarat',
-              color: AppTheme.brandAI,
-            ),
-          ],
-        ),
       ],
     );
   }
 
-  Widget _buildTrustMetric(
-    BuildContext context, {
+  /// Pure visual composition using only brand assets and minimalist icons.
+  /// Contains zero text rows or data tables so the Hero remains calm and elegant.
+  Widget _buildHeroVisualShowcase(BuildContext context, bool isDark) {
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderSubtle = AppTheme.borderSubtleOf(context);
+    final borderStrong = AppTheme.borderStrongOf(context);
+
+    return SizedBox(
+      height: 360,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // 1. Soft Ambient Glow
+              Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      AppTheme.brandPrimary.withValues(
+                        alpha: isDark ? 0.22 : 0.10,
+                      ),
+                      AppTheme.brandAccent.withValues(
+                        alpha: isDark ? 0.08 : 0.04,
+                      ),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+
+              // 2. Clean Concentric Architectural Rings & Axis Lines
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _HeroMinimalistRingsPainter(
+                    ringColor: borderStrong.withValues(
+                      alpha: isDark ? 0.45 : 0.65,
+                    ),
+                    accentColor: AppTheme.brandPrimary.withValues(
+                      alpha: isDark ? 0.32 : 0.20,
+                    ),
+                  ),
+                ),
+              ),
+
+              // 3. Central Elevated Brand Emblem Card
+              Container(
+                width: 128,
+                height: 128,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(34),
+                  border: Border.all(
+                    color: AppTheme.brandPrimary.withValues(
+                      alpha: isDark ? 0.40 : 0.22,
+                    ),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.brandPrimary.withValues(
+                        alpha: isDark ? 0.24 : 0.10,
+                      ),
+                      blurRadius: 32,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: AppLogo.icon(height: 76),
+              ),
+
+              // 4. Four Symmetrical Minimalist Icon Nodes (Pure Icons, Zero Data)
+              Positioned(
+                top: 28,
+                left: 36,
+                child: _buildMinimalIconBadge(
+                  cardBg: cardBg,
+                  borderColor: borderSubtle,
+                  icon: Icons.verified_outlined,
+                  iconColor: AppTheme.brandTertiary,
+                  isDark: isDark,
+                ),
+              ),
+              Positioned(
+                top: 28,
+                right: 36,
+                child: _buildMinimalIconBadge(
+                  cardBg: cardBg,
+                  borderColor: borderSubtle,
+                  icon: Icons.tune_rounded,
+                  iconColor: AppTheme.brandPrimary,
+                  isDark: isDark,
+                ),
+              ),
+              Positioned(
+                bottom: 28,
+                left: 36,
+                child: _buildMinimalIconBadge(
+                  cardBg: cardBg,
+                  borderColor: borderSubtle,
+                  icon: Icons.auto_awesome_outlined,
+                  iconColor: AppTheme.brandAI,
+                  isDark: isDark,
+                ),
+              ),
+              Positioned(
+                bottom: 28,
+                right: 36,
+                child: _buildMinimalIconBadge(
+                  cardBg: cardBg,
+                  borderColor: borderSubtle,
+                  icon: Icons.event_available_outlined,
+                  iconColor: AppTheme.brandWarning,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMinimalIconBadge({
+    required Color cardBg,
+    required Color borderColor,
     required IconData icon,
-    required String label,
-    required Color color,
+    required Color iconColor,
+    required bool isDark,
   }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Container(
+      width: 58,
+      height: 58,
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(11),
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+      ),
+    );
+  }
+
+  // ─── Real Database Preview Section (100% Backend-Driven, Redirects to Login) ───
+  Widget _buildDatabasePreviewSection(
+    BuildContext context,
+    bool isDesktop,
+    bool isMobile,
+    bool isDark,
+  ) {
+    final discoveryState = ref.watch(scholarshipControllerProvider);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+    final borderSubtle = AppTheme.borderSubtleOf(context);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceOf(context),
+        border: Border(bottom: BorderSide(color: borderSubtle)),
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 20 : 48,
+        vertical: 64,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1140),
+          child: Column(
+            children: [
+              Text(
+                'Beasiswa Aktif di Database',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Pratinjau langsung dari database portal resmi. Masuk ke akun Anda untuk melihat detail syarat dan mengevaluasi kecocokan profil.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: textSecondary, fontSize: 14),
+              ),
+              const SizedBox(height: 32),
+              _buildDatabasePreviewContent(
+                context,
+                discoveryState,
+                isDesktop,
+                isDark,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDatabasePreviewContent(
+    BuildContext context,
+    ScholarshipDiscoveryState state,
+    bool isDesktop,
+    bool isDark,
+  ) {
+    final cardBg = AppTheme.cardColorOf(context);
+    final borderSubtle = AppTheme.borderSubtleOf(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+
+    if (state is ScholarshipDiscoveryInitial ||
+        state is ScholarshipDiscoveryLoading) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(color: borderSubtle),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.2),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Memuat data beasiswa aktif dari database...',
+              style: TextStyle(color: textSecondary, fontSize: 13.5),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state is ScholarshipDiscoveryError) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(color: borderSubtle),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.cloud_off_rounded, color: textSecondary, size: 28),
+            const SizedBox(height: 10),
+            Text(
+              state.message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: textPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.5,
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {
+                ref
+                    .read(scholarshipControllerProvider.notifier)
+                    .fetchScholarships(refresh: true, status: 'active');
+              },
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text('Muat Ulang dari Server'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state is ScholarshipDiscoveryEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(color: borderSubtle),
+        ),
+        child: Text(
+          'Belum ada beasiswa aktif yang tersedia di database saat ini.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: textSecondary, fontSize: 13.5),
+        ),
+      );
+    }
+
+    final items = (state as ScholarshipDiscoverySuccess).scholarships
+        .take(3)
+        .toList();
+
+    return Column(
       children: [
-        Icon(icon, size: 15, color: color),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textSecondaryOf(context),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isThreeCol = constraints.maxWidth >= 900;
+            if (isThreeCol) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (int i = 0; i < items.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 20),
+                    Expanded(
+                      child: _buildLiveScholarshipCard(
+                        context,
+                        items[i],
+                        isDark,
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            }
+            return Column(
+              children: [
+                for (int i = 0; i < items.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 16),
+                  _buildLiveScholarshipCard(context, items[i], isDark),
+                ],
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 28),
+        FilledButton.tonalIcon(
+          onPressed: () => context.go('/login'),
+          icon: const Icon(Icons.lock_open_rounded, size: 17),
+          label: const Text(
+            'Masuk untuk Melihat Seluruh Beasiswa & Evaluasi Kecocokan Profil',
+          ),
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildHeroVisual(BuildContext context, bool isDark) {
+  Widget _buildLiveScholarshipCard(
+    BuildContext context,
+    Scholarship scholarship,
+    bool isDark,
+  ) {
     final cardBg = AppTheme.cardColorOf(context);
-    final elevatedBg = AppTheme.surfaceElevatedOf(context);
+    final surfaceElevated = AppTheme.surfaceElevatedOf(context);
     final borderSubtle = AppTheme.borderSubtleOf(context);
-    final borderStrong = AppTheme.borderStrongOf(context);
     final textPrimary = AppTheme.textPrimaryOf(context);
-    final textMuted = AppTheme.textMutedOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: cardBg,
+    final deadlineLabel = scholarship.deadline != null
+        ? 'Tenggat: ${DateFormat('dd MMM yyyy').format(scholarship.deadline!)}'
+        : 'Tenggat belum ditentukan';
+
+    final statusLabel = scholarship.isActive ? 'Aktif' : 'Ditutup';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => context.go('/login'),
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        boxShadow: AppTheme.cardShadowOf(context),
-        border: Border.all(color: borderStrong),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top window chrome + live indicator
-          Row(
+        child: Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            border: Border.all(color: borderSubtle),
+            boxShadow: AppTheme.cardShadowOf(context),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEF4444),
-                  shape: BoxShape.circle,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.brandTertiary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: const TextStyle(
+                        color: AppTheme.brandTertiary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_outward_rounded,
+                    size: 16,
+                    color: textSecondary,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                scholarship.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textPrimary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15.5,
+                  height: 1.3,
                 ),
               ),
-              const SizedBox(width: 6),
-              Container(
-                width: 10,
-                height: 10,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF59E0B),
-                  shape: BoxShape.circle,
+              const SizedBox(height: 6),
+              Text(
+                scholarship.source?.providerName ??
+                    'Portal Resmi Terverifikasi',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: 6),
-              Container(
-                width: 10,
-                height: 10,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF10B981),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const Spacer(),
+              const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 4,
+                  vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: elevatedBg,
-                  borderRadius: BorderRadius.circular(AppRadius.xxl),
-                  border: Border.all(color: borderSubtle),
+                  color: surfaceElevated,
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.bolt_rounded,
+                    Icon(
+                      Icons.calendar_today_outlined,
                       size: 13,
-                      color: AppTheme.brandAccent,
+                      color: textSecondary,
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'RADAR ENGINE v2.4',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.6,
-                        color: textMuted,
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text(
+                        deadlineLabel,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: textSecondary,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -499,183 +832,38 @@ class LandingPage extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: Spacing.lg),
-          Center(child: AppLogo(mode: AppLogoMode.full, height: 46)),
-          const SizedBox(height: Spacing.lg),
-          Divider(height: 1, color: borderSubtle),
-          const SizedBox(height: Spacing.md),
-          Text(
-            'TELEMETRI INTELIJENSI BEASISWA',
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-              color: textMuted,
-            ),
-          ),
-          const SizedBox(height: Spacing.sm),
-          _buildHeroPreviewItem(
-            context: context,
-            icon: Icons.verified_user_rounded,
-            color: AppTheme.brandTertiary,
-            title: 'Sumber resmi, lebih terpercaya',
-            badge: 'Source-first',
-            desc:
-                'Lihat asal data, status verifikasi, dan deadline dengan jelas.',
-          ),
-          const SizedBox(height: Spacing.sm),
-          _buildHeroPreviewItem(
-            context: context,
-            icon: Icons.auto_graph_rounded,
-            color: isDark ? AppTheme.brandAccent : AppTheme.brandPrimary,
-            title: 'Match yang bisa dijelaskan',
-            badge: 'Deterministik',
-            desc: 'Pahami kenapa peluang tertentu relevan dengan profilmu.',
-          ),
-          const SizedBox(height: Spacing.sm),
-          _buildHeroPreviewItem(
-            context: context,
-            icon: Icons.auto_awesome_rounded,
-            color: AppTheme.brandAI,
-            title: 'Pendamping Persiapan Berintegritas',
-            badge: 'Zero-Fabrication',
-            desc:
-                'Review CV, motivasi esai, dan checklist berkas sesuai fakta.',
-          ),
-          const SizedBox(height: Spacing.md),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: elevatedBg,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: borderSubtle),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.check_circle_outline_rounded,
-                  size: 16,
-                  color: AppTheme.brandTertiary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Evaluasi kriteria IPK, Jenjang, Semester & Dokumen secara objektif',
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeroPreviewItem({
-    required BuildContext context,
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String badge,
-    required String desc,
-  }) {
-    final surfaceBg = AppTheme.surfaceOf(context);
-    final borderSubtle = AppTheme.borderSubtleOf(context);
-    final textPrimary = AppTheme.textPrimaryOf(context);
-    final textSecondary = AppTheme.textSecondaryOf(context);
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: surfaceBg,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: borderSubtle),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-              border: Border.all(color: color.withValues(alpha: 0.28)),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          color: textPrimary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(AppRadius.xs),
-                        border: Border.all(
-                          color: color.withValues(alpha: 0.28),
-                        ),
-                      ),
-                      child: Text(
-                        badge,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: color,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  desc,
-                  style: TextStyle(fontSize: 11.5, color: textSecondary),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── Product Flow Stepper Section ───────────────────────────────────
-  Widget _buildProductFlowSection(
-    BuildContext context,
-    double screenWidth,
-    bool isDark,
-  ) {
+  // ─── Logical UX Workflow Section ─────────────────────────────────────
+  Widget _buildWorkflowSection(BuildContext context, bool isDark) {
     final steps = [
-      {'num': '1', 'name': 'Discover', 'desc': 'Cari sumber resmi'},
-      {'num': '2', 'name': 'Understand', 'desc': 'Pahami syarat'},
-      {'num': '3', 'name': 'Match', 'desc': 'Cocokkan profil'},
-      {'num': '4', 'name': 'Decide', 'desc': 'Pilih target'},
-      {'num': '5', 'name': 'Prepare', 'desc': 'Susun berkas & esai'},
-      {'num': '6', 'name': 'Track', 'desc': 'Pantau deadline'},
-      {'num': '7', 'name': 'Official Apply', 'desc': 'Kirim ke portal resmi'},
+      (
+        num: '01',
+        title: 'Buat Akun & Profil Akademik',
+        desc:
+            'Lengkapi jenjang studi, jurusan, semester, dan IPK Anda sebagai dasar evaluasi kelayakan.',
+      ),
+      (
+        num: '02',
+        title: 'Eksplorasi Sumber Resmi',
+        desc:
+            'Telusuri beasiswa aktif dari portal resmi lengkap dengan rincian syarat dan tautan aslinya.',
+      ),
+      (
+        num: '03',
+        title: 'Evaluasi Kecocokan Objektif',
+        desc:
+            'Sistem membandingkan profil akademik Anda terhadap kriteria beasiswa secara deterministik.',
+      ),
+      (
+        num: '04',
+        title: 'Siapkan Berkas & Daftar',
+        desc:
+            'Pantau checklist dokumen, rapikan esai bersama asisten AI, lalu daftar di portal resmi.',
+      ),
     ];
 
     final textPrimary = AppTheme.textPrimaryOf(context);
@@ -686,137 +874,105 @@ class LandingPage extends ConsumerWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppTheme.surfaceOf(context),
         border: Border(bottom: BorderSide(color: borderSubtle)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 64),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1160),
+          constraints: const BoxConstraints(maxWidth: 1140),
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.brandPrimary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppRadius.xxl),
-                ),
-                child: Text(
-                  '7-STAGE WORKFLOW',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
-                    color: isDark
-                        ? AppTheme.brandAccent
-                        : AppTheme.brandPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
               Text(
-                'Alur Kerja RadarScholar',
+                'Cara Kerja RadarScholar',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: textPrimary,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Text(
-                'Prinsip panduan dari penemuan hingga pendaftaran resmi di portal beasiswa',
+                'Alur yang terarah mulai dari pengisian profil hingga pengajuan di situs resmi penyelenggara',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: textSecondary, fontSize: 14),
               ),
-              const SizedBox(height: Spacing.xl),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: steps.map((step) {
-                    final isLast = step == steps.last;
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 132,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(AppRadius.lg),
-                            border: Border.all(color: borderSubtle),
-                          ),
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 38,
-                                height: 38,
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      AppTheme.brandPrimary,
-                                      Color(0xFF1D4ED8),
-                                    ],
-                                  ),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppTheme.brandPrimary.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    step['num']!,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                step['name']!,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13,
-                                  color: textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                step['desc']!,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
+              const SizedBox(height: 36),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth >= 900
+                      ? 4
+                      : (constraints.maxWidth >= 600 ? 2 : 1);
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 18,
+                      mainAxisSpacing: 18,
+                      mainAxisExtent: 176,
+                    ),
+                    itemCount: steps.length,
+                    itemBuilder: (context, index) {
+                      final step = steps[index];
+                      return Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                          border: Border.all(color: borderSubtle),
                         ),
-                        if (!isLast)
-                          Container(
-                            width: 24,
-                            height: 2,
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            color: AppTheme.borderStrongOf(context),
-                          ),
-                      ],
-                    );
-                  }).toList(),
-                ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 9,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.brandPrimary.withValues(
+                                  alpha: 0.10,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.sm,
+                                ),
+                              ),
+                              child: Text(
+                                step.num,
+                                style: TextStyle(
+                                  color: isDark
+                                      ? AppTheme.brandAccent
+                                      : AppTheme.brandPrimary,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11.5,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              step.title,
+                              style: TextStyle(
+                                color: textPrimary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Expanded(
+                              child: Text(
+                                step.desc,
+                                style: TextStyle(
+                                  color: textSecondary,
+                                  fontSize: 12.5,
+                                  height: 1.45,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),
@@ -825,55 +981,47 @@ class LandingPage extends ConsumerWidget {
     );
   }
 
-  // ─── Features Grid Section ──────────────────────────────────────────
-  Widget _buildFeaturesSection(
-    BuildContext context,
-    double screenWidth,
-    bool isDesktop,
-    bool isMobile,
-    bool isDark,
-  ) {
+  // ─── Core Pillars Section (Clean Standard Cards) ─────────────────────
+  Widget _buildFeaturesSection(BuildContext context, bool isDark) {
     final pillars = [
-      {
-        'icon': Icons.verified_outlined,
-        'color': isDark ? AppTheme.brandAccent : AppTheme.brandPrimary,
-        'title': 'Sumber Resmi Terkurasi',
-        'desc':
-            'Informasi bersumber langsung dari portal resmi (BCA, Djarum, LPDP, dll) dengan atribusi tautan asli dan tanggal verifikasi.',
-      },
-      {
-        'icon': Icons.rule_rounded,
-        'color': AppTheme.brandTertiary,
-        'title': 'Pencocokan Deterministik',
-        'desc':
-            'Kriteria objektif (IPK, semester, jenjang) dihitung secara pasti tanpa skor probabilitas palsu. Relevansi disampaikan secara kualitatif dan transparan.',
-      },
-      {
-        'icon': Icons.checklist_rounded,
-        'color': AppTheme.brandWarning,
-        'title': 'Manajemen Berkas & Deadline',
-        'desc':
-            'Daftar periksa dokumen lengkap dan pengingat tanggal penutupan agar Anda tidak pernah melewatkan batas waktu pendaftaran.',
-      },
-      {
-        'icon': Icons.auto_awesome_rounded,
-        'color': AppTheme.brandAI,
-        'title': 'Pendamping AI Berintegritas',
-        'desc':
-            'Bantuan perbaikan CV dan draf esai yang menjaga keaslian data pribadi Anda tanpa memfabrikasi pencapaian atau fakta palsu.',
-      },
+      (
+        icon: Icons.verified_outlined,
+        color: AppTheme.brandTertiary,
+        title: 'Sumber Resmi Terkurasi',
+        desc:
+            'Informasi bersumber dari registri portal resmi dengan atribusi tautan asli dan catatan waktu verifikasi.',
+      ),
+      (
+        icon: Icons.rule_rounded,
+        color: isDark ? AppTheme.brandAccent : AppTheme.brandPrimary,
+        title: 'Pencocokan Deterministik',
+        desc:
+            'Kriteria objektif dihitung secara pasti berdasarkan profil Anda tanpa skor probabilitas yang menyesatkan.',
+      ),
+      (
+        icon: Icons.checklist_rounded,
+        color: AppTheme.brandWarning,
+        title: 'Manajemen Berkas & Tenggat',
+        desc:
+            'Daftar periksa dokumen dan pemantauan jadwal penutupan agar persiapan lamaran Anda tetap terorganisir.',
+      ),
+      (
+        icon: Icons.auto_awesome_rounded,
+        color: AppTheme.brandAI,
+        title: 'Pendamping AI Berintegritas',
+        desc:
+            'Bantuan peninjauan CV dan struktur esai yang menjaga keaslian riwayat akademik Anda tanpa fabrikasi fakta.',
+      ),
     ];
 
     final textPrimary = AppTheme.textPrimaryOf(context);
     final textSecondary = AppTheme.textSecondaryOf(context);
-    final cardBg = AppTheme.cardColorOf(context);
-    final borderSubtle = AppTheme.borderSubtleOf(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 68),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 64),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1160),
+          constraints: const BoxConstraints(maxWidth: 1140),
           child: Column(
             children: [
               Text(
@@ -885,14 +1033,16 @@ class LandingPage extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Didesain khusus untuk mahasiswa Indonesia dengan standar keandalan tinggi.',
+                'Dirancang dengan fokus pada keakuratan sumber, transparansi kriteria, dan kemandirian pendaftar',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: textSecondary, fontSize: 14),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 36),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final crossAxisCount = constraints.maxWidth > 800 ? 2 : 1;
+                  final crossAxisCount = constraints.maxWidth > 840 ? 2 : 1;
+                  final cardBg = AppTheme.cardColorOf(context);
+                  final borderSubtle = AppTheme.borderSubtleOf(context);
                   return GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -905,12 +1055,11 @@ class LandingPage extends ConsumerWidget {
                     itemCount: pillars.length,
                     itemBuilder: (context, index) {
                       final p = pillars[index];
-                      final color = p['color'] as Color;
                       return Container(
                         padding: const EdgeInsets.all(22),
                         decoration: BoxDecoration(
                           color: cardBg,
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
                           border: Border.all(color: borderSubtle),
                           boxShadow: AppTheme.cardShadowOf(context),
                         ),
@@ -918,21 +1067,15 @@ class LandingPage extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              width: 44,
+                              height: 44,
                               decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.14),
+                                color: p.color.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(
                                   AppRadius.md,
                                 ),
-                                border: Border.all(
-                                  color: color.withValues(alpha: 0.28),
-                                ),
                               ),
-                              child: Icon(
-                                p['icon'] as IconData,
-                                color: color,
-                                size: 26,
-                              ),
+                              child: Icon(p.icon, color: p.color, size: 22),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -940,9 +1083,9 @@ class LandingPage extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    p['title'] as String,
+                                    p.title,
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w800,
                                       fontSize: 16,
                                       color: textPrimary,
                                     ),
@@ -950,11 +1093,11 @@ class LandingPage extends ConsumerWidget {
                                   const SizedBox(height: 6),
                                   Expanded(
                                     child: Text(
-                                      p['desc'] as String,
+                                      p.desc,
                                       style: TextStyle(
-                                        fontSize: 13,
+                                        fontSize: 13.5,
                                         color: textSecondary,
-                                        height: 1.45,
+                                        height: 1.5,
                                       ),
                                     ),
                                   ),
@@ -976,15 +1119,10 @@ class LandingPage extends ConsumerWidget {
   }
 
   // ─── Backend Connectivity Card (CPMK 1 Evidence) ─────────────────────
-  Widget _buildBackendHealthSection(
-    BuildContext context,
-    WidgetRef ref,
-    double screenWidth,
-    bool isDark,
-  ) {
+  Widget _buildBackendHealthSection(BuildContext context, bool isDark) {
     final healthAsync = ref.watch(healthControllerProvider);
-    final cardBg = AppTheme.cardColorOf(context);
     final borderSubtle = AppTheme.borderSubtleOf(context);
+    final cardBg = AppTheme.cardColorOf(context);
     final textPrimary = AppTheme.textPrimaryOf(context);
     final textSecondary = AppTheme.textSecondaryOf(context);
 
@@ -994,17 +1132,16 @@ class LandingPage extends ConsumerWidget {
         color: AppTheme.surfaceOf(context),
         border: Border(top: BorderSide(color: borderSubtle)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 44),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
+          constraints: const BoxConstraints(maxWidth: 580),
           child: Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(AppRadius.xl),
               border: Border.all(color: borderSubtle),
-              boxShadow: AppTheme.cardShadowOf(context),
             ),
             child: Column(
               children: [
@@ -1016,7 +1153,7 @@ class LandingPage extends ConsumerWidget {
                       color: isDark
                           ? AppTheme.brandAccent
                           : AppTheme.brandPrimary,
-                      size: 20,
+                      size: 19,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -1028,7 +1165,7 @@ class LandingPage extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
                 healthAsync.when(
                   data: (health) {
                     final statusColor = health.isHealthy
@@ -1036,14 +1173,14 @@ class LandingPage extends ConsumerWidget {
                         : AppTheme.brandDanger;
                     return Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
+                        horizontal: 14,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
                         color: statusColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         border: Border.all(
-                          color: statusColor.withValues(alpha: 0.32),
+                          color: statusColor.withValues(alpha: 0.30),
                         ),
                       ),
                       child: Row(
@@ -1054,9 +1191,9 @@ class LandingPage extends ConsumerWidget {
                                 ? Icons.check_circle_rounded
                                 : Icons.error_rounded,
                             color: statusColor,
-                            size: 19,
+                            size: 18,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Text(
                             health.isHealthy
                                 ? 'FastAPI API Terhubung • v${health.version}'
@@ -1064,7 +1201,7 @@ class LandingPage extends ConsumerWidget {
                             style: TextStyle(
                               color: statusColor,
                               fontWeight: FontWeight.w700,
-                              fontSize: 13,
+                              fontSize: 12.5,
                             ),
                           ),
                         ],
@@ -1075,27 +1212,27 @@ class LandingPage extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(
-                        width: 16,
-                        height: 16,
+                        width: 15,
+                        height: 15,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                       const SizedBox(width: 10),
                       Text(
                         'Memeriksa status API FastAPI...',
-                        style: TextStyle(fontSize: 13, color: textSecondary),
+                        style: TextStyle(fontSize: 12.5, color: textSecondary),
                       ),
                     ],
                   ),
                   error: (error, _) => Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
+                      horizontal: 14,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
                       color: AppTheme.brandWarning.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
-                        color: AppTheme.brandWarning.withValues(alpha: 0.32),
+                        color: AppTheme.brandWarning.withValues(alpha: 0.30),
                       ),
                     ),
                     child: const Row(
@@ -1104,13 +1241,13 @@ class LandingPage extends ConsumerWidget {
                         Icon(
                           Icons.cloud_off_rounded,
                           color: AppTheme.brandWarning,
-                          size: 19,
+                          size: 18,
                         ),
-                        SizedBox(width: 10),
+                        SizedBox(width: 8),
                         Text(
                           'Backend lokal belum aktif (jalankan uvicorn)',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w600,
                             color: AppTheme.brandWarning,
                           ),
@@ -1119,10 +1256,10 @@ class LandingPage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 TextButton.icon(
                   onPressed: () => ref.invalidate(healthControllerProvider),
-                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  icon: const Icon(Icons.refresh_rounded, size: 15),
                   label: const Text(
                     'Perbarui Status',
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -1137,66 +1274,107 @@ class LandingPage extends ConsumerWidget {
   }
 
   // ─── Footer ─────────────────────────────────────────────────────────
-  Widget _buildFooter(BuildContext context, double screenWidth, bool isDark) {
+  Widget _buildFooter(BuildContext context, bool isDark) {
+    final borderSubtle = AppTheme.borderSubtleOf(context);
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF060911) : const Color(0xFF090D16),
-        border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-        ),
+        color: AppTheme.cardColorOf(context),
+        border: Border(top: BorderSide(color: borderSubtle)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1160),
-          child: Column(
+          constraints: const BoxConstraints(maxWidth: 1140),
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 16,
+            runSpacing: 12,
             children: [
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 12,
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const AppLogo(mode: AppLogoMode.iconOnly, height: 34),
+                  const AppLogo(mode: AppLogoMode.iconOnly, height: 28),
+                  const SizedBox(width: 10),
                   Text(
-                    'RadarScholar Intelligence Platform',
+                    '© 2026 RadarScholar',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.92),
+                      color: textPrimary,
                       fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Divider(color: Colors.white.withValues(alpha: 0.08), height: 1),
-              const SizedBox(height: 20),
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  Text(
-                    '© 2026 RadarScholar. Proyek Rekayasa Perangkat Lunak.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.55),
-                      fontSize: 12,
-                    ),
+              TextButton(
+                onPressed: () => context.go('/about'),
+                child: Text(
+                  'Tentang Pembuat',
+                  style: TextStyle(
+                    color: textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
                   ),
-                  Text(
-                    'Sumber resmi. Keputusan yang lebih terarah.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.55),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+/// Draws clean, minimal concentric rings and diagonal connector lines for the
+/// pure visual Hero showcase without any heavy dark background.
+class _HeroMinimalistRingsPainter extends CustomPainter {
+  final Color ringColor;
+  final Color accentColor;
+
+  const _HeroMinimalistRingsPainter({
+    required this.ringColor,
+    required this.accentColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width * 0.5, size.height * 0.5);
+
+    final outerPaint = Paint()
+      ..color = ringColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    final innerPaint = Paint()
+      ..color = accentColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    final outerRadius = (size.shortestSide * 0.44).clamp(90.0, 165.0);
+    final innerRadius = outerRadius * 0.66;
+
+    canvas.drawCircle(center, outerRadius, outerPaint);
+    canvas.drawCircle(center, innerRadius, innerPaint);
+
+    // Subtle connector lines from center toward the 4 corner icon badges
+    final linePaint = Paint()
+      ..color = ringColor.withValues(alpha: 0.55)
+      ..strokeWidth = 1.0;
+
+    final dx = size.width * 0.30;
+    final dy = size.height * 0.32;
+    canvas.drawLine(center, Offset(center.dx - dx, center.dy - dy), linePaint);
+    canvas.drawLine(center, Offset(center.dx + dx, center.dy - dy), linePaint);
+    canvas.drawLine(center, Offset(center.dx - dx, center.dy + dy), linePaint);
+    canvas.drawLine(center, Offset(center.dx + dx, center.dy + dy), linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeroMinimalistRingsPainter old) {
+    return old.ringColor != ringColor || old.accentColor != accentColor;
   }
 }

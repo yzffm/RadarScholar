@@ -5,6 +5,7 @@ import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../controllers/register_controller.dart';
 import '../../widgets/app_logo.dart';
+import '../../widgets/auth_showcase_panel.dart';
 
 /// RadarScholar Registration Page.
 ///
@@ -122,124 +123,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget _buildDesktopLayout(BuildContext context, RegisterFormState state) {
     return Row(
       children: [
-        // Left Column: Brand Hero
-        Expanded(
+        // Left Column: Interactive Product Mockup Showcase
+        const Expanded(
           flex: 5,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 48),
-            decoration: BoxDecoration(
-              gradient: AppTheme.heroGradient,
-              border: Border(
-                right: BorderSide(color: AppTheme.borderSubtleOf(context)),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    AppLogo.icon(height: 44),
-                    const SizedBox(width: 14),
-                    Text(
-                      'RadarScholar',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                          ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.brandAccent.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(AppRadius.xxl),
-                        border: Border.all(
-                          color: AppTheme.brandAccent.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.school_rounded,
-                            color: AppTheme.brandAccent,
-                            size: 16,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Bergabung Sekarang',
-                            style: TextStyle(
-                              color: AppTheme.brandAccent,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.lg),
-                    Text(
-                      'Mulai Perjalanan\nBeasiswa Anda.',
-                      style: Theme.of(context).textTheme.displayMedium
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            height: 1.15,
-                            letterSpacing: -0.5,
-                          ),
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    Text(
-                      'Buat akun untuk mendapatkan rekomendasi beasiswa yang sesuai dengan profil akademik, jenjang studi, dan minat bidang Anda.',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        height: 1.6,
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.xl),
-                    _buildPillarItem(
-                      icon: Icons.person_search_rounded,
-                      title: 'Profil Akademik Terstruktur',
-                      subtitle:
-                          'Isi IPK, jurusan, dan jenjang untuk pencocokan akurat.',
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    _buildPillarItem(
-                      icon: Icons.bookmark_added_rounded,
-                      title: 'Simpan & Lacak Lamaran',
-                      subtitle:
-                          'Kelola daftar beasiswa incaran dan checklist dokumen.',
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    _buildPillarItem(
-                      icon: Icons.auto_awesome_rounded,
-                      title: 'Pendamping AI Berintegritas',
-                      subtitle:
-                          'Bantuan review CV dan draf esai tanpa fabrikasi.',
-                    ),
-                  ],
-                ),
-                Text(
-                  'RadarScholar © 2026 • Proyek Pengembangan Perangkat Lunak Mahasiswa',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.55),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          child: AuthShowcasePanel(mode: AuthShowcaseMode.register),
         ),
 
         // Right Column: Register Form
@@ -600,53 +487,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           width: 1.5,
         ),
       ),
-    );
-  }
-
-  Widget _buildPillarItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppTheme.brandAccent.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(
-              color: AppTheme.brandAccent.withValues(alpha: 0.25),
-            ),
-          ),
-          child: Icon(icon, color: AppTheme.brandAccent, size: 20),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.75),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
