@@ -28,6 +28,7 @@ def test_seed_is_idempotent_and_marks_provenance():
             assert scholarship.data_origin == "SEED"
             assert scholarship.last_verified_live_at is None
             assert scholarship.deadline is None
+            assert scholarship.is_active is False
             assert len(scholarship.requirements) > 0
             assert len(scholarship.benefits) > 0
     finally:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../core/scholarship_status.dart';
 import '../core/theme.dart';
 import '../models/scholarship.dart';
 
@@ -138,8 +139,6 @@ class _ScholarshipCardState extends State<ScholarshipCard> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      _buildStatusBadge(context),
                     ],
                   ),
                   const SizedBox(height: 14),
@@ -159,8 +158,17 @@ class _ScholarshipCardState extends State<ScholarshipCard> {
                   ),
                   const SizedBox(height: 14),
 
-                  // Data Origin & Verification Tag
-                  _buildFreshnessLabel(context),
+                  // Registration status & data freshness. A Wrap keeps the
+                  // longer neutral/stale labels readable on narrow screens.
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _buildStatusBadge(context),
+                      _buildFreshnessLabel(context),
+                    ],
+                  ),
                   const SizedBox(height: 14),
 
                   // Hairline Divider
@@ -255,74 +263,115 @@ class _ScholarshipCardState extends State<ScholarshipCard> {
   }
 
   Widget _buildFreshnessLabel(BuildContext context) {
-    final origin = widget.scholarship.dataOrigin;
-    final isLive = origin == 'CRAWLER_LIVE';
+    final info = verificationInfoOf(widget.scholarship);
     final isDark = AppTheme.isDark(context);
 
-    final label = switch (origin) {
-      'CRAWLER_LIVE' => 'Sumber resmi terverifikasi live',
-      'CRAWLER_BASELINE' => 'Baseline resmi, perlu verifikasi terbaru',
-      'SEED' => 'Data seed, perlu verifikasi terbaru',
-      _ => 'Status verifikasi belum tersedia',
-    };
+    final okColor = isDark ? const Color(0xFF34D399) : const Color(0xFF059669);
+    final warnColor = isDark
+        ? const Color(0xFFFBBF24)
+        : const Color(0xFFD97706);
+    final color = info.isLiveChecked && !info.isStale ? okColor : warnColor;
 
-    final color = isLive
-        ? (isDark ? const Color(0xFF34D399) : const Color(0xFF059669))
-        : (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706));
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.1 : 0.07),
-        borderRadius: BorderRadius.circular(AppRadius.xs),
-        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(color: color.withValues(alpha: 0.6), blurRadius: 4),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: isDark ? 0.1 : 0.07),
+            borderRadius: BorderRadius.circular(AppRadius.xs),
+            border: Border.all(
+              color: color.withValues(alpha: 0.25),
+              width: 0.8,
             ),
           ),
-          const SizedBox(width: 7),
-          Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
-                color: color,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.6),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
               ),
-              overflow: TextOverflow.ellipsis,
-            ),
+              const SizedBox(width: 7),
+              Flexible(
+                child: Text(
+                  info.label,
+                  key: const ValueKey('freshness-label'),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (info.staleWarning != null) ...[
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.warning_amber_rounded, size: 13, color: warnColor),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  info.staleWarning!,
+                  key: const ValueKey('freshness-stale-warning'),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: warnColor,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
-      ),
+      ],
     );
   }
 
+  /// Registration status badge. A scholarship whose official source states no
+  /// deadline gets a neutral badge; it is never shown as "Aktif".
   Widget _buildStatusBadge(BuildContext context) {
-    final isActive = widget.scholarship.isActive;
+    final status = registrationStatusOf(widget.scholarship);
     final isDark = AppTheme.isDark(context);
 
-    final bgColor = isActive
-        ? (isDark
-              ? const Color(0xFF064E3B).withValues(alpha: 0.45)
-              : const Color(0xFFDCFCE7))
-        : (isDark
-              ? const Color(0xFF7F1D1D).withValues(alpha: 0.45)
-              : const Color(0xFFFEE2E2));
-
-    final textColor = isActive
-        ? (isDark ? const Color(0xFF34D399) : const Color(0xFF15803D))
-        : (isDark ? const Color(0xFFF87171) : const Color(0xFFB91C1C));
+    final (String label, Color bgColor, Color textColor) = switch (status) {
+      RegistrationStatus.open => (
+        'Aktif',
+        isDark
+            ? const Color(0xFF064E3B).withValues(alpha: 0.45)
+            : const Color(0xFFDCFCE7),
+        isDark ? const Color(0xFF34D399) : const Color(0xFF15803D),
+      ),
+      RegistrationStatus.closed => (
+        'Tidak Aktif',
+        isDark
+            ? const Color(0xFF7F1D1D).withValues(alpha: 0.45)
+            : const Color(0xFFFEE2E2),
+        isDark ? const Color(0xFFF87171) : const Color(0xFFB91C1C),
+      ),
+      RegistrationStatus.unknown => (
+        'Status pendaftaran belum diketahui',
+        isDark
+            ? const Color(0xFF334155).withValues(alpha: 0.5)
+            : const Color(0xFFF1F5F9),
+        isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+      ),
+    };
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
@@ -340,13 +389,16 @@ class _ScholarshipCardState extends State<ScholarshipCard> {
             decoration: BoxDecoration(color: textColor, shape: BoxShape.circle),
           ),
           const SizedBox(width: 5),
-          Text(
-            isActive ? 'Aktif' : 'Tidak Aktif',
-            style: TextStyle(
-              color: textColor,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.1,
+          Flexible(
+            child: Text(
+              label,
+              key: const ValueKey('registration-status-badge'),
+              style: TextStyle(
+                color: textColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.1,
+              ),
             ),
           ),
         ],
@@ -355,7 +407,7 @@ class _ScholarshipCardState extends State<ScholarshipCard> {
   }
 
   String _formatDeadline(DateTime? date) {
-    if (date == null) return 'Batas waktu belum ditentukan';
+    if (date == null) return 'Batas waktu belum diketahui';
     return 'Ditutup: ${DateFormat('dd MMM yyyy').format(date)}';
   }
 }

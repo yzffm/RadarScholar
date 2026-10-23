@@ -10,6 +10,7 @@ from app.database.session import get_db
 from app.matching.schemas import RelevanceTier
 from app.matching.service import MatchingService
 from app.scholarships import service
+from app.scholarships.repository import STATUS_NOT_CLOSED
 from app.scholarships.schemas import (
     MatchedScholarshipListResponse,
     MatchedScholarshipResponse,
@@ -38,7 +39,14 @@ def get_scholarships(
     """
     Get a paginated list of scholarships.
 
-    Supports filtering by search query and active status.
+    Supports filtering by search query and registration status, evaluated
+    against the current time:
+
+    - ``active``: deadline known and not yet passed (and not marked inactive).
+    - ``inactive``: deadline passed or marked inactive.
+    - omitted: everything; scholarships without a source-stated deadline
+      (registration status unknown) only appear here.
+
     Ordered by deadline ascending (nulls last).
     """
     return service.get_scholarships_paginated(
@@ -69,18 +77,21 @@ def get_matched_scholarships(
             detail="Profil pengguna belum dilengkapi."
         )
 
-    # We fetch the active scholarships first (can be optimized later)
+    # We fetch the not-closed scholarships first (can be optimized later)
     # The M4 service already supports getting scholarships paginated, but we want all to rank them,
-    # or a sufficient number. Since MVP, let's fetch all active matching the search, evaluate, rank, then paginate.
+    # or a sufficient number. Since MVP, let's fetch all not-closed matching the search, evaluate, rank, then paginate.
     # Note: For production with thousands, this requires a DB-level engine or pre-calculation.
-    # We will fetch all active matching search (without pagination), rank them, then paginate.
+    # We will fetch all not-closed matching search (without pagination), rank them, then paginate.
+    # "not_closed" = registration OPEN or UNKNOWN (no source-stated deadline). Scholarships whose
+    # deadline has passed (or that were marked stale) are never recommended, even if a crawler
+    # has not been able to refresh them recently.
 
     scholarships_list = service.get_scholarships_paginated(
         db=db,
         page=1,
         page_size=1000, # Fetch up to 1000 for in-memory ranking
         search=search,
-        status="active"
+        status=STATUS_NOT_CLOSED,
     ).items
 
     matching_service = MatchingService()
