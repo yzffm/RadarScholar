@@ -18,7 +18,6 @@ class KseScraper(BaseScraper):
 
     provider_name = "Karya Salemba Empat (KSE)"
     source_url = "https://kse.or.id/"
-    application_url = "https://beasiswa.or.id"
 
     def scrape(self) -> list[ScrapedScholarship]:
         response = self.fetch(self.source_url)
@@ -30,15 +29,23 @@ class KseScraper(BaseScraper):
         reference_time: datetime | None = None,
     ) -> list[ScrapedScholarship]:
         soup = BeautifulSoup(html, "html.parser")
-        text = soup.get_text(" ", strip=True)
+        text = soup.get_text("\n", strip=True)
         if "Program Beasiswa KSE" not in text and "Karya Salemba Empat" not in text:
             raise ValueError("KSE scholarship marker was not found")
 
         deadline = extract_contextual_deadline(text, reference_time=reference_time)
         historical_deadlines = extract_contextual_dates(text)
 
+        application_url = self.source_url
+        for link in soup.find_all("a", href=True):
+            href = link["href"].strip()
+            if "beasiswa.or.id" in href:
+                application_url = href.rstrip("/")
+                break
+
+        lower_text = text.lower()
         requirements: list[ScrapedRequirement] = []
-        if "mahasiswa S1" in text:
+        if "mahasiswa s1" in lower_text:
             requirements.append(
                 ScrapedRequirement(
                     requirement_type="DEGREE_LEVEL",
@@ -48,20 +55,28 @@ class KseScraper(BaseScraper):
                 )
             )
 
-        benefits = [
-            ScrapedBenefit(
-                benefit_type="TUITION_FEE",
-                description="Bantuan finansial pendidikan tinggi untuk mahasiswa S1.",
-            ),
-            ScrapedBenefit(
-                benefit_type="LEADERSHIP_DEVELOPMENT",
-                description="Pengembangan diri, pelatihan kepemimpinan, soft skills, dan bimbingan karier.",
-            ),
-            ScrapedBenefit(
-                benefit_type="TRAINING",
-                description="Pembekalan inovasi, kewirausahaan, dan pengabdian masyarakat.",
-            ),
-        ]
+        benefits: list[ScrapedBenefit] = []
+        if "bantuan finansial" in lower_text:
+            benefits.append(
+                ScrapedBenefit(
+                    benefit_type="TUITION_FEE",
+                    description="Bantuan finansial pendidikan tinggi untuk mahasiswa S1.",
+                )
+            )
+        if "pengembangan diri" in lower_text or "kepemimpinan" in lower_text:
+            benefits.append(
+                ScrapedBenefit(
+                    benefit_type="LEADERSHIP_DEVELOPMENT",
+                    description="Pengembangan diri, pelatihan kepemimpinan, soft skills, dan bimbingan karier.",
+                )
+            )
+        if "kewirausahaan" in lower_text or "pengabdian masyarakat" in lower_text:
+            benefits.append(
+                ScrapedBenefit(
+                    benefit_type="TRAINING",
+                    description="Pembekalan inovasi, kewirausahaan, dan pengabdian masyarakat.",
+                )
+            )
 
         return [
             ScrapedScholarship(
@@ -78,7 +93,7 @@ class KseScraper(BaseScraper):
                     "spesifik per kampus mengikuti pengumuman resmi KSE."
                 ),
                 deadline=deadline,
-                application_url=self.application_url,
+                application_url=application_url,
                 requirements=requirements,
                 benefits=benefits,
                 is_active=deadline is not None,
@@ -86,4 +101,3 @@ class KseScraper(BaseScraper):
                 is_live_verified=True,
             )
         ]
-

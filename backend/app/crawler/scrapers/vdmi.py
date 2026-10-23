@@ -25,12 +25,22 @@ class VdmiScraper(BaseScraper):
         reference_time: datetime | None = None,
     ) -> list[ScrapedScholarship]:
         soup = BeautifulSoup(html, "html.parser")
-        text = soup.get_text(" ", strip=True)
+        text = soup.get_text("\n", strip=True)
         if "Van Deventer-Maas" not in text:
             raise ValueError("VDMI scholarship marker was not found")
 
         deadline = extract_contextual_deadline(text, reference_time=reference_time)
         historical_deadlines = extract_contextual_dates(text)
+
+        lower_text = text.lower()
+        benefits: list[ScrapedBenefit] = []
+        if "grants for scholarships" in lower_text or "capacity building" in lower_text:
+            benefits.append(
+                ScrapedBenefit(
+                    benefit_type="EDUCATIONAL_SUPPORT",
+                    description="Dukungan hibah beasiswa (grants for scholarships) dan program capacity building.",
+                )
+            )
 
         return [
             ScrapedScholarship(
@@ -49,15 +59,9 @@ class VdmiScraper(BaseScraper):
                 deadline=deadline,
                 application_url=self.application_url,
                 requirements=[],
-                benefits=[
-                    ScrapedBenefit(
-                        benefit_type="EDUCATIONAL_SUPPORT",
-                        description="Dukungan hibah beasiswa (grants for scholarships) dan program capacity building.",
-                    )
-                ],
+                benefits=benefits,
                 is_active=deadline is not None,
                 has_contextual_dates=bool(historical_deadlines),
                 is_live_verified=True,
             )
         ]
-

@@ -42,7 +42,7 @@ def test_kse_scraper_parses_real_snapshot():
     assert item.title == "Beasiswa Karya Salemba Empat (KSE)"
     assert item.provider_name == "Karya Salemba Empat (KSE)"
     assert item.source_url == "https://kse.or.id/"
-    assert item.application_url == "https://beasiswa.or.id"
+    assert item.application_url == "https://kse.or.id/"
     assert item.deadline is None
     assert item.is_active is False
     assert item.has_contextual_dates is False

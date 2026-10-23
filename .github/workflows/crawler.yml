@@ -58,4 +58,4 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             DRY_RUN_FLAG="--dry-run"
           fi
-          python -m app.crawler.main $DRY_RUN_FLAG --source teladan --source pertamina_sobat_bumi --source cimb_scholarship --source bca_scholarship --source ugm_bulletin
+          python -m app.crawler.main $DRY_RUN_FLAG

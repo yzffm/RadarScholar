@@ -10,6 +10,11 @@ def test_registry_only_enables_audited_crawlable_source():
         "pertamina_sobat_bumi",
         "bca_scholarship",
         "ugm_bulletin",
+        "kse",
+        "vdmi",
+        "dataprint",
+        "bank_indonesia_genbi",
+        "ugm_ditmawa_index",
     }
     assert registry["teladan"].crawl_status == "ACTIVE"
     assert registry["teladan"].crawl_method == "HTTP_HTML"
@@ -32,7 +37,7 @@ def test_registry_only_enables_audited_crawlable_source():
         "bank_indonesia_genbi",
         "ugm_ditmawa_index",
     ):
-        assert registry[wave1_key].enabled is False
-        assert registry[wave1_key].crawl_status == "NEEDS_REVIEW"
+        assert registry[wave1_key].enabled is True
+        assert registry[wave1_key].crawl_status == "ACTIVE"
         assert registry[wave1_key].crawl_method == "HTTP_HTML"
         assert registry[wave1_key].scraper_factory is not None
