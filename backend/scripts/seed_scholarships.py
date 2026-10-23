@@ -147,7 +147,7 @@ def seed_scholarships(session=None) -> int:
             scholarship.description = data["description"]
             scholarship.deadline = data["deadline"]
             scholarship.application_url = app_url
-            scholarship.is_active = True
+            scholarship.is_active = bool(data["deadline"])
             scholarship.data_origin = "SEED"
             # Seed data has provenance but no live verification timestamp.
             scholarship.last_verified_live_at = None

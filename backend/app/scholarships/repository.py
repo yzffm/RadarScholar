@@ -1,9 +1,19 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import nulls_last, or_
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.time import utc_now
 from app.scholarships.models import Scholarship, ScholarshipSource
+from app.scholarships.status import closed_clause, open_clause
+
+# Public filter values (see ``ScholarshipStatus`` in router.py) plus one
+# internal value used by the matcher: everything that is *not* known to be
+# closed (i.e. OPEN or UNKNOWN registration status).
+STATUS_ACTIVE = "active"
+STATUS_INACTIVE = "inactive"
+STATUS_NOT_CLOSED = "not_closed"
 
 
 def get_scholarships(
@@ -11,16 +21,30 @@ def get_scholarships(
     skip: int = 0,
     limit: int = 20,
     search: str = None,
-    status: str = None
+    status: str = None,
+    now: datetime | None = None,
 ) -> tuple[list[Scholarship], int]:
-    """Retrieve scholarships with optional filtering, search, and pagination."""
+    """Retrieve scholarships with optional filtering, search, and pagination.
+
+    ``status`` is evaluated against the current clock (``now``), not just the
+    stored ``is_active`` flag:
+
+    * ``active``     -> deadline known, not past, and ``is_active``
+    * ``inactive``   -> deadline known and (past or ``is_active`` false)
+    * ``not_closed`` -> everything except ``inactive`` (open + unknown)
+    * ``None``       -> no filter; scholarships without a deadline only appear here
+    """
+    reference = now if now is not None else utc_now()
     query = db.query(Scholarship).options(joinedload(Scholarship.source))
 
     if status is not None:
-        if status.lower() == "active":
-            query = query.filter(Scholarship.is_active.is_(True))
-        elif status.lower() == "inactive":
-            query = query.filter(Scholarship.is_active.is_(False))
+        normalized = status.lower()
+        if normalized == STATUS_ACTIVE:
+            query = query.filter(open_clause(Scholarship, reference))
+        elif normalized == STATUS_INACTIVE:
+            query = query.filter(closed_clause(Scholarship, reference))
+        elif normalized == STATUS_NOT_CLOSED:
+            query = query.filter(~closed_clause(Scholarship, reference))
 
     if search:
         search_term = f"%{search}%"

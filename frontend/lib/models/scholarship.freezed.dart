@@ -874,7 +874,10 @@ mixin _$Scholarship {
   @JsonKey(name: 'application_url')
   String get applicationUrl => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
-  bool get isActive => throw _privateConstructorUsedError;
+  bool get isActive => throw _privateConstructorUsedError; // Derived server-side from deadline + current time: OPEN, CLOSED, UNKNOWN.
+  // Defaults to UNKNOWN so a missing field never renders as "open".
+  @JsonKey(name: 'registration_status')
+  String get registrationStatus => throw _privateConstructorUsedError;
   @JsonKey(name: 'data_origin')
   String get dataOrigin => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
@@ -914,6 +917,7 @@ abstract class $ScholarshipCopyWith<$Res> {
     DateTime? deadline,
     @JsonKey(name: 'application_url') String applicationUrl,
     @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'registration_status') String registrationStatus,
     @JsonKey(name: 'data_origin') String dataOrigin,
     @JsonKey(name: 'created_at') DateTime createdAt,
     @JsonKey(name: 'updated_at') DateTime updatedAt,
@@ -949,6 +953,7 @@ class _$ScholarshipCopyWithImpl<$Res, $Val extends Scholarship>
     Object? deadline = freezed,
     Object? applicationUrl = null,
     Object? isActive = null,
+    Object? registrationStatus = null,
     Object? dataOrigin = null,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -991,6 +996,10 @@ class _$ScholarshipCopyWithImpl<$Res, $Val extends Scholarship>
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
                       as bool,
+            registrationStatus: null == registrationStatus
+                ? _value.registrationStatus
+                : registrationStatus // ignore: cast_nullable_to_non_nullable
+                      as String,
             dataOrigin: null == dataOrigin
                 ? _value.dataOrigin
                 : dataOrigin // ignore: cast_nullable_to_non_nullable
@@ -1057,6 +1066,7 @@ abstract class _$$ScholarshipImplCopyWith<$Res>
     DateTime? deadline,
     @JsonKey(name: 'application_url') String applicationUrl,
     @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'registration_status') String registrationStatus,
     @JsonKey(name: 'data_origin') String dataOrigin,
     @JsonKey(name: 'created_at') DateTime createdAt,
     @JsonKey(name: 'updated_at') DateTime updatedAt,
@@ -1092,6 +1102,7 @@ class __$$ScholarshipImplCopyWithImpl<$Res>
     Object? deadline = freezed,
     Object? applicationUrl = null,
     Object? isActive = null,
+    Object? registrationStatus = null,
     Object? dataOrigin = null,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -1134,6 +1145,10 @@ class __$$ScholarshipImplCopyWithImpl<$Res>
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
                   as bool,
+        registrationStatus: null == registrationStatus
+            ? _value.registrationStatus
+            : registrationStatus // ignore: cast_nullable_to_non_nullable
+                  as String,
         dataOrigin: null == dataOrigin
             ? _value.dataOrigin
             : dataOrigin // ignore: cast_nullable_to_non_nullable
@@ -1179,6 +1194,7 @@ class _$ScholarshipImpl implements _Scholarship {
     this.deadline,
     @JsonKey(name: 'application_url') required this.applicationUrl,
     @JsonKey(name: 'is_active') this.isActive = true,
+    @JsonKey(name: 'registration_status') this.registrationStatus = 'UNKNOWN',
     @JsonKey(name: 'data_origin') this.dataOrigin = 'UNKNOWN',
     @JsonKey(name: 'created_at') required this.createdAt,
     @JsonKey(name: 'updated_at') required this.updatedAt,
@@ -1211,6 +1227,11 @@ class _$ScholarshipImpl implements _Scholarship {
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
+  // Derived server-side from deadline + current time: OPEN, CLOSED, UNKNOWN.
+  // Defaults to UNKNOWN so a missing field never renders as "open".
+  @override
+  @JsonKey(name: 'registration_status')
+  final String registrationStatus;
   @override
   @JsonKey(name: 'data_origin')
   final String dataOrigin;
@@ -1246,7 +1267,7 @@ class _$ScholarshipImpl implements _Scholarship {
 
   @override
   String toString() {
-    return 'Scholarship(id: $id, sourceId: $sourceId, title: $title, summary: $summary, description: $description, deadline: $deadline, applicationUrl: $applicationUrl, isActive: $isActive, dataOrigin: $dataOrigin, createdAt: $createdAt, updatedAt: $updatedAt, lastVerifiedLiveAt: $lastVerifiedLiveAt, benefits: $benefits, requirements: $requirements, source: $source)';
+    return 'Scholarship(id: $id, sourceId: $sourceId, title: $title, summary: $summary, description: $description, deadline: $deadline, applicationUrl: $applicationUrl, isActive: $isActive, registrationStatus: $registrationStatus, dataOrigin: $dataOrigin, createdAt: $createdAt, updatedAt: $updatedAt, lastVerifiedLiveAt: $lastVerifiedLiveAt, benefits: $benefits, requirements: $requirements, source: $source)';
   }
 
   @override
@@ -1267,6 +1288,8 @@ class _$ScholarshipImpl implements _Scholarship {
                 other.applicationUrl == applicationUrl) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
+            (identical(other.registrationStatus, registrationStatus) ||
+                other.registrationStatus == registrationStatus) &&
             (identical(other.dataOrigin, dataOrigin) ||
                 other.dataOrigin == dataOrigin) &&
             (identical(other.createdAt, createdAt) ||
@@ -1295,6 +1318,7 @@ class _$ScholarshipImpl implements _Scholarship {
     deadline,
     applicationUrl,
     isActive,
+    registrationStatus,
     dataOrigin,
     createdAt,
     updatedAt,
@@ -1328,6 +1352,7 @@ abstract class _Scholarship implements Scholarship {
     final DateTime? deadline,
     @JsonKey(name: 'application_url') required final String applicationUrl,
     @JsonKey(name: 'is_active') final bool isActive,
+    @JsonKey(name: 'registration_status') final String registrationStatus,
     @JsonKey(name: 'data_origin') final String dataOrigin,
     @JsonKey(name: 'created_at') required final DateTime createdAt,
     @JsonKey(name: 'updated_at') required final DateTime updatedAt,
@@ -1358,7 +1383,11 @@ abstract class _Scholarship implements Scholarship {
   String get applicationUrl;
   @override
   @JsonKey(name: 'is_active')
-  bool get isActive;
+  bool get isActive; // Derived server-side from deadline + current time: OPEN, CLOSED, UNKNOWN.
+  // Defaults to UNKNOWN so a missing field never renders as "open".
+  @override
+  @JsonKey(name: 'registration_status')
+  String get registrationStatus;
   @override
   @JsonKey(name: 'data_origin')
   String get dataOrigin;

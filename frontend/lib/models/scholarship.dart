@@ -60,6 +60,11 @@ class Scholarship with _$Scholarship {
     DateTime? deadline,
     @JsonKey(name: 'application_url') required String applicationUrl,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
+    // Derived server-side from deadline + current time: OPEN, CLOSED, UNKNOWN.
+    // Defaults to UNKNOWN so a missing field never renders as "open".
+    @JsonKey(name: 'registration_status')
+    @Default('UNKNOWN')
+    String registrationStatus,
     @JsonKey(name: 'data_origin') @Default('UNKNOWN') String dataOrigin,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,

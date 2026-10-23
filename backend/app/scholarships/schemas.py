@@ -8,12 +8,13 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, computed_field
 
 # ==============================================================================
 # ScholarshipSource Schemas
 # ==============================================================================
 from app.matching.schemas import MatchResult
+from app.scholarships.status import RegistrationStatus, derive_registration_status
 
 
 class ScholarshipSourceBase(BaseModel):
@@ -101,6 +102,12 @@ class ScholarshipResponse(ScholarshipBase):
     source: ScholarshipSourceResponse | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def registration_status(self) -> RegistrationStatus:
+        """OPEN / CLOSED / UNKNOWN, derived from deadline and the current time."""
+        return derive_registration_status(self.deadline, self.is_active)
 
 class ScholarshipListResponse(BaseModel):
     items: list[ScholarshipResponse]

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../controllers/auth_controller.dart';
+import '../../core/scholarship_status.dart';
 import '../../core/theme.dart';
 import '../../models/scholarship.dart';
 import '../../models/match_result.dart';
@@ -174,7 +175,7 @@ class ScholarshipDetailPage extends ConsumerWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _buildStatusBadge(isDark, scholarship.isActive),
+                  _buildStatusBadge(isDark, registrationStatusOf(scholarship)),
                   const Spacer(),
                   if (scholarship.source != null)
                     Container(
@@ -736,8 +737,25 @@ class ScholarshipDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBadge(bool isDark, bool isActive) {
-    final color = isActive ? AppTheme.statusSuccess : AppTheme.statusDanger;
+  Widget _buildStatusBadge(bool isDark, RegistrationStatus status) {
+    final (String label, Color color, Color textColor) = switch (status) {
+      RegistrationStatus.open => (
+        'Pendaftaran Dibuka',
+        AppTheme.statusSuccess,
+        isDark ? const Color(0xFF34D399) : const Color(0xFF15803D),
+      ),
+      RegistrationStatus.closed => (
+        'Pendaftaran Ditutup',
+        AppTheme.statusDanger,
+        isDark ? const Color(0xFFF87171) : const Color(0xFFB91C1C),
+      ),
+      // No deadline stated by the official source: neutral, never "open".
+      RegistrationStatus.unknown => (
+        'Status pendaftaran belum diketahui',
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+        isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+      ),
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -754,16 +772,15 @@ class ScholarshipDetailPage extends ConsumerWidget {
             decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           ),
           const SizedBox(width: 6),
-          Text(
-            isActive ? 'Pendaftaran Dibuka' : 'Pendaftaran Ditutup',
-            style: TextStyle(
-              color: isActive
-                  ? (isDark ? const Color(0xFF34D399) : const Color(0xFF15803D))
-                  : (isDark
-                        ? const Color(0xFFF87171)
-                        : const Color(0xFFB91C1C)),
-              fontSize: 11.5,
-              fontWeight: FontWeight.w700,
+          Flexible(
+            child: Text(
+              label,
+              key: const ValueKey('detail-registration-status-badge'),
+              style: TextStyle(
+                color: textColor,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -772,7 +789,7 @@ class ScholarshipDetailPage extends ConsumerWidget {
   }
 
   String _formatDeadline(DateTime? date) {
-    if (date == null) return 'Batas waktu belum ditentukan';
+    if (date == null) return 'Batas waktu belum diketahui';
     return DateFormat('dd MMMM yyyy').format(date);
   }
 

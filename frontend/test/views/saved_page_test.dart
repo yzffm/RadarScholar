@@ -24,7 +24,7 @@ class FakeApplicationRepository extends ApplicationRepository {
 }
 
 SavedScholarship makeSaved() {
-  final now = DateTime(2027);
+  final now = DateTime.utc(2026, 10, 23, 12);
   return SavedScholarship(
     id: 'saved-1',
     userId: 'user-1',
@@ -40,6 +40,7 @@ SavedScholarship makeSaved() {
       createdAt: now,
       updatedAt: now,
       dataOrigin: 'CRAWLER_LIVE',
+      lastVerifiedLiveAt: now,
     ),
   );
 }
@@ -68,7 +69,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('TELADAN 2027'), findsOneWidget);
-    expect(find.text('Sumber resmi terverifikasi live'), findsOneWidget);
+    expect(find.text('Status pendaftaran belum diketahui'), findsOneWidget);
+    expect(
+      find.text(
+        'Halaman resmi dicek 23 Oct 2026; syarat dan manfaat dikurasi manual',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('SavedPage sanitizes repository errors', (tester) async {
