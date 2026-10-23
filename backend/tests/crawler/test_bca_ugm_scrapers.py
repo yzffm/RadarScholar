@@ -95,9 +95,17 @@ def test_ugm_bulletin_extracts_official_program_data_and_unknown_when_deadline_r
     )[0]
 
     assert result.title.startswith("Beasiswa Cendekia BAZNAS")
-    assert result.deadline is None  # audited 2026 period is expired at 2026-10-20
+    assert result.deadline == datetime(2026, 9, 27, 16, 59, 59)
     assert result.is_active is False
     assert result.has_contextual_dates is True
+    assert (
+        derive_registration_status(
+            result.deadline,
+            result.is_active,
+            now=datetime(2026, 10, 20, 3, 0),
+        )
+        == RegistrationStatus.CLOSED
+    )
     assert result.application_url == "https://beasiswa.baznas.go.id"
     assert {item.requirement_type for item in result.requirements} >= {
         "DEGREE_LEVEL",

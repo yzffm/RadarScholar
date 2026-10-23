@@ -34,7 +34,12 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
-from app.crawler.date_utils import extract_contextual_dates, extract_contextual_deadline
+from app.crawler.date_utils import (
+    _normalize_reference_time,
+    extract_contextual_dates,
+    extract_contextual_deadline,
+    extract_registration_period,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +115,10 @@ class DjarumScraper(BaseScraper):
         logger.info("Fetching Djarum Beasiswa Plus regulation page")
         try:
             response = self.fetch(self.source_url)
+            results = self.parse_html(response.text)
+            for item in results:
+                item.is_live_verified = True
+            return results
         except httpx.HTTPError as exc:
             logger.warning(
                 "Could not reach Djarum page (%s) — using known baseline data instead",
@@ -119,8 +128,6 @@ class DjarumScraper(BaseScraper):
             for item in results:
                 item.is_live_verified = False
             return results
-
-        return self.parse_html(response.text)
 
     def parse_html(
         self,
@@ -146,9 +153,27 @@ class DjarumScraper(BaseScraper):
             else "Djarum Beasiswa Plus adalah program beasiswa prestasi bagi mahasiswa Indonesia."
         )
 
-        # Try to extract deadline from page content
-        deadline = self._extract_deadline(soup, reference_time=reference_time)
+        open_date, range_deadline = extract_registration_period(text)
+        ctx_deadline = extract_contextual_deadline(text, reference_time=reference_time)
         historical_deadlines = extract_contextual_dates(text)
+        if range_deadline and range_deadline not in historical_deadlines:
+            historical_deadlines.append(range_deadline)
+
+        if ctx_deadline is not None:
+            deadline = ctx_deadline
+        elif range_deadline is not None:
+            deadline = max([range_deadline] + historical_deadlines) if historical_deadlines else range_deadline
+        elif historical_deadlines:
+            deadline = max(historical_deadlines)
+        else:
+            deadline = None
+
+        now_utc = _normalize_reference_time(reference_time)
+        is_active = (
+            deadline is not None
+            and deadline >= now_utc
+            and (open_date is None or open_date <= now_utc)
+        )
 
         scholarship = ScrapedScholarship(
             provider_name=self.provider_name,
@@ -156,10 +181,11 @@ class DjarumScraper(BaseScraper):
             title="Djarum Beasiswa Plus",
             summary="Program beasiswa prestasi bagi mahasiswa S1/D4 di Indonesia yang dilengkapi pelatihan soft skills.",
             description=description,
+            open_date=open_date,
             deadline=deadline,
             application_url="https://register.djarumbeasiswaplus.org",
-            is_active=deadline is not None,
-            has_contextual_dates=bool(historical_deadlines),
+            is_active=is_active,
+            has_contextual_dates=bool(historical_deadlines or open_date),
             requirements=list(_KNOWN_REQUIREMENTS),
             benefits=list(_KNOWN_BENEFITS),
         )

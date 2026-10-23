@@ -149,10 +149,15 @@ class CrawlerPipeline:
         if not self.dry_run:
             self._sync_registry_sources()
 
-        enabled = get_enabled_sources()
-
         if source_filter:
-            enabled = {k: v for k, v in enabled.items() if k in source_filter}
+            registry = get_registry()
+            enabled = {
+                k: v
+                for k, v in registry.items()
+                if k in source_filter and v.scraper_factory is not None
+            }
+        else:
+            enabled = get_enabled_sources()
 
         for key, entry in enabled.items():
             result.sources_attempted += 1

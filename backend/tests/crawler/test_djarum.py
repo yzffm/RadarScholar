@@ -139,6 +139,26 @@ class TestDjarumParserEdgeCases:
         assert result.deadline.year == 2027
         assert result.deadline.month == 9
 
+    def test_djarum_registration_period_live_text(self, scraper: DjarumScraper):
+        html = """
+        <html><body>
+        <p>Untuk tahun 2026, pendaftaran akan dibuka pada 8 April 2026 dan ditutup pada 10 Juni 2026.</p>
+        </body></html>
+        """
+        # When reference_time is after the period (e.g. October 2026), status is CLOSED and is_active is False
+        expired_result = scraper.parse_html(html, reference_time=FIXED_REF)[0]
+        assert expired_result.open_date == datetime(2026, 4, 7, 17, 0, 0)
+        assert expired_result.deadline == datetime(2026, 6, 10, 16, 59, 59)
+        assert expired_result.is_active is False
+        assert expired_result.has_contextual_dates is True
+
+        # When reference_time is during the period (e.g. May 2026), status is OPEN and is_active is True
+        active_ref = datetime(2026, 5, 1, 10, 0, 0)
+        active_result = scraper.parse_html(html, reference_time=active_ref)[0]
+        assert active_result.open_date == datetime(2026, 4, 7, 17, 0, 0)
+        assert active_result.deadline == datetime(2026, 6, 10, 16, 59, 59)
+        assert active_result.is_active is True
+
 
 class TestDjarumScrapeFallback:
     """scrape() must degrade gracefully to known baseline data instead of

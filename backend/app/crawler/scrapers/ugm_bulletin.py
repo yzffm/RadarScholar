@@ -10,7 +10,12 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
-from app.crawler.date_utils import extract_contextual_dates, extract_contextual_deadline
+from app.crawler.date_utils import (
+    _normalize_reference_time,
+    extract_contextual_dates,
+    extract_contextual_deadline,
+    extract_registration_period,
+)
 
 
 class UgmScholarshipBulletinScraper(BaseScraper):
@@ -37,8 +42,27 @@ class UgmScholarshipBulletinScraper(BaseScraper):
         if "Beasiswa Cendekia BAZNAS" not in text:
             raise ValueError("UGM BAZNAS bulletin marker was not found")
 
-        deadline = extract_contextual_deadline(text, reference_time=reference_time)
+        open_date, range_deadline = extract_registration_period(text)
+        ctx_deadline = extract_contextual_deadline(text, reference_time=reference_time)
         historical_deadlines = extract_contextual_dates(text)
+        if range_deadline and range_deadline not in historical_deadlines:
+            historical_deadlines.append(range_deadline)
+
+        if ctx_deadline is not None:
+            deadline = ctx_deadline
+        elif range_deadline is not None:
+            deadline = max([range_deadline] + historical_deadlines) if historical_deadlines else range_deadline
+        elif historical_deadlines:
+            deadline = max(historical_deadlines)
+        else:
+            deadline = None
+
+        now_utc = _normalize_reference_time(reference_time)
+        is_active = (
+            deadline is not None
+            and deadline >= now_utc
+            and (open_date is None or open_date <= now_utc)
+        )
         return [
             ScrapedScholarship(
                 provider_name=self.provider_name,
@@ -53,6 +77,7 @@ class UgmScholarshipBulletinScraper(BaseScraper):
                     "Cakupan pengumuman ini mengikuti konteks mahasiswa dan proses "
                     "pendaftaran yang disampaikan UGM."
                 ),
+                open_date=open_date,
                 deadline=deadline,
                 application_url=self.application_url,
                 requirements=[
@@ -95,8 +120,8 @@ class UgmScholarshipBulletinScraper(BaseScraper):
                         description="Pengembangan diri bersama mentor beasiswa BAZNAS.",
                     ),
                 ],
-                is_active=deadline is not None,
-                has_contextual_dates=bool(historical_deadlines),
+                is_active=is_active,
+                has_contextual_dates=bool(historical_deadlines or open_date),
                 is_live_verified=True,
             )
         ]

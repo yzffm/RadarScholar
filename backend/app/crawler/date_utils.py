@@ -40,9 +40,9 @@ _MONTHS = {
 
 _ID_RANGE_PATTERN = re.compile(
     r"(?:pendaftaran\b[^\.\n]*?)?"
-    r"(?:dibuka\s+(?:mulai\s+)?(?:tanggal\s+)?|periode\s+pendaftaran\s*:?\s*)"
-    r"(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})"
-    r"\s+(?:sampai\s+(?:dengan)?|hingga|s\.d\.?|[-–—])\s+(?:tanggal\s+)?"
+    r"(?:(?:akan\s+)?dibuka\s+(?:mulai\s+|pada\s+)?(?:bulan\s+|tanggal\s+)?|periode\s+pendaftaran\s*:?\s*)"
+    r"(\d{1,2})\s+([A-Za-z]+)(?:\s+(\d{4}))?"
+    r"\s*(?:sampai\s+(?:dengan)?|hingga|s\.d\.?|dan\s+ditutup\s+(?:pada\s+)?|[-–—])\s*(?:tanggal\s+)?"
     r"(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})",
     re.IGNORECASE,
 )
@@ -193,10 +193,12 @@ def extract_registration_period(text: str) -> tuple[datetime | None, datetime | 
         d1, m1_str, y1, d2, m2_str, y2 = m_id.groups()
         m1 = _MONTHS.get(m1_str.lower())
         m2 = _MONTHS.get(m2_str.lower())
+        year2 = int(y2)
+        year1 = int(y1) if y1 else year2
         if m1 and m2:
             try:
-                start_dt = _open_date_start_of_day_utc(int(y1), m1, int(d1))
-                end_dt = _deadline_end_of_day_utc(int(y2), m2, int(d2))
+                start_dt = _open_date_start_of_day_utc(year1, m1, int(d1))
+                end_dt = _deadline_end_of_day_utc(year2, m2, int(d2))
                 return start_dt, end_dt
             except ValueError:
                 pass

@@ -108,3 +108,20 @@ def test_extract_registration_period_no_range():
     open_date, deadline = extract_registration_period(text)
     assert open_date is None
     assert deadline is None
+
+
+def test_extract_registration_period_djarum_patterns():
+    from app.crawler.date_utils import extract_registration_period
+    # Djarum pattern 1: full years on both dates
+    text1 = "Untuk tahun 2026, pendaftaran akan dibuka pada 8 April 2026 dan ditutup pada 10 Juni 2026."
+    open_date, deadline = extract_registration_period(text1)
+    # 8 April 2026 00:00:00 WIB == 2026-04-07 17:00:00 UTC
+    assert open_date == datetime(2026, 4, 7, 17, 0, 0)
+    # 10 Juni 2026 23:59:59 WIB == 2026-06-10 16:59:59 UTC
+    assert deadline == datetime(2026, 6, 10, 16, 59, 59)
+
+    # Djarum pattern 2: first date omits year, second date has year
+    text2 = "website resmi yang akan dibuka pada bulan 8 April - 10 Juni 2026"
+    open_date2, deadline2 = extract_registration_period(text2)
+    assert open_date2 == datetime(2026, 4, 7, 17, 0, 0)
+    assert deadline2 == datetime(2026, 6, 10, 16, 59, 59)
