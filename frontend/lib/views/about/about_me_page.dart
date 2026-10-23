@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../widgets/app_logo.dart';
+import '../../widgets/interactive_3d_name_card.dart';
 import '../../widgets/interactive_3d_tilt_card.dart';
 
 /// ============================================================================
@@ -547,36 +548,32 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
   Widget _buildInteractive3dIdBadge(BuildContext context, bool isDark) {
     return Column(
       children: [
-        Interactive3dTiltCard(
-          maxTiltDegrees: 12.0,
-          borderRadius: AppRadius.xxl,
+        Interactive3dNameCard(
+          isFlipped: _isBadgeFlipped,
+          onFlipChanged: (val) => setState(() => _isBadgeFlipped = val),
+          onTap: () => setState(() => _isBadgeFlipped = !_isBadgeFlipped),
           glowColor: _isBadgeFlipped
               ? AppTheme.brandTertiary
               : AppTheme.brandAccent,
           backgroundColor: const Color(0xFF0B111E),
           borderColor: const Color(0xFF283A5A),
-          onTap: () => setState(() => _isBadgeFlipped = !_isBadgeFlipped),
-          padding: const EdgeInsets.all(24),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 320),
-            child: _isBadgeFlipped
-                ? _buildBadgeBackSpec(context)
-                : _buildBadgeFrontHologram(context),
-          ),
+          padding: const EdgeInsets.fromLTRB(22, 28, 22, 22),
+          front: _buildBadgeFrontHologram(context),
+          back: _buildBadgeBackSpec(context),
         ),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.touch_app_rounded,
+              Icons.drag_indicator_rounded,
               size: 14,
               color: AppTheme.textMutedOf(context),
             ),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
-                'Arahkan kursor untuk efek 3D Tilt • Klik kartu untuk membalik spesifikasi',
+                'Geser mouse untuk memutar kartu 3D • Klik kartu atau tombol untuk membalik',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 11.5,
@@ -774,22 +771,120 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              'FLIP [1/2]',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppTheme.brandTertiary.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                'VERIFIED // 3D ID',
+                style: TextStyle(
+                  color: AppTheme.brandTertiary,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+
+        // Biometric & Architect Photo Credential Badge (Dual-sided photo)
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF131D33),
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(
+              color: AppTheme.brandTertiary.withValues(alpha: 0.45),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.brandTertiary, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.brandTertiary.withValues(alpha: 0.35),
+                      blurRadius: 14,
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    CreatorProfileConfig.avatarAsset,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const Icon(
+                      Icons.person_rounded,
+                      color: AppTheme.brandTertiary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.verified_user_rounded,
+                          size: 13,
+                          color: AppTheme.brandTertiary,
+                        ),
+                        const SizedBox(width: 4),
+                        const Flexible(
+                          child: Text(
+                            'SECURITY CREDENTIAL // BACK',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: AppTheme.brandTertiary,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    const Text(
+                      CreatorProfileConfig.fullName,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${CreatorProfileConfig.roleTitle} • ${CreatorProfileConfig.handle}',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.72),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
         ...CreatorProfileConfig.techMatrix.map(
           (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 8),
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: const Color(0xFF131D33),
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -802,26 +897,26 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
                     item.category,
                     style: TextStyle(
                       color: item.color,
-                      fontSize: 10,
+                      fontSize: 9.5,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   Text(
                     item.tech,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12.5,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 1),
                   Text(
                     item.detail,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.68),
-                      fontSize: 11,
+                      fontSize: 10.5,
                     ),
                   ),
                 ],
