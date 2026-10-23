@@ -88,6 +88,7 @@ class ScrapedScholarship(BaseModel):
     title: str
     summary: str
     description: str
+    open_date: datetime | None = None
     deadline: datetime | None = None
     application_url: str
     is_active: bool = False

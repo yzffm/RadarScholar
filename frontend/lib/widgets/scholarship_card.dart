@@ -205,7 +205,10 @@ class _ScholarshipCardState extends State<ScholarshipCard> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              _formatDeadline(scholarship.deadline),
+                              _formatDateRange(
+                                scholarship.openDate,
+                                scholarship.deadline,
+                              ),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppTheme.textSecondaryOf(context),
@@ -406,8 +409,15 @@ class _ScholarshipCardState extends State<ScholarshipCard> {
     );
   }
 
-  String _formatDeadline(DateTime? date) {
-    if (date == null) return 'Batas waktu belum diketahui';
-    return 'Ditutup: ${DateFormat('dd MMM yyyy').format(date)}';
+  String _formatDateRange(DateTime? openDate, DateTime? deadline) {
+    if (openDate != null && deadline != null) {
+      final start = DateFormat('dd MMM').format(openDate.toLocal());
+      final end = DateFormat('dd MMM yyyy').format(deadline.toLocal());
+      return '$start – $end';
+    }
+    if (deadline != null) {
+      return 'Ditutup: ${DateFormat('dd MMM yyyy').format(deadline.toLocal())}';
+    }
+    return 'Batas waktu belum diketahui';
   }
 }

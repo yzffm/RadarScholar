@@ -31,6 +31,13 @@ void main() {
   testWidgets('DiscoveryPage shows loading then list of scholarships', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(1280, 1024);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     final now = DateTime.now();
     final mockResponse = ScholarshipListResponse(
       items: [

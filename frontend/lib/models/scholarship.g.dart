@@ -77,6 +77,9 @@ _$ScholarshipImpl _$$ScholarshipImplFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String,
       summary: json['summary'] as String,
       description: json['description'] as String,
+      openDate: json['open_date'] == null
+          ? null
+          : DateTime.parse(json['open_date'] as String),
       deadline: json['deadline'] == null
           ? null
           : DateTime.parse(json['deadline'] as String),
@@ -116,6 +119,7 @@ Map<String, dynamic> _$$ScholarshipImplToJson(_$ScholarshipImpl instance) =>
       'title': instance.title,
       'summary': instance.summary,
       'description': instance.description,
+      'open_date': instance.openDate?.toIso8601String(),
       'deadline': instance.deadline?.toIso8601String(),
       'application_url': instance.applicationUrl,
       'is_active': instance.isActive,

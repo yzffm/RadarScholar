@@ -420,6 +420,7 @@ class CrawlerPipeline:
             title=_normalize_text(item.title),
             summary=_normalize_text(item.summary),
             description=_normalize_text(item.description),
+            open_date=item.open_date,
             deadline=item.deadline,
             application_url=_normalize_url(item.application_url),
             is_active=item.is_active,
@@ -469,6 +470,7 @@ class CrawlerPipeline:
             title=item.title,
             summary=item.summary,
             description=item.description,
+            open_date=item.open_date,
             deadline=item.deadline,
             application_url=item.application_url,
             is_active=item.is_active,
@@ -520,7 +522,7 @@ class CrawlerPipeline:
         """
         changed = False
 
-        for attr in ("title", "summary", "description", "deadline", "application_url", "is_active"):
+        for attr in ("title", "summary", "description", "open_date", "deadline", "application_url", "is_active"):
             if attr == "is_active" and not item.has_contextual_dates and item.deadline is None:
                 continue
             new_val = getattr(item, attr)

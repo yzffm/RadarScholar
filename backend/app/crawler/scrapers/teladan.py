@@ -11,7 +11,12 @@ from app.crawler.base import (
     ScrapedRequirement,
     ScrapedScholarship,
 )
-from app.crawler.date_utils import extract_contextual_dates, extract_contextual_deadline
+from app.crawler.date_utils import (
+    _normalize_reference_time,
+    extract_contextual_dates,
+    extract_contextual_deadline,
+    extract_registration_period,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +43,18 @@ class TeladanScraper(BaseScraper):
 
     def scrape(self) -> list[ScrapedScholarship]:
         """Fetch and parse the official TELADAN page."""
-        response = self.fetch(self.source_url)
-        return self.parse_html(response.text)
+        try:
+            response = self.fetch(self.application_url)
+            return self.parse_html(response.text)
+        except Exception as exc:
+            logger.warning(
+                "Failed to fetch application_url %s (%s); falling back to source_url %s",
+                self.application_url,
+                exc,
+                self.source_url,
+            )
+            response = self.fetch(self.source_url)
+            return self.parse_html(response.text)
 
     def parse_html(
         self,
@@ -51,8 +66,29 @@ class TeladanScraper(BaseScraper):
         if "TELADAN" not in text.upper():
             raise ValueError("TELADAN page marker was not found")
 
-        deadline = extract_contextual_deadline(text, reference_time=reference_time)
-        historical_deadlines = extract_contextual_dates(text)
+        open_date, range_deadline = extract_registration_period(text)
+        ctx_deadline = extract_contextual_deadline(text, reference_time=reference_time)
+        all_candidates = extract_contextual_dates(text)
+        if range_deadline and range_deadline not in all_candidates:
+            all_candidates.append(range_deadline)
+
+        # Prioritize active contextual deadline, then max candidate date
+        if ctx_deadline is not None:
+            deadline = ctx_deadline
+        elif range_deadline is not None:
+            deadline = max([range_deadline] + all_candidates) if all_candidates else range_deadline
+        elif all_candidates:
+            deadline = max(all_candidates)
+        else:
+            deadline = None
+
+        now_utc = _normalize_reference_time(reference_time)
+        is_active = (
+            deadline is not None
+            and deadline >= now_utc
+            and (open_date is None or open_date <= now_utc)
+        )
+
         requirements = [
             ScrapedRequirement(
                 requirement_type="NATIONALITY",
@@ -120,10 +156,11 @@ class TeladanScraper(BaseScraper):
                     "dengan dukungan biaya kuliah, tunjangan hidup, mentoring, dan pengalaman "
                     "pengembangan profesional."
                 ),
+                open_date=open_date,
                 deadline=deadline,
                 application_url=self.application_url,
-                is_active=deadline is not None,
-                has_contextual_dates=bool(historical_deadlines),
+                is_active=is_active,
+                has_contextual_dates=bool(all_candidates) or deadline is not None,
                 requirements=requirements,
                 benefits=benefits,
                 is_live_verified=True,

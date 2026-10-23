@@ -476,7 +476,10 @@ class ScholarshipDetailPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Batas Waktu Pendaftaran',
+                        scholarship.openDate != null &&
+                                scholarship.deadline != null
+                            ? 'Periode Pendaftaran'
+                            : 'Batas Waktu Pendaftaran',
                         style: TextStyle(
                           fontSize: 11.5,
                           color: isDark
@@ -487,7 +490,10 @@ class ScholarshipDetailPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        _formatDeadline(scholarship.deadline),
+                        _formatRegistrationDates(
+                          scholarship.openDate,
+                          scholarship.deadline,
+                        ),
                         style: TextStyle(
                           fontSize: 14.5,
                           color: textPrimary,
@@ -788,9 +794,16 @@ class ScholarshipDetailPage extends ConsumerWidget {
     );
   }
 
-  String _formatDeadline(DateTime? date) {
-    if (date == null) return 'Batas waktu belum diketahui';
-    return DateFormat('dd MMMM yyyy').format(date);
+  String _formatRegistrationDates(DateTime? openDate, DateTime? deadline) {
+    if (openDate != null && deadline != null) {
+      final start = DateFormat('dd MMMM yyyy').format(openDate.toLocal());
+      final end = DateFormat('dd MMMM yyyy').format(deadline.toLocal());
+      return '$start – $end';
+    }
+    if (deadline != null) {
+      return DateFormat('dd MMMM yyyy').format(deadline.toLocal());
+    }
+    return 'Batas waktu belum diketahui';
   }
 
   Future<void> _launchUrl(String url) async {

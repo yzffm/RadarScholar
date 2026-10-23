@@ -50,6 +50,7 @@ class Scholarship(Base):
     title: Mapped[str] = mapped_column(String, index=True)
     summary: Mapped[str] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text)
+    open_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     application_url: Mapped[str] = mapped_column(String)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

@@ -57,6 +57,7 @@ class Scholarship with _$Scholarship {
     required String title,
     required String summary,
     required String description,
+    @JsonKey(name: 'open_date') DateTime? openDate,
     DateTime? deadline,
     @JsonKey(name: 'application_url') required String applicationUrl,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,

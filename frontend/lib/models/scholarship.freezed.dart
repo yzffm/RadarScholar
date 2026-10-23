@@ -870,6 +870,8 @@ mixin _$Scholarship {
   String get title => throw _privateConstructorUsedError;
   String get summary => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
+  @JsonKey(name: 'open_date')
+  DateTime? get openDate => throw _privateConstructorUsedError;
   DateTime? get deadline => throw _privateConstructorUsedError;
   @JsonKey(name: 'application_url')
   String get applicationUrl => throw _privateConstructorUsedError;
@@ -914,6 +916,7 @@ abstract class $ScholarshipCopyWith<$Res> {
     String title,
     String summary,
     String description,
+    @JsonKey(name: 'open_date') DateTime? openDate,
     DateTime? deadline,
     @JsonKey(name: 'application_url') String applicationUrl,
     @JsonKey(name: 'is_active') bool isActive,
@@ -950,6 +953,7 @@ class _$ScholarshipCopyWithImpl<$Res, $Val extends Scholarship>
     Object? title = null,
     Object? summary = null,
     Object? description = null,
+    Object? openDate = freezed,
     Object? deadline = freezed,
     Object? applicationUrl = null,
     Object? isActive = null,
@@ -984,6 +988,10 @@ class _$ScholarshipCopyWithImpl<$Res, $Val extends Scholarship>
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
                       as String,
+            openDate: freezed == openDate
+                ? _value.openDate
+                : openDate // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             deadline: freezed == deadline
                 ? _value.deadline
                 : deadline // ignore: cast_nullable_to_non_nullable
@@ -1063,6 +1071,7 @@ abstract class _$$ScholarshipImplCopyWith<$Res>
     String title,
     String summary,
     String description,
+    @JsonKey(name: 'open_date') DateTime? openDate,
     DateTime? deadline,
     @JsonKey(name: 'application_url') String applicationUrl,
     @JsonKey(name: 'is_active') bool isActive,
@@ -1099,6 +1108,7 @@ class __$$ScholarshipImplCopyWithImpl<$Res>
     Object? title = null,
     Object? summary = null,
     Object? description = null,
+    Object? openDate = freezed,
     Object? deadline = freezed,
     Object? applicationUrl = null,
     Object? isActive = null,
@@ -1133,6 +1143,10 @@ class __$$ScholarshipImplCopyWithImpl<$Res>
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
                   as String,
+        openDate: freezed == openDate
+            ? _value.openDate
+            : openDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         deadline: freezed == deadline
             ? _value.deadline
             : deadline // ignore: cast_nullable_to_non_nullable
@@ -1191,6 +1205,7 @@ class _$ScholarshipImpl implements _Scholarship {
     required this.title,
     required this.summary,
     required this.description,
+    @JsonKey(name: 'open_date') this.openDate,
     this.deadline,
     @JsonKey(name: 'application_url') required this.applicationUrl,
     @JsonKey(name: 'is_active') this.isActive = true,
@@ -1219,6 +1234,9 @@ class _$ScholarshipImpl implements _Scholarship {
   final String summary;
   @override
   final String description;
+  @override
+  @JsonKey(name: 'open_date')
+  final DateTime? openDate;
   @override
   final DateTime? deadline;
   @override
@@ -1267,7 +1285,7 @@ class _$ScholarshipImpl implements _Scholarship {
 
   @override
   String toString() {
-    return 'Scholarship(id: $id, sourceId: $sourceId, title: $title, summary: $summary, description: $description, deadline: $deadline, applicationUrl: $applicationUrl, isActive: $isActive, registrationStatus: $registrationStatus, dataOrigin: $dataOrigin, createdAt: $createdAt, updatedAt: $updatedAt, lastVerifiedLiveAt: $lastVerifiedLiveAt, benefits: $benefits, requirements: $requirements, source: $source)';
+    return 'Scholarship(id: $id, sourceId: $sourceId, title: $title, summary: $summary, description: $description, openDate: $openDate, deadline: $deadline, applicationUrl: $applicationUrl, isActive: $isActive, registrationStatus: $registrationStatus, dataOrigin: $dataOrigin, createdAt: $createdAt, updatedAt: $updatedAt, lastVerifiedLiveAt: $lastVerifiedLiveAt, benefits: $benefits, requirements: $requirements, source: $source)';
   }
 
   @override
@@ -1282,6 +1300,8 @@ class _$ScholarshipImpl implements _Scholarship {
             (identical(other.summary, summary) || other.summary == summary) &&
             (identical(other.description, description) ||
                 other.description == description) &&
+            (identical(other.openDate, openDate) ||
+                other.openDate == openDate) &&
             (identical(other.deadline, deadline) ||
                 other.deadline == deadline) &&
             (identical(other.applicationUrl, applicationUrl) ||
@@ -1315,6 +1335,7 @@ class _$ScholarshipImpl implements _Scholarship {
     title,
     summary,
     description,
+    openDate,
     deadline,
     applicationUrl,
     isActive,
@@ -1349,6 +1370,7 @@ abstract class _Scholarship implements Scholarship {
     required final String title,
     required final String summary,
     required final String description,
+    @JsonKey(name: 'open_date') final DateTime? openDate,
     final DateTime? deadline,
     @JsonKey(name: 'application_url') required final String applicationUrl,
     @JsonKey(name: 'is_active') final bool isActive,
@@ -1376,6 +1398,9 @@ abstract class _Scholarship implements Scholarship {
   String get summary;
   @override
   String get description;
+  @override
+  @JsonKey(name: 'open_date')
+  DateTime? get openDate;
   @override
   DateTime? get deadline;
   @override

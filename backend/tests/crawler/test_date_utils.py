@@ -79,3 +79,32 @@ def test_deadline_same_day_active_until_end_of_day_jakarta():
         )
         is None
     )
+
+
+def test_extract_registration_period_indonesian():
+    from app.crawler.date_utils import extract_registration_period
+    text = (
+        "Pendaftaran Program TELADAN 2027 dibuka mulai tanggal 1 Juli 2026 "
+        "sampai dengan 7 September 2026. Formulir pendaftaran dapat diakses..."
+    )
+    open_date, deadline = extract_registration_period(text)
+    # 1 Juli 2026 00:00:00 WIB == 2026-06-30 17:00:00 UTC
+    assert open_date == datetime(2026, 6, 30, 17, 0, 0)
+    # 7 September 2026 23:59:59 WIB == 2026-09-07 16:59:59 UTC
+    assert deadline == datetime(2026, 9, 7, 16, 59, 59)
+
+
+def test_extract_registration_period_english():
+    from app.crawler.date_utils import extract_registration_period
+    text = "Registration for the TELADAN 2027 Program is open from July 1 to September 7, 2026."
+    open_date, deadline = extract_registration_period(text)
+    assert open_date == datetime(2026, 6, 30, 17, 0, 0)
+    assert deadline == datetime(2026, 9, 7, 16, 59, 59)
+
+
+def test_extract_registration_period_no_range():
+    from app.crawler.date_utils import extract_registration_period
+    text = "Pendaftaran online: s.d. 27 September 2026"
+    open_date, deadline = extract_registration_period(text)
+    assert open_date is None
+    assert deadline is None

@@ -34,14 +34,16 @@ def test_teladan_extracts_official_program_data(scraper, html):
 
     assert result.provider_name == "Tanoto Foundation TELADAN"
     assert result.title == "Program Beasiswa Kepemimpinan TELADAN 2027"
-    # Real live snapshot has no Indonesian contextual deadline sentence (only English
-    # copy), so parser does not invent a deadline and status becomes UNKNOWN (never OPEN).
-    assert result.deadline is None
+    # Registration period extracted from official English copy (July 1 to September 7, 2026)
+    # Stored in naive UTC (converted from Asia/Jakarta)
+    assert result.open_date == datetime(2026, 6, 30, 17, 0, 0)
+    assert result.deadline == datetime(2026, 9, 7, 16, 59, 59)
+    # Since deadline has passed relative to FIXED_REF, is_active is False and status is CLOSED
     assert result.is_active is False
-    assert result.has_contextual_dates is False
+    assert result.has_contextual_dates is True
     assert (
-        derive_registration_status(result.deadline, result.is_active)
-        == RegistrationStatus.UNKNOWN
+        derive_registration_status(result.deadline, result.is_active, now=FIXED_REF)
+        == RegistrationStatus.CLOSED
     )
     assert result.application_url == "https://www.tanotofoundation.org/teladan-2027"
     assert result.is_live_verified is True
@@ -69,15 +71,17 @@ def test_teladan_real_page_with_contextual_deadline_sentence(scraper, html):
         html_with_deadline,
         reference_time=datetime(2026, 10, 26, 3, 0, 0),
     )[0]
-    assert expired_result.deadline is None
+    # Retains factual deadline even when expired
+    assert expired_result.deadline == datetime(2026, 10, 25, 16, 59, 59)
     assert expired_result.is_active is False
     assert expired_result.has_contextual_dates is True
     assert (
         derive_registration_status(
             expired_result.deadline,
             expired_result.is_active,
+            now=datetime(2026, 10, 26, 3, 0, 0),
         )
-        == RegistrationStatus.UNKNOWN
+        == RegistrationStatus.CLOSED
     )
 
 

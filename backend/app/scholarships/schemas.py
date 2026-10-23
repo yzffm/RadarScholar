@@ -77,6 +77,7 @@ class ScholarshipBase(BaseModel):
     title: str
     summary: str
     description: str
+    open_date: datetime | None = None
     deadline: datetime | None = None
     application_url: str
     is_active: bool = True
@@ -107,7 +108,7 @@ class ScholarshipResponse(ScholarshipBase):
     @property
     def registration_status(self) -> RegistrationStatus:
         """OPEN / CLOSED / UNKNOWN, derived from deadline and the current time."""
-        return derive_registration_status(self.deadline, self.is_active)
+        return derive_registration_status(self.deadline, self.is_active, open_date=self.open_date)
 
 class ScholarshipListResponse(BaseModel):
     items: list[ScholarshipResponse]

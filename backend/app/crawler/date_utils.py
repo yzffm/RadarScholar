@@ -33,7 +33,28 @@ _MONTHS = {
     "januari": 1, "februari": 2, "maret": 3, "april": 4,
     "mei": 5, "juni": 6, "juli": 7, "agustus": 8,
     "september": 9, "oktober": 10, "november": 11, "desember": 12,
+    "january": 1, "february": 2, "march": 3,
+    "may": 5, "june": 6, "july": 7, "august": 8,
+    "october": 10, "december": 12,
 }
+
+_ID_RANGE_PATTERN = re.compile(
+    r"(?:pendaftaran\b[^\.\n]*?)?"
+    r"(?:dibuka\s+(?:mulai\s+)?(?:tanggal\s+)?|periode\s+pendaftaran\s*:?\s*)"
+    r"(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})"
+    r"\s+(?:sampai\s+(?:dengan)?|hingga|s\.d\.?|[-–—])\s+(?:tanggal\s+)?"
+    r"(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})",
+    re.IGNORECASE,
+)
+
+_EN_RANGE_PATTERN = re.compile(
+    r"(?:registration\b[^\.\n]*?)?"
+    r"(?:is\s+open\s+from\s+|period\s*:?\s*)"
+    r"([A-Za-z]+)\s+(\d{1,2})(?:,\s*(\d{4}))?"
+    r"\s+(?:to|until|through|[-–—])\s+"
+    r"([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})",
+    re.IGNORECASE,
+)
 _ABBREVIATION_PATTERN = re.compile(
     r"\b(?:s\.d\.|no\.|dr\.|prof\.|tbk\.|pt\.|cv\.|jl\.|kab\.|kec\.|dll\.|dkk\.|dst\.|a\.n\.|u\.p\.|hlm\.)",
     re.IGNORECASE,
@@ -58,6 +79,12 @@ def _mask_abbreviations(text: str) -> str:
         lambda match: match.group(0).replace(".", " "),
         text,
     )
+
+
+def _open_date_start_of_day_utc(year: int, month: int, day: int) -> datetime:
+    """Return naive UTC datetime for 00:00:00 Asia/Jakarta on the given date."""
+    jakarta_sod = datetime(year, month, day, 0, 0, 0, tzinfo=JAKARTA_TZ)
+    return jakarta_sod.astimezone(UTC).replace(tzinfo=None)
 
 
 def _deadline_end_of_day_utc(year: int, month: int, day: int) -> datetime:
@@ -153,3 +180,40 @@ def parse_indonesian_date(text: str) -> datetime | None:
     except (KeyError, ValueError):
         return None
 
+
+
+def extract_registration_period(text: str) -> tuple[datetime | None, datetime | None]:
+    """Extract (open_date, deadline) in naive UTC when a date range is stated.
+
+    Supports Indonesian ranges (e.g. 'dibuka mulai 1 Juli 2026 sampai dengan 7 September 2026')
+    and English ranges (e.g. 'open from July 1 to September 7, 2026').
+    """
+    m_id = _ID_RANGE_PATTERN.search(text)
+    if m_id:
+        d1, m1_str, y1, d2, m2_str, y2 = m_id.groups()
+        m1 = _MONTHS.get(m1_str.lower())
+        m2 = _MONTHS.get(m2_str.lower())
+        if m1 and m2:
+            try:
+                start_dt = _open_date_start_of_day_utc(int(y1), m1, int(d1))
+                end_dt = _deadline_end_of_day_utc(int(y2), m2, int(d2))
+                return start_dt, end_dt
+            except ValueError:
+                pass
+
+    m_en = _EN_RANGE_PATTERN.search(text)
+    if m_en:
+        m1_str, d1, y1, m2_str, d2, y2 = m_en.groups()
+        m1 = _MONTHS.get(m1_str.lower())
+        m2 = _MONTHS.get(m2_str.lower())
+        year2 = int(y2)
+        year1 = int(y1) if y1 else year2
+        if m1 and m2:
+            try:
+                start_dt = _open_date_start_of_day_utc(year1, m1, int(d1))
+                end_dt = _deadline_end_of_day_utc(year2, m2, int(d2))
+                return start_dt, end_dt
+            except ValueError:
+                pass
+
+    return None, None

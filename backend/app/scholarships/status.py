@@ -38,12 +38,15 @@ def derive_registration_status(
     deadline: datetime | None,
     is_active: bool,
     now: datetime | None = None,
+    open_date: datetime | None = None,
 ) -> RegistrationStatus:
     """Return the registration status for the given stored values."""
     if deadline is None:
         return RegistrationStatus.UNKNOWN
     reference = now if now is not None else utc_now()
     if not is_active or deadline < reference:
+        return RegistrationStatus.CLOSED
+    if open_date is not None and open_date > reference:
         return RegistrationStatus.CLOSED
     return RegistrationStatus.OPEN
 

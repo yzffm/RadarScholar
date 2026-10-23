@@ -109,35 +109,36 @@ void main() {
     expect(updated.toJson()['nationality'], 'Lainnya');
   });
 
-  testWidgets('ProfilePage displays nationality in read mode and form dropdown', (
-    tester,
-  ) async {
-    final loadedProfile = UserProfile(
-      id: 'u-1',
-      email: 'student@example.com',
-      nationality: 'Indonesia',
-      university: 'Universitas Gadjah Mada',
-      createdAt: DateTime.utc(2026, 10, 20),
-      updatedAt: DateTime.utc(2026, 10, 20),
-    );
+  testWidgets(
+    'ProfilePage displays nationality in read mode and form dropdown',
+    (tester) async {
+      final loadedProfile = UserProfile(
+        id: 'u-1',
+        email: 'student@example.com',
+        nationality: 'Indonesia',
+        university: 'Universitas Gadjah Mada',
+        createdAt: DateTime.utc(2026, 10, 20),
+        updatedAt: DateTime.utc(2026, 10, 20),
+      );
 
-    final repo = _LoadedProfileRepository(loadedProfile);
-    final controller = ProfileController(repo);
-    await controller.fetchProfile();
+      final repo = _LoadedProfileRepository(loadedProfile);
+      final controller = ProfileController(repo);
+      await controller.fetchProfile();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          profileControllerProvider.overrideWith((ref) => controller),
-        ],
-        child: const MaterialApp(home: ProfilePage()),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            profileControllerProvider.overrideWith((ref) => controller),
+          ],
+          child: const MaterialApp(home: ProfilePage()),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Kewarganegaraan'), findsOneWidget);
-    expect(find.text('Indonesia'), findsOneWidget);
-  });
+      expect(find.text('Kewarganegaraan'), findsOneWidget);
+      expect(find.text('Indonesia'), findsOneWidget);
+    },
+  );
 }
 
 class _LoadedProfileRepository extends UserProfileRepository {
@@ -148,4 +149,3 @@ class _LoadedProfileRepository extends UserProfileRepository {
   @override
   Future<UserProfile?> getMyProfile() async => _profile;
 }
-
