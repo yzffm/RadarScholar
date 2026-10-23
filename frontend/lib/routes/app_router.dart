@@ -18,6 +18,7 @@ import '../views/profile/profile_page.dart';
 import '../views/discovery/scholarship_detail_page.dart';
 import '../views/matching/recommendations_page.dart';
 import '../views/admin/admin_dashboard_page.dart';
+import '../views/about/about_me_page.dart';
 
 /// A Listenable that notifies when the auth state changes.
 /// This is used to trigger GoRouter redirects without rebuilding the whole router.
@@ -55,6 +56,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authControllerProvider);
       final isAuth = authState is AuthAuthenticated;
       final isGoingToAdmin = state.matchedLocation == '/admin';
+      final isGoingToAbout = state.matchedLocation == '/about';
+
+      if (isGoingToAbout) {
+        return null;
+      }
 
       // Determine if we are on a public auth route
       final isGoingToLogin = state.matchedLocation == '/login';
@@ -93,6 +99,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/',
         name: 'landing',
         builder: (context, state) => const LandingPage(),
+      ),
+
+      // ─── About Creator / 3D Interactive Profile ──────────────────────
+      GoRoute(
+        path: '/about',
+        name: 'about',
+        builder: (context, state) => const AboutMePage(),
       ),
 
       // ─── Authentication ──────────────────────────────────────────────

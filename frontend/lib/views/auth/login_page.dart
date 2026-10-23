@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +5,7 @@ import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../controllers/login_controller.dart';
 import '../../widgets/app_logo.dart';
+import '../../widgets/auth_showcase_panel.dart';
 
 /// RadarScholar Login Page.
 ///
@@ -23,54 +22,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _carouselController = PageController();
-  Timer? _carouselTimer;
-  int _carouselIndex = 0;
-
-  static const _carouselSlides = [
-    (
-      title: 'Cari dengan arah yang jelas.',
-      body:
-          'Temukan peluang resmi yang lebih dekat dengan profil akademik dan tujuanmu.',
-      icon: Icons.explore_rounded,
-      badge: 'DISCOVERY ENGINE',
-    ),
-    (
-      title: 'Pahami sebelum memutuskan.',
-      body:
-          'Bandingkan kriteria, benefit, deadline, dan status verifikasi dalam satu tempat.',
-      icon: Icons.fact_check_rounded,
-      badge: 'DETERMINISTIC MATCH',
-    ),
-    (
-      title: 'Siapkan aplikasi dengan percaya diri.',
-      body:
-          'Lacak progres dan gunakan AI sebagai pendamping, bukan pengganti keputusanmu.',
-      icon: Icons.track_changes_rounded,
-      badge: 'PREPARATION WORKSPACE',
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _carouselTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted || !_carouselController.hasClients) return;
-      final next = (_carouselIndex + 1) % _carouselSlides.length;
-      _carouselController.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 420),
-        curve: Curves.easeOut,
-      );
-    });
-  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _carouselTimer?.cancel();
-    _carouselController.dispose();
     super.dispose();
   }
 
@@ -136,176 +92,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget _buildDesktopLayout(BuildContext context, LoginFormState state) {
     return Row(
       children: [
-        // Left Column: Brand Hero Showcase
-        Expanded(
+        // Left Column: Interactive Product Mockup Showcase
+        const Expanded(
           flex: 5,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 48),
-            decoration: BoxDecoration(
-              gradient: AppTheme.heroGradient,
-              border: Border(
-                right: BorderSide(color: AppTheme.borderSubtleOf(context)),
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: -80,
-                  left: -60,
-                  child: IgnorePointer(
-                    child: Container(
-                      width: 320,
-                      height: 320,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            AppTheme.brandPrimary.withValues(alpha: 0.25),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Top Brand Bar
-                    Row(
-                      children: [
-                        AppLogo.icon(height: 44),
-                        const SizedBox(width: 14),
-                        Text(
-                          'RadarScholar',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.3,
-                              ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(
-                      height: 320,
-                      child: PageView.builder(
-                        controller: _carouselController,
-                        itemCount: _carouselSlides.length,
-                        onPageChanged: (index) =>
-                            setState(() => _carouselIndex = index),
-                        itemBuilder: (context, index) {
-                          final slide = _carouselSlides[index];
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.brandAccent.withValues(
-                                    alpha: 0.14,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    AppRadius.xxl,
-                                  ),
-                                  border: Border.all(
-                                    color: AppTheme.brandAccent.withValues(
-                                      alpha: 0.3,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      slide.icon,
-                                      color: AppTheme.brandAccent,
-                                      size: 15,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      slide.badge,
-                                      style: const TextStyle(
-                                        color: AppTheme.brandAccent,
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.6,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: Spacing.lg),
-                              Text(
-                                slide.title,
-                                style: Theme.of(context).textTheme.displaySmall
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      height: 1.15,
-                                      letterSpacing: -0.5,
-                                    ),
-                              ),
-                              const SizedBox(height: Spacing.md),
-                              Text(
-                                slide.body,
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.80,
-                                      ),
-                                      height: 1.6,
-                                    ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    Row(
-                      children: List.generate(
-                        _carouselSlides.length,
-                        (index) => GestureDetector(
-                          onTap: () => _carouselController.animateToPage(
-                            index,
-                            duration: const Duration(milliseconds: 260),
-                            curve: Curves.easeOut,
-                          ),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            margin: const EdgeInsets.only(right: 8),
-                            width: index == _carouselIndex ? 28 : 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: index == _carouselIndex
-                                  ? AppTheme.brandAccent
-                                  : Colors.white.withValues(alpha: 0.30),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Bottom academic note
-                    Text(
-                      'RadarScholar © 2026 • Proyek Pengembangan Perangkat Lunak Mahasiswa',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.55),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          child: AuthShowcasePanel(mode: AuthShowcaseMode.login),
         ),
 
         // Right Column: Login Card Form

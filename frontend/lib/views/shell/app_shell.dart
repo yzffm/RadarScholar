@@ -89,6 +89,15 @@ class AppShell extends ConsumerWidget {
           child: Container(height: 1, color: borderColor),
         ),
         actions: [
+          IconButton(
+            tooltip: 'About Creator (3D)',
+            icon: const Icon(Icons.view_in_ar_rounded, size: 20),
+            onPressed: () {
+              try {
+                context.go('/about');
+              } catch (_) {}
+            },
+          ),
           _ThemeToggleButton(themeMode: themeMode, ref: ref),
           const SizedBox(width: 4),
           if (ref.watch(isAuthenticatedProvider))
@@ -168,6 +177,16 @@ class AppShell extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        IconButton(
+                          tooltip: 'About Creator (3D)',
+                          icon: const Icon(Icons.view_in_ar_rounded),
+                          onPressed: () {
+                            try {
+                              context.go('/about');
+                            } catch (_) {}
+                          },
+                        ),
+                        const SizedBox(height: 4),
                         _ThemeToggleButton(themeMode: themeMode, ref: ref),
                         const SizedBox(height: 8),
                         ref.watch(isAuthenticatedProvider)
@@ -314,9 +333,69 @@ class AppShell extends ConsumerWidget {
                   ),
                 ),
 
+                // About Creator 3D Interactive Link
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    onTap: () {
+                      try {
+                        context.go('/about');
+                      } catch (_) {}
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.brandPrimary.withValues(
+                              alpha: isDark ? 0.18 : 0.08,
+                            ),
+                            AppTheme.brandAccent.withValues(
+                              alpha: isDark ? 0.10 : 0.04,
+                            ),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.28),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.view_in_ar_rounded,
+                            size: 18,
+                            color: primaryColor,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'About Creator (3D)',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: textPrimary,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_outward_rounded,
+                            size: 14,
+                            color: primaryColor,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
                 // Bottom Account / Workspace Card
                 Padding(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
                   child: _AccountDockCard(
                     isDark: isDark,
                     primaryColor: primaryColor,
