@@ -21,7 +21,7 @@ void main() {
         expect(find.text(CreatorProfileConfig.fullName), findsWidgets);
         expect(find.text(CreatorProfileConfig.handle), findsWidgets);
         expect(find.text('3D HOLOGRAM ID'), findsOneWidget);
-        expect(find.text('Putar Kartu 3D ID'), findsOneWidget);
+        expect(find.text('Balik Kartu'), findsOneWidget);
 
         // Verify 3D Architecture Orbit shows central 3D RadarScholar Core and floating 3D module badges
         expect(find.text('RADARSCHOLAR CORE'), findsOneWidget);
@@ -30,11 +30,11 @@ void main() {
         expect(find.text('FastAPI REST'), findsOneWidget);
 
         // Flip the 3D Hologram ID Card to the back side
-        await tester.tap(find.text('Putar Kartu 3D ID'));
+        await tester.tap(find.text('Balik Kartu'));
         await tester.pumpAndSettle();
 
-        expect(find.text('ENGINEERING TELEMETRY MATRIX'), findsOneWidget);
-        expect(find.text('Lihat Sisi Depan 3D'), findsOneWidget);
+        expect(find.byKey(const ValueKey('badge_back')), findsOneWidget);
+        expect(find.text('Lihat Sisi Depan'), findsOneWidget);
       },
     );
   });

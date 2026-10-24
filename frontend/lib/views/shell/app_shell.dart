@@ -90,8 +90,8 @@ class AppShell extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            tooltip: 'About Creator (3D)',
-            icon: const Icon(Icons.view_in_ar_rounded, size: 20),
+            tooltip: 'About Creator',
+            icon: const Icon(Icons.badge_outlined, size: 20),
             onPressed: () {
               try {
                 context.go('/about');
@@ -178,8 +178,8 @@ class AppShell extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          tooltip: 'About Creator (3D)',
-                          icon: const Icon(Icons.view_in_ar_rounded),
+                          tooltip: 'About Creator',
+                          icon: const Icon(Icons.badge_outlined),
                           onPressed: () {
                             try {
                               context.go('/about');
@@ -333,7 +333,7 @@ class AppShell extends ConsumerWidget {
                   ),
                 ),
 
-                // About Creator 3D Interactive Link
+                // About Creator Link
                 Padding(
                   padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
                   child: InkWell(
@@ -367,14 +367,14 @@ class AppShell extends ConsumerWidget {
                       child: Row(
                         children: [
                           Icon(
-                            Icons.view_in_ar_rounded,
+                            Icons.badge_outlined,
                             size: 18,
                             color: primaryColor,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'About Creator (3D)',
+                              'About Creator',
                               style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w700,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../controllers/health_controller.dart';
 import '../../controllers/scholarship_controller.dart';
 import '../../core/responsive.dart';
 import '../../core/theme.dart';
@@ -55,7 +54,6 @@ class _LandingPageState extends ConsumerState<LandingPage> {
             _buildDatabasePreviewSection(context, isDesktop, isMobile, isDark),
             _buildWorkflowSection(context, isDark),
             _buildFeaturesSection(context, isDark),
-            _buildBackendHealthSection(context, isDark),
             _buildFooter(context, isDark),
           ],
         ),
@@ -1112,161 +1110,6 @@ class _LandingPageState extends ConsumerState<LandingPage> {
                 },
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ─── Backend Connectivity Card (CPMK 1 Evidence) ─────────────────────
-  Widget _buildBackendHealthSection(BuildContext context, bool isDark) {
-    final healthAsync = ref.watch(healthControllerProvider);
-    final borderSubtle = AppTheme.borderSubtleOf(context);
-    final cardBg = AppTheme.cardColorOf(context);
-    final textPrimary = AppTheme.textPrimaryOf(context);
-    final textSecondary = AppTheme.textSecondaryOf(context);
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceOf(context),
-        border: Border(top: BorderSide(color: borderSubtle)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 44),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 580),
-          child: Container(
-            padding: const EdgeInsets.all(22),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              border: Border.all(color: borderSubtle),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.hub_outlined,
-                      color: isDark
-                          ? AppTheme.brandAccent
-                          : AppTheme.brandPrimary,
-                      size: 19,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Status Integrasi Backend (CPMK 1)',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                healthAsync.when(
-                  data: (health) {
-                    final statusColor = health.isHealthy
-                        ? AppTheme.brandTertiary
-                        : AppTheme.brandDanger;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        border: Border.all(
-                          color: statusColor.withValues(alpha: 0.30),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            health.isHealthy
-                                ? Icons.check_circle_rounded
-                                : Icons.error_rounded,
-                            color: statusColor,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            health.isHealthy
-                                ? 'FastAPI API Terhubung • v${health.version}'
-                                : 'Layanan Backend Tidak Sehat: ${health.status}',
-                            style: TextStyle(
-                              color: statusColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  loading: () => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        width: 15,
-                        height: 15,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Memeriksa status API FastAPI...',
-                        style: TextStyle(fontSize: 12.5, color: textSecondary),
-                      ),
-                    ],
-                  ),
-                  error: (error, _) => Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.brandWarning.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      border: Border.all(
-                        color: AppTheme.brandWarning.withValues(alpha: 0.30),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.cloud_off_rounded,
-                          color: AppTheme.brandWarning,
-                          size: 18,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Backend lokal belum aktif (jalankan uvicorn)',
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.brandWarning,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed: () => ref.invalidate(healthControllerProvider),
-                  icon: const Icon(Icons.refresh_rounded, size: 15),
-                  label: const Text(
-                    'Perbarui Status',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

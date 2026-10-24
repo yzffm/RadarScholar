@@ -2,13 +2,16 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 
-/// An interactive 3D Name Card / ID Badge that can be rotated 360 degrees
-/// in real time using mouse drag (pan) gestures, or animated with a 180° flip.
+/// An interactive 3D Name Card / ID Badge with physical volume (thickness),
+/// rotatable in 360 degrees in real time via mouse drag (pan) gestures,
+/// or animated with a smooth 180° flip.
 ///
 /// Features:
 /// - True 3D perspective matrix transform (`Matrix4.setEntry(3, 2, 0.0011)`)
+/// - Physical 3D volume & depth slices along the Z-axis (extruded bevel rim)
 /// - Continuous 360° horizontal rotation (yaw) and bounded vertical tilt (pitch)
 /// - Double-sided rendering (front & back faces, properly oriented)
+/// - Custom front and back padding (e.g. full-bleed back photo)
 /// - Dynamic specular gloss & holographic iridescent glare that tracks rotation
 /// - Smooth spring / cubic snap-back to nearest face when drag ends
 /// - Realistic lanyard slot cut-out at top of the card
@@ -24,7 +27,9 @@ class Interactive3dNameCard extends StatefulWidget {
   final Color? backgroundColor;
   final Color? borderColor;
   final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? backPadding;
   final double maxPitchDegrees;
+  final double thickness;
 
   const Interactive3dNameCard({
     super.key,
@@ -38,7 +43,9 @@ class Interactive3dNameCard extends StatefulWidget {
     this.backgroundColor,
     this.borderColor,
     this.padding = const EdgeInsets.all(24),
+    this.backPadding = EdgeInsets.zero,
     this.maxPitchDegrees = 22.0,
+    this.thickness = 14.0,
   });
 
   @override
@@ -186,25 +193,25 @@ class _Interactive3dNameCardState extends State<Interactive3dNameCard>
   Widget build(BuildContext context) {
     final effectivePitch =
         (_isHovered && !_isDragging && !_animController.isAnimating)
-        ? _currentPitch - (_hoverOffset.dy * 0.05)
-        : _currentPitch;
+            ? _currentPitch - (_hoverOffset.dy * 0.05)
+            : _currentPitch;
     final effectiveYaw =
         (_isHovered && !_isDragging && !_animController.isAnimating)
-        ? _currentYaw + (_hoverOffset.dx * 0.05)
-        : _currentYaw;
+            ? _currentYaw + (_hoverOffset.dx * 0.05)
+            : _currentYaw;
 
     final normYaw = _normalizeYaw(effectiveYaw);
     final isFront = normYaw <= math.pi / 2 || normYaw >= 3 * math.pi / 2;
 
-    final transform = Matrix4.identity()
-      ..setEntry(3, 2, 0.0011) // 3D Perspective Depth
-      ..rotateX(effectivePitch)
-      ..rotateY(effectiveYaw);
+    final transform =
+        Matrix4.identity()
+          ..setEntry(3, 2, 0.0011) // 3D Perspective Depth
+          ..rotateX(effectivePitch)
+          ..rotateY(effectiveYaw);
 
     return MouseRegion(
-      cursor: _isDragging
-          ? SystemMouseCursors.grabbing
-          : SystemMouseCursors.grab,
+      cursor:
+          _isDragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
       onEnter: (_) => setState(() => _isHovered = true),
       onHover: (event) {
         final box = context.findRenderObject() as RenderBox?;
@@ -220,10 +227,11 @@ class _Interactive3dNameCardState extends State<Interactive3dNameCard>
           setState(() => _hoverOffset = Offset(dx, dy));
         }
       },
-      onExit: (_) => setState(() {
-        _isHovered = false;
-        _hoverOffset = Offset.zero;
-      }),
+      onExit:
+          (_) => setState(() {
+            _isHovered = false;
+            _hoverOffset = Offset.zero;
+          }),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _handleTap,
@@ -233,7 +241,7 @@ class _Interactive3dNameCardState extends State<Interactive3dNameCard>
         child: Transform(
           alignment: Alignment.center,
           transform: transform,
-          child: _buildCardSurface(
+          child: _buildVolumetricCard(
             context,
             isFront: isFront,
             yaw: effectiveYaw,
@@ -244,7 +252,7 @@ class _Interactive3dNameCardState extends State<Interactive3dNameCard>
     );
   }
 
-  Widget _buildCardSurface(
+  Widget _buildVolumetricCard(
     BuildContext context, {
     required bool isFront,
     required double yaw,
@@ -260,67 +268,150 @@ class _Interactive3dNameCardState extends State<Interactive3dNameCard>
     final glareX = math.sin(yaw).clamp(-1.0, 1.0);
     final glareY = math.sin(pitch).clamp(-1.0, 1.0);
 
+    final halfThickness = widget.thickness / 2.0;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        // ─── 1. Realistic 3D Cast Shadow ─────────────────────────────
+        Positioned.fill(
+          child: Transform(
+            alignment: Alignment.center,
+            transform:
+                Matrix4.identity()
+                  ..setTranslationRaw(glareX * 16.0, glareY * 16.0 + 14.0, -20.0),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(widget.borderRadius),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.65),
+                    blurRadius: 42,
+                    spreadRadius: 2,
+                  ),
+                  BoxShadow(
+                    color: glow.withValues(alpha: isDark ? 0.25 : 0.15),
+                    blurRadius: 36,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // ─── 2. Physical 3D Volume Edge Rim (Depth Slices) ───────────
+        for (double z = -halfThickness + 1.5; z <= halfThickness - 1.5; z += 2.0)
+          Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()..setTranslationRaw(0.0, 0.0, z),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF131D2E),
+                borderRadius: BorderRadius.circular(widget.borderRadius),
+                border: Border.all(
+                  color: const Color(0xFF283850).withValues(alpha: 0.50),
+                  width: 1.2,
+                ),
+              ),
+            ),
+          ),
+
+        // ─── 3. Card Faces (Front at +Z, Back at -Z) ─────────────────
+        if (isFront)
+          Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()..setTranslationRaw(0.0, 0.0, halfThickness),
+            child: _buildSurfaceContainer(
+              context,
+              isFront: true,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              glow: glow,
+              glareX: glareX,
+              glareY: glareY,
+              isDark: isDark,
+              child: widget.front,
+              padding: widget.padding ?? const EdgeInsets.all(24),
+            ),
+          )
+        else
+          Transform(
+            alignment: Alignment.center,
+            transform:
+                Matrix4.identity()
+                  ..setTranslationRaw(0.0, 0.0, -halfThickness)
+                  ..rotateY(math.pi),
+            child: _buildSurfaceContainer(
+              context,
+              isFront: false,
+              cardBg: cardBg,
+              borderCol: borderCol,
+              glow: glow,
+              glareX: glareX,
+              glareY: glareY,
+              isDark: isDark,
+              child: widget.back,
+              padding: widget.backPadding ?? EdgeInsets.zero,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSurfaceContainer(
+    BuildContext context, {
+    required bool isFront,
+    required Color cardBg,
+    required Color borderCol,
+    required Color glow,
+    required double glareX,
+    required double glareY,
+    required bool isDark,
+    required Widget child,
+    required EdgeInsetsGeometry padding,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(widget.borderRadius),
         border: Border.all(
-          color: _isHovered || _isDragging
-              ? glow.withValues(alpha: isDark ? 0.70 : 0.48)
-              : borderCol,
+          color:
+              _isHovered || _isDragging
+                  ? glow.withValues(alpha: isDark ? 0.75 : 0.52)
+                  : borderCol,
           width: _isHovered || _isDragging ? 1.6 : 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.50),
-            blurRadius: 36,
-            spreadRadius: 2,
-            offset: Offset(glareX * 14, glareY * 14 + 10),
-          ),
-          BoxShadow(
-            color: glow.withValues(alpha: isDark ? 0.24 : 0.14),
-            blurRadius: 30,
-            spreadRadius: 1,
-            offset: Offset(-glareX * 8, -glareY * 8),
-          ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(widget.borderRadius - 1),
         child: Stack(
           children: [
-            // Top Lanyard slot cut-out accent
-            Positioned(
-              top: 10,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  width: 54,
-                  height: 9,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.75),
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      width: 1,
+            // Top Lanyard slot cut-out accent (only on front for cleaner aesthetic)
+            if (isFront)
+              Positioned(
+                top: 10,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    width: 54,
+                    height: 9,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        width: 1,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
 
             // Card Face Content
-            Padding(
-              padding: widget.padding ?? const EdgeInsets.all(24),
-              child: isFront
-                  ? widget.front
-                  : Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.identity()..rotateY(math.pi),
-                      child: widget.back,
-                    ),
-            ),
+            Padding(padding: padding, child: child),
 
             // Specular Holographic Glare & Iridescent Shimmer Overlay
             Positioned.fill(
@@ -331,8 +422,8 @@ class _Interactive3dNameCardState extends State<Interactive3dNameCard>
                       center: Alignment(glareX * 0.85, glareY * 0.85),
                       radius: 0.95,
                       colors: [
-                        Colors.white.withValues(alpha: isDark ? 0.10 : 0.18),
-                        glow.withValues(alpha: isDark ? 0.06 : 0.09),
+                        Colors.white.withValues(alpha: isDark ? 0.12 : 0.20),
+                        glow.withValues(alpha: isDark ? 0.08 : 0.11),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 0.45, 1.0],

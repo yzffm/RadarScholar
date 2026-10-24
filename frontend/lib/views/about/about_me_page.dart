@@ -79,7 +79,7 @@ class _ArchNode3d {
   final String name;
   final String layer;
   final String description;
-  final String cpmkTag;
+  final String systemTag;
   final String assetPath;
   final Color color;
   final IconData icon;
@@ -92,7 +92,7 @@ class _ArchNode3d {
     required this.name,
     required this.layer,
     required this.description,
-    required this.cpmkTag,
+    required this.systemTag,
     required this.assetPath,
     required this.color,
     required this.icon,
@@ -129,7 +129,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
       layer: 'PRESENTATION LAYER (VIEW)',
       description:
           'Antarmuka adaptif Desktop/Tablet/Mobile dengan kanvas 3D interaktif dan komponen daftar dinamis ListView.builder.',
-      cpmkTag: 'CPMK 2, 5 & 6',
+      systemTag: 'CLIENT LAYER',
       assetPath: 'assets/images/radarscholar_logo_3d.png',
       color: AppTheme.brandAccent,
       icon: Icons.devices_rounded,
@@ -143,7 +143,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
       layer: 'STATE & CONTROLLER LAYER',
       description:
           'Pemisahan tegas antara Model (Freezed/JSON), View (Flutter UI), dan Controller (Riverpod Notifier) tanpa logika bisnis di widget.',
-      cpmkTag: 'CPMK 4 (MVC)',
+      systemTag: 'CONTROLLER LAYER',
       assetPath: 'assets/images/pillar_deadline_tracker.png',
       color: AppTheme.brandPrimary,
       icon: Icons.account_tree_rounded,
@@ -157,7 +157,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
       layer: 'BACKEND API GATEWAY',
       description:
           'Integrasi langsung Flutter ke FastAPI melalui Dio client dengan validasi skema Pydantic dan proteksi kepemilikan data.',
-      cpmkTag: 'CPMK 1 (API)',
+      systemTag: 'API GATEWAY',
       assetPath: 'assets/images/pillar_verified_source.png',
       color: AppTheme.brandTertiary,
       icon: Icons.hub_rounded,
@@ -171,7 +171,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
       layer: 'ELIGIBILITY INTELLIGENCE',
       description:
           'Mesin aturan Python yang mengevaluasi syarat objektif (IPK, jenjang, semester) secara eksak tanpa klaim probabilitas palsu.',
-      cpmkTag: 'T=0.0 EXACT',
+      systemTag: 'RULE ENGINE',
       assetPath: 'assets/images/pillar_deterministic_match.png',
       color: AppTheme.brandSecondary,
       icon: Icons.rule_rounded,
@@ -185,7 +185,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
       layer: 'GEMINI PRIMARY / GROQ FALLBACK',
       description:
           'Abstraksi AIProvider dengan failover otomatis untuk penjelasan kecocokan dan asistensi berkas tanpa memfabrikasi prestasi.',
-      cpmkTag: 'ZERO FABRICATION',
+      systemTag: 'AI ABSTRACTION',
       assetPath: 'assets/images/pillar_ai_assistant.png',
       color: AppTheme.brandAI,
       icon: Icons.auto_awesome_rounded,
@@ -199,7 +199,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
       layer: 'ETHICAL CRAWLER & SUPABASE DB',
       description:
           'Registri sumber beasiswa terkurasi dengan pelacakan waktu verifikasi, atribusi URL resmi, dan kepatuhan akses.',
-      cpmkTag: 'SOURCE-FIRST',
+      systemTag: 'DATA PIPELINE',
       assetPath: 'assets/images/pillar_verified_source.png',
       color: AppTheme.brandSkyBlue,
       icon: Icons.verified_user_rounded,
@@ -525,7 +525,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
                   setState(() => _isBadgeFlipped = !_isBadgeFlipped),
               icon: const Icon(Icons.threed_rotation_rounded, size: 18),
               label: Text(
-                _isBadgeFlipped ? 'Lihat Sisi Depan 3D' : 'Putar Kartu 3D ID',
+                _isBadgeFlipped ? 'Lihat Sisi Depan' : 'Balik Kartu',
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: accentColor,
@@ -558,6 +558,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
           backgroundColor: const Color(0xFF0B111E),
           borderColor: const Color(0xFF283A5A),
           padding: const EdgeInsets.fromLTRB(22, 28, 22, 22),
+          backPadding: EdgeInsets.zero,
           front: _buildBadgeFrontHologram(context),
           back: _buildBadgeBackSpec(context),
         ),
@@ -746,185 +747,26 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
   }
 
   Widget _buildBadgeBackSpec(BuildContext context) {
-    return Column(
+    return SizedBox(
       key: const ValueKey('badge_back'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(
-              Icons.memory_rounded,
-              color: AppTheme.brandTertiary,
-              size: 18,
-            ),
-            const SizedBox(width: 8),
-            const Expanded(
-              child: Text(
-                'ENGINEERING TELEMETRY MATRIX',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: AppTheme.brandTertiary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.7,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppTheme.brandTertiary.withValues(alpha: 0.16),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text(
-                'VERIFIED // 3D ID',
-                style: TextStyle(
-                  color: AppTheme.brandTertiary,
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-
-        // Biometric & Architect Photo Credential Badge (Dual-sided photo)
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF131D33),
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(
-              color: AppTheme.brandTertiary.withValues(alpha: 0.45),
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.brandTertiary, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.brandTertiary.withValues(alpha: 0.35),
-                      blurRadius: 14,
-                    ),
-                  ],
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    CreatorProfileConfig.avatarAsset,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const Icon(
-                      Icons.person_rounded,
-                      color: AppTheme.brandTertiary,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.verified_user_rounded,
-                          size: 13,
-                          color: AppTheme.brandTertiary,
-                        ),
-                        const SizedBox(width: 4),
-                        const Flexible(
-                          child: Text(
-                            'SECURITY CREDENTIAL // BACK',
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: AppTheme.brandTertiary,
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    const Text(
-                      CreatorProfileConfig.fullName,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${CreatorProfileConfig.roleTitle} • ${CreatorProfileConfig.handle}',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.72),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        ...CreatorProfileConfig.techMatrix.map(
-          (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF131D33),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(color: item.color.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.category,
-                    style: TextStyle(
-                      color: item.color,
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.tech,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    item.detail,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.68),
-                      fontSize: 10.5,
-                    ),
-                  ),
-                ],
-              ),
+      width: double.infinity,
+      height: 480,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xxl - 1),
+        child: Image.asset(
+          CreatorProfileConfig.avatarAsset,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          errorBuilder: (_, _, _) => const Center(
+            child: Icon(
+              Icons.person_rounded,
+              size: 72,
+              color: AppTheme.brandAccent,
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -1131,7 +973,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                node.cpmkTag,
+                                node.systemTag,
                                 style: TextStyle(
                                   color: node.color,
                                   fontSize: 9.5,
@@ -1185,7 +1027,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
 
     final valueCards = [
       (
-        asset: 'assets/images/pillar_verified_source.png',
+        type: 0,
         tag: 'PRINSIP 01 // SOURCE-FIRST',
         title: 'Kebenaran Data di Atas Segalanya',
         desc:
@@ -1193,7 +1035,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
         color: AppTheme.brandTertiary,
       ),
       (
-        asset: 'assets/images/pillar_deterministic_match.png',
+        type: 1,
         tag: 'PRINSIP 02 // DETERMINISTIC ENGINE',
         title: 'Aturan Objektif Tanpa Tebakan AI',
         desc:
@@ -1201,7 +1043,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
         color: AppTheme.brandAccent,
       ),
       (
-        asset: 'assets/images/pillar_deadline_tracker.png',
+        type: 2,
         tag: 'PRINSIP 03 // END-TO-END WORKFLOW',
         title: 'Dari Penemuan hingga Pengajuan Resmi',
         desc:
@@ -1209,7 +1051,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
         color: AppTheme.brandSecondary,
       ),
       (
-        asset: 'assets/images/pillar_ai_assistant.png',
+        type: 3,
         tag: 'PRINSIP 04 // ETHICAL AI COACHING',
         title: 'Pendamping AI Tanpa Fabrikasi',
         desc:
@@ -1238,7 +1080,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Setiap visual 3D di bawah ini merepresentasikan pilar utama yang kami jaga dalam membangun platform ini.',
+                'Setiap pilar arsitektur di bawah ini merepresentasikan prinsip rekayasa yang kami jaga dalam membangun platform ini.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: textSecondary, fontSize: 14),
               ),
@@ -1263,33 +1105,7 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
                         padding: const EdgeInsets.all(20),
                         child: Row(
                           children: [
-                            Container(
-                              width: 112,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF090D16),
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.lg,
-                                ),
-                                border: Border.all(
-                                  color: card.color.withValues(alpha: 0.35),
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.lg - 1,
-                                ),
-                                child: Image.asset(
-                                  card.asset,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => Icon(
-                                    Icons.auto_awesome_rounded,
-                                    color: card.color,
-                                    size: 36,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            _buildPillarShowcase(card.type, card.color, isDark),
                             const SizedBox(width: 18),
                             Expanded(
                               child: Column(
@@ -1336,6 +1152,410 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPillarShowcase(int type, Color color, bool isDark) {
+    switch (type) {
+      case 0:
+        return _buildSourceFirstShowcase(color, isDark);
+      case 1:
+        return _buildDeterministicEngineShowcase(color, isDark);
+      case 2:
+        return _buildWorkflowShowcase(color, isDark);
+      case 3:
+      default:
+        return _buildEthicalAIShowcase(color, isDark);
+    }
+  }
+
+  Widget _buildSourceFirstShowcase(Color color, bool isDark) {
+    return Container(
+      width: 124,
+      height: 156,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF090E17),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(Icons.verified_user_rounded, color: color, size: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'AUDIT LIVE',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF131D2E),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.lock_outline_rounded, size: 9, color: Colors.white70),
+                    const SizedBox(width: 3),
+                    Expanded(
+                      child: Text(
+                        'portal.official',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 8,
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Status: 200 OK',
+                  style: TextStyle(
+                    fontSize: 7.5,
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  'Attributed Time',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 8,
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeterministicEngineShowcase(Color color, bool isDark) {
+    return Container(
+      width: 124,
+      height: 156,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF090E17),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(Icons.functions_rounded, color: color, size: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'T = 0.0',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF131D2E),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'IPK >= 3.0 -> TRUE',
+                  style: TextStyle(
+                    fontSize: 7.5,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'JENJANG -> PASS',
+                  style: TextStyle(
+                    fontSize: 7.5,
+                    color: color,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'SEMESTER -> PASS',
+                  style: TextStyle(
+                    fontSize: 7.5,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Icon(Icons.check_circle_outline_rounded, size: 10, color: color),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  'Exact Logic',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 8,
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorkflowShowcase(Color color, bool isDark) {
+    return Container(
+      width: 124,
+      height: 156,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF090E17),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(Icons.account_tree_outlined, color: color, size: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'PIPELINE',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF131D2E),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(width: 4, height: 4, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                    const SizedBox(width: 4),
+                    Text('01. Discover & Match', style: TextStyle(fontSize: 7.5, color: Colors.white.withValues(alpha: 0.9), fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Container(width: 4, height: 4, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                    const SizedBox(width: 4),
+                    Text('02. Track & Prep', style: TextStyle(fontSize: 7.5, color: color, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Container(width: 4, height: 4, decoration: const BoxDecoration(color: Colors.white38, shape: BoxShape.circle)),
+                    const SizedBox(width: 4),
+                    Text('03. Official Apply', style: TextStyle(fontSize: 7.5, color: Colors.white.withValues(alpha: 0.6))),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Icon(Icons.done_all_rounded, size: 11, color: color),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  'E2E Integrity',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 8,
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEthicalAIShowcase(Color color, bool isDark) {
+    return Container(
+      width: 124,
+      height: 156,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF090E17),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(Icons.auto_awesome_rounded, color: color, size: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'GUARD',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF131D2E),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Grounded: 100%',
+                  style: TextStyle(
+                    fontSize: 7.5,
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Hallucination: 0%',
+                  style: TextStyle(
+                    fontSize: 7.5,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'No Fake Credential',
+                  style: TextStyle(
+                    fontSize: 7.5,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Icon(Icons.shield_outlined, size: 10, color: color),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  'Zero Fabrication',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 8,
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1739,7 +1959,7 @@ class _Architecture3dCanvasState extends State<_Architecture3dCanvas> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  activeNode.cpmkTag,
+                                  activeNode.systemTag,
                                   style: TextStyle(
                                     color: activeNode.color,
                                     fontSize: 9.5,
@@ -1990,7 +2210,7 @@ class _Architecture3dCanvasState extends State<_Architecture3dCanvas> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          node.cpmkTag,
+                          node.systemTag,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: node.color,
