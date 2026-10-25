@@ -155,9 +155,13 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<bool> signInWithGoogle() async {
     state = const AuthLoading();
     try {
-      final result = await _authRepository.signInWithGoogle();
-      // OAuth redirects the browser — state will be updated via the stream.
-      return result;
+      final launched = await _authRepository.signInWithGoogle();
+      // OAuth redirects the browser — the signed-in state is delivered later
+      // via the auth stream, so we must not mark the user as authenticated here.
+      state = launched
+          ? const AuthUnauthenticated()
+          : const AuthError('Gagal membuka halaman login Google.');
+      return launched;
     } on AuthException catch (e) {
       state = AuthError(_mapAuthError(e.message));
       return false;

@@ -132,17 +132,21 @@ class LoginNotifier extends StateNotifier<LoginFormState> {
     return false;
   }
 
-  /// Sign in with Google OAuth via Supabase.
+  /// Start the Google OAuth redirect via Supabase.
+  ///
+  /// Returns true when the redirect was launched. This does NOT mean the user
+  /// is signed in: the browser leaves the app and the session is restored on
+  /// return, after which the router redirect moves the user to `/discovery`.
   Future<bool> loginWithGoogle() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     final authController = _ref.read(authControllerProvider.notifier);
-    final success = await authController.signInWithGoogle();
+    final launched = await authController.signInWithGoogle();
 
     if (!mounted) return false;
 
-    if (success) {
-      state = state.copyWith(isLoading: false, isSuccess: true);
+    if (launched) {
+      state = state.copyWith(isLoading: false);
       return true;
     }
 

@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../controllers/register_controller.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/auth_showcase_panel.dart';
+import '../../widgets/google_auth_button.dart';
 
 /// RadarScholar Registration Page.
 ///
@@ -54,6 +55,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         }
       }
     }
+  }
+
+  void _handleGoogleRegister() {
+    // Redirects the browser to Google; the account is created on first
+    // sign-in and the router then sends the user to /discovery.
+    ref.read(registerControllerProvider.notifier).registerWithGoogle();
   }
 
   void _showEmailConfirmationDialog() {
@@ -239,6 +246,30 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: textSecondary),
+              ),
+              const SizedBox(height: Spacing.lg),
+
+              // Google sign-up
+              GoogleAuthButton(
+                label: 'Daftar dengan Google',
+                onPressed: state.isLoading ? null : _handleGoogleRegister,
+              ),
+              const SizedBox(height: Spacing.lg),
+              Row(
+                children: [
+                  Expanded(child: Divider(color: borderSubtle)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      'atau daftar dengan email',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textMutedOf(context),
+                      ),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: borderSubtle)),
+                ],
               ),
               const SizedBox(height: Spacing.lg),
 

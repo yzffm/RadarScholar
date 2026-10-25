@@ -192,6 +192,32 @@ class RegisterNotifier extends StateNotifier<RegisterFormState> {
     state = state.copyWith(isLoading: false, errorMessage: errorMsg);
     return false;
   }
+
+  /// Start the Google OAuth redirect (creates the account on first sign-in).
+  ///
+  /// Returns true when the redirect was launched; the session is restored on
+  /// return and the router then redirects to `/discovery`.
+  Future<bool> registerWithGoogle() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    final authController = _ref.read(authControllerProvider.notifier);
+    final launched = await authController.signInWithGoogle();
+
+    if (!mounted) return false;
+
+    if (launched) {
+      state = state.copyWith(isLoading: false);
+      return true;
+    }
+
+    final authState = _ref.read(authControllerProvider);
+    final errorMsg = authState is AuthError
+        ? authState.message
+        : 'Daftar dengan Google gagal. Silakan coba lagi.';
+
+    state = state.copyWith(isLoading: false, errorMessage: errorMsg);
+    return false;
+  }
 }
 
 final registerControllerProvider =

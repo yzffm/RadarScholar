@@ -11,6 +11,7 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -65,7 +66,15 @@ class AuthRepository {
     );
   }
 
-  /// Sign in with Google OAuth.
+  /// Sign in (or sign up) with Google OAuth via Supabase.
+  ///
+  /// On web this redirects the whole browser to Google and back to the app
+  /// origin (PKCE flow); the session is then restored by `Supabase.initialize`
+  /// and surfaced through [onAuthStateChange]. The returned bool only tells
+  /// whether the redirect was launched, not whether the user is signed in.
+  ///
+  /// The redirect origin must be listed under Supabase → Authentication →
+  /// URL Configuration → Redirect URLs.
   Future<bool> signInWithGoogle() async {
     final client = _client;
     if (client == null) {
@@ -74,7 +83,10 @@ class AuthRepository {
 
     return client.auth.signInWithOAuth(
       OAuthProvider.google,
-      redirectTo: null, // Uses default for web
+      // Web: return to the app origin (works for localhost and production).
+      // Mobile: null falls back to the project's Site URL until a deep link
+      // is configured.
+      redirectTo: kIsWeb ? Uri.base.origin : null,
     );
   }
 

@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../controllers/login_controller.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/auth_showcase_panel.dart';
+import '../../widgets/google_auth_button.dart';
 
 /// RadarScholar Login Page.
 ///
@@ -52,24 +53,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  void _handleGoogleLogin() async {
-    final success = await ref
-        .read(loginControllerProvider.notifier)
-        .loginWithGoogle();
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppTheme.brandPrimary,
-          content: const Text('Login Google berhasil.'),
-          action: SnackBarAction(
-            label: 'Ke Eksplorasi',
-            textColor: AppTheme.brandSecondary,
-            onPressed: () => context.go('/discovery'),
-          ),
-        ),
-      );
-      context.go('/discovery');
-    }
+  void _handleGoogleLogin() {
+    // Redirects the browser to Google; on return the router sends the user to
+    // /discovery once the Supabase session is restored. Errors surface via
+    // the form's error banner.
+    ref.read(loginControllerProvider.notifier).loginWithGoogle();
   }
 
   @override
@@ -214,49 +202,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               const SizedBox(height: Spacing.xl),
 
               // ─── SPECIAL GOOGLE LOGIN BUTTON ───────────────────────
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton(
-                  onPressed: state.isLoading ? null : _handleGoogleLogin,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: borderStrong, width: 1.2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    backgroundColor: elevatedBg,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 22,
-                        height: 22,
-                        decoration: const BoxDecoration(shape: BoxShape.circle),
-                        child: const Center(
-                          child: Text(
-                            'G',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFEA4335),
-                              fontFamily: 'Roboto',
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Masuk dengan Google',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              GoogleAuthButton(
+                label: 'Masuk dengan Google',
+                onPressed: state.isLoading ? null : _handleGoogleLogin,
               ),
 
               const SizedBox(height: Spacing.lg),

@@ -90,6 +90,29 @@ All environment variables are documented in `backend/.env.example`.
 | `GEMINI_API_KEY` | M8+ | Google Gemini API key |
 | `GROQ_API_KEY` | M8+ | Groq API key (fallback AI) |
 
+## Google Sign-In (Supabase OAuth)
+
+Google login/register uses Supabase Auth's Google provider (PKCE flow). No
+Google secret is stored in the Flutter app or this repository — the Client ID
+and Client Secret live only in the Supabase dashboard.
+
+1. **Google Cloud Console** → create/select a project → *APIs & Services* →
+   *OAuth consent screen* (External, fill app name + emails, publish to
+   Production so non-test users can sign in) → *Credentials* →
+   *Create Credentials* → *OAuth client ID* → type **Web application**.
+   - **Authorized JavaScript origins**: `https://radarscholar.vercel.app`,
+     `http://localhost:3000`
+   - **Authorized redirect URIs**: `https://<project-ref>.supabase.co/auth/v1/callback`
+     (copy the exact value from the Supabase Google provider page).
+2. **Supabase Dashboard** → *Authentication* → *Providers* → **Google** →
+   enable, paste Client ID and Client Secret, save.
+3. **Supabase Dashboard** → *Authentication* → *URL Configuration*:
+   - **Site URL**: `https://radarscholar.vercel.app`
+   - **Redirect URLs**: `https://radarscholar.vercel.app/**` and
+     `http://localhost:3000/**`
+4. **Local dev**: run with a fixed port so the redirect URL matches:
+   `flutter run -d chrome --web-port 3000 --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=... --dart-define=API_BASE_URL=http://localhost:8000`
+
 ## Running Tests
 
 ### Backend
