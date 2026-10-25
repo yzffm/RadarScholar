@@ -1027,35 +1027,39 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
 
     final valueCards = [
       (
-        type: 0,
+        icon: Icons.verified_user_rounded,
         tag: 'PRINSIP 01 // SOURCE-FIRST',
         title: 'Kebenaran Data di Atas Segalanya',
         desc:
-            'Tidak ada informasi beasiswa yang dikarang. Semua berasal dari portal terkurasi dengan cap waktu verifikasi transparan.',
+            'Tidak ada informasi beasiswa yang dikarang. Semua berasal dari portal resmi terkurasi dengan cap waktu verifikasi transparan.',
+        badge: 'Validasi Portal & Atribusi Waktu Nyata',
         color: AppTheme.brandTertiary,
       ),
       (
-        type: 1,
+        icon: Icons.functions_rounded,
         tag: 'PRINSIP 02 // DETERMINISTIC ENGINE',
         title: 'Aturan Objektif Tanpa Tebakan AI',
         desc:
             'Kelayakan IPK, jenjang, dan semester dievaluasi secara matematis (T = 0.0) agar mahasiswa mendapat kepastian yang jujur.',
+        badge: 'Evaluasi Logika Eksak (T = 0.0)',
         color: AppTheme.brandAccent,
       ),
       (
-        type: 2,
+        icon: Icons.alt_route_rounded,
         tag: 'PRINSIP 03 // END-TO-END WORKFLOW',
         title: 'Dari Penemuan hingga Pengajuan Resmi',
         desc:
             'Menjaga alur Discover -> Understand -> Match -> Decide -> Prepare -> Track -> Apply tetap fokus dan terstruktur.',
+        badge: 'Pipeline Lengkap: Discover hingga Apply',
         color: AppTheme.brandSecondary,
       ),
       (
-        type: 3,
+        icon: Icons.auto_awesome_rounded,
         tag: 'PRINSIP 04 // ETHICAL AI COACHING',
         title: 'Pendamping AI Tanpa Fabrikasi',
         desc:
             'AI membantu menyempurnakan struktur CV dan esai berdasarkan pengalaman asli mahasiswa, bukan menciptakan riwayat palsu.',
+        badge: 'Zero Fabrication & Strictly Grounded',
         color: AppTheme.brandAI,
       ),
     ];
@@ -1095,39 +1099,59 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
                       crossAxisCount: cols,
                       crossAxisSpacing: 20,
                       mainAxisSpacing: 20,
-                      mainAxisExtent: 210,
+                      mainAxisExtent: 205,
                     ),
                     itemCount: valueCards.length,
                     itemBuilder: (context, index) {
                       final card = valueCards[index];
                       return Interactive3dTiltCard(
                         glowColor: card.color,
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(22),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildPillarShowcase(card.type, card.color, isDark),
+                            _buildModernPillarIcon(card.icon, card.color, isDark),
                             const SizedBox(width: 18),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    card.tag,
-                                    style: TextStyle(
-                                      color: card.color,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.7,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: card.color.withValues(
+                                        alpha: isDark ? 0.16 : 0.08,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.xs,
+                                      ),
+                                      border: Border.all(
+                                        color: card.color.withValues(
+                                          alpha: isDark ? 0.35 : 0.22,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      card.tag,
+                                      style: TextStyle(
+                                        color: card.color,
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.8,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 8),
                                   Text(
                                     card.title,
                                     style: TextStyle(
                                       color: textPrimary,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.2,
                                     ),
                                   ),
                                   const SizedBox(height: 6),
@@ -1137,6 +1161,46 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
                                       color: textSecondary,
                                       fontSize: 12.5,
                                       height: 1.45,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3.5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: card.color.withValues(
+                                        alpha: isDark ? 0.10 : 0.06,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.full,
+                                      ),
+                                      border: Border.all(
+                                        color: card.color.withValues(alpha: 0.22),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.check_circle_rounded,
+                                          size: 11,
+                                          color: card.color,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Flexible(
+                                          child: Text(
+                                            card.badge,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: card.color,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -1156,404 +1220,40 @@ class _AboutMePageState extends ConsumerState<AboutMePage> {
     );
   }
 
-  Widget _buildPillarShowcase(int type, Color color, bool isDark) {
-    switch (type) {
-      case 0:
-        return _buildSourceFirstShowcase(color, isDark);
-      case 1:
-        return _buildDeterministicEngineShowcase(color, isDark);
-      case 2:
-        return _buildWorkflowShowcase(color, isDark);
-      case 3:
-      default:
-        return _buildEthicalAIShowcase(color, isDark);
-    }
-  }
-
-  Widget _buildSourceFirstShowcase(Color color, bool isDark) {
+  Widget _buildModernPillarIcon(IconData icon, Color color, bool isDark) {
     return Container(
-      width: 124,
-      height: 156,
-      padding: const EdgeInsets.all(10),
+      width: 54,
+      height: 54,
       decoration: BoxDecoration(
-        color: const Color(0xFF090E17),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(Icons.verified_user_rounded, color: color, size: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'AUDIT LIVE',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-            decoration: BoxDecoration(
-              color: const Color(0xFF131D2E),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.lock_outline_rounded, size: 9, color: Colors.white70),
-                    const SizedBox(width: 3),
-                    Expanded(
-                      child: Text(
-                        'portal.official',
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 8,
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'Status: 200 OK',
-                  style: TextStyle(
-                    fontSize: 7.5,
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              Container(
-                width: 5,
-                height: 5,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  'Attributed Time',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 8,
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+        color: color.withValues(alpha: isDark ? 0.16 : 0.09),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.40 : 0.25),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: isDark ? 0.20 : 0.10),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildDeterministicEngineShowcase(Color color, bool isDark) {
-    return Container(
-      width: 124,
-      height: 156,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF090E17),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(Icons.functions_rounded, color: color, size: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'T = 0.0',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: const Color(0xFF131D2E),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'IPK >= 3.0 -> TRUE',
-                  style: TextStyle(
-                    fontSize: 7.5,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'monospace',
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'JENJANG -> PASS',
-                  style: TextStyle(
-                    fontSize: 7.5,
-                    color: color,
-                    fontFamily: 'monospace',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'SEMESTER -> PASS',
-                  style: TextStyle(
-                    fontSize: 7.5,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ],
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: isDark ? 0.12 : 0.06),
             ),
           ),
-          Row(
-            children: [
-              Icon(Icons.check_circle_outline_rounded, size: 10, color: color),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  'Exact Logic',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 8,
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWorkflowShowcase(Color color, bool isDark) {
-    return Container(
-      width: 124,
-      height: 156,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF090E17),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(Icons.account_tree_outlined, color: color, size: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'PIPELINE',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-            decoration: BoxDecoration(
-              color: const Color(0xFF131D2E),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(width: 4, height: 4, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-                    const SizedBox(width: 4),
-                    Text('01. Discover & Match', style: TextStyle(fontSize: 7.5, color: Colors.white.withValues(alpha: 0.9), fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Container(width: 4, height: 4, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-                    const SizedBox(width: 4),
-                    Text('02. Track & Prep', style: TextStyle(fontSize: 7.5, color: color, fontWeight: FontWeight.w700)),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Container(width: 4, height: 4, decoration: const BoxDecoration(color: Colors.white38, shape: BoxShape.circle)),
-                    const SizedBox(width: 4),
-                    Text('03. Official Apply', style: TextStyle(fontSize: 7.5, color: Colors.white.withValues(alpha: 0.6))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              Icon(Icons.done_all_rounded, size: 11, color: color),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  'E2E Integrity',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 8,
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEthicalAIShowcase(Color color, bool isDark) {
-    return Container(
-      width: 124,
-      height: 156,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF090E17),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(Icons.auto_awesome_rounded, color: color, size: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'GUARD',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-            decoration: BoxDecoration(
-              color: const Color(0xFF131D2E),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Grounded: 100%',
-                  style: TextStyle(
-                    fontSize: 7.5,
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Hallucination: 0%',
-                  style: TextStyle(
-                    fontSize: 7.5,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'monospace',
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'No Fake Credential',
-                  style: TextStyle(
-                    fontSize: 7.5,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              Icon(Icons.shield_outlined, size: 10, color: color),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  'Zero Fabrication',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 8,
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+          Icon(
+            icon,
+            color: color,
+            size: 26,
           ),
         ],
       ),
