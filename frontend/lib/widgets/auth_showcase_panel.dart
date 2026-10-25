@@ -35,48 +35,30 @@ class _AuthShowcasePanelState extends State<AuthShowcasePanel> {
       indexLabel: '01',
       imagePath: 'assets/images/login and register 1.jpg',
       imageAlignment: Alignment(0.0, -0.25),
-      badge: '',
-      topTrustTitle: '',
-      topTrustSubtitle: 'Atribusi Tautan Asli & Tanggal Verifikasi',
       headline:
           'Jangan Biarkan Peluang Beasiswa Impianmu Terlewat Begitu Saja.',
       subtitle:
           'Telusuri beasiswa aktif dari portal resmi terkurasi, pahami setiap syarat dengan jernih, dan susun strategi pendaftaranmu sejak hari pertama.',
-      highlights: [
-        '',
-      ],
       accentColor: AppTheme.brandAccent,
     ),
     _AuthShowcaseSlide(
       indexLabel: '02',
       imagePath: 'assets/images/login and register 2.jpg',
       imageAlignment: Alignment(0.0, -0.35),
-      badge: '',
-      topTrustTitle: '',
-      topTrustSubtitle: 'IPK • Jenjang • Semester • Batas Usia',
       headline:
           'Fokus pada Beasiswa yang Benar-Benar Sesuai dengan Profil Akademikmu.',
       subtitle:
           'Evaluasi kelayakan akademik secara deterministik dan transparan—tanpa tebakan atau skor persentase kecocokan yang menyesatkan.',
-      highlights: [
-       '',
-      ],
       accentColor: AppTheme.brandTertiary,
     ),
     _AuthShowcaseSlide(
       indexLabel: '03',
       imagePath: 'assets/images/login and register 3.jpg',
       imageAlignment: Alignment(0.0, -0.30),
-      badge: '',
-      topTrustTitle: '',
-      topTrustSubtitle: 'Checklist Berkas • Review CV & Esai Jujur',
       headline:
           'Siapkan Berkas & Esai Terbaikmu dengan Pendampingan yang Jujur.',
       subtitle:
           'Kelola daftar periksa dokumen pendaftaran dan perbaiki struktur CV maupun esai bersama asisten AI yang menjaga keaslian cerita prestasimu.',
-      highlights: [
-        '',
-      ],
       accentColor: Color(0xFF818CF8),
     ),
   ];
@@ -211,107 +193,41 @@ class _AuthShowcasePanelState extends State<AuthShowcasePanel> {
                 ),
               ),
 
-              // ─── 3. Top Header Bar (Brand Logo + Floating Verification Badge) ───
+              // ─── 3. Top Header Bar (Brand Logo) ───
               Positioned(
                 top: 24,
                 left: 24,
-                right: 24,
-                child: Row(
-                  children: [
-                    // Frosted Brand Pill
-                    GestureDetector(
-                      onTap: () => _navigateSafely(context, '/'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFF0B111E,
-                          ).withValues(alpha: 0.84),
-                          borderRadius: BorderRadius.circular(AppRadius.xxl),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.16),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AppLogo.icon(height: 26),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'RadarScholar',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                          ],
-                        ),
+                child: GestureDetector(
+                  onTap: () => _navigateSafely(context, '/'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0B111E).withValues(alpha: 0.84),
+                      borderRadius: BorderRadius.circular(AppRadius.xxl),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.16),
                       ),
                     ),
-                    const Spacer(),
-                    // Contextual Floating Verification Pill
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFF0B111E,
-                          ).withValues(alpha: 0.84),
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: Border.all(
-                            color: slide.accentColor.withValues(alpha: 0.45),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AppLogo.icon(height: 26),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'RadarScholar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.verified_rounded,
-                              size: 16,
-                              color: slide.accentColor,
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    slide.topTrustTitle,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  Text(
-                                    slide.topTrustSubtitle,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.68,
-                                      ),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
 
@@ -324,49 +240,6 @@ class _AuthShowcasePanelState extends State<AuthShowcasePanel> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Slide Badge Pill
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: Container(
-                        key: ValueKey<String>(slide.badge),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: slide.accentColor.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(AppRadius.xxl),
-                          border: Border.all(
-                            color: slide.accentColor.withValues(alpha: 0.45),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                color: slide.accentColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              slide.badge,
-                              style: TextStyle(
-                                color: slide.accentColor,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.7,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
                     // Persuasive Hook Headline
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 320),
@@ -377,13 +250,13 @@ class _AuthShowcasePanelState extends State<AuthShowcasePanel> {
                             ?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
-                              fontSize: 25,
-                              height: 1.24,
+                              fontSize: 26,
+                              height: 1.25,
                               letterSpacing: -0.5,
                             ),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
 
                     // Persuasive Hook Subtitle
                     AnimatedSwitcher(
@@ -392,56 +265,14 @@ class _AuthShowcasePanelState extends State<AuthShowcasePanel> {
                         slide.subtitle,
                         key: ValueKey<String>(slide.subtitle),
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.82),
-                          fontSize: 13.5,
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 14,
                           height: 1.55,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 18),
-
-                    // Key Advantage Pills
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: slide.highlights.map((item) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 11,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.14),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.check_circle_rounded,
-                                size: 14,
-                                color: slide.accentColor,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                item,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 24),
                     Divider(
                       color: Colors.white.withValues(alpha: 0.12),
                       height: 1,
@@ -580,24 +411,16 @@ class _AuthShowcaseSlide {
   final String indexLabel;
   final String imagePath;
   final Alignment imageAlignment;
-  final String badge;
-  final String topTrustTitle;
-  final String topTrustSubtitle;
   final String headline;
   final String subtitle;
-  final List<String> highlights;
   final Color accentColor;
 
   const _AuthShowcaseSlide({
     required this.indexLabel,
     required this.imagePath,
     required this.imageAlignment,
-    required this.badge,
-    required this.topTrustTitle,
-    required this.topTrustSubtitle,
     required this.headline,
     required this.subtitle,
-    required this.highlights,
     required this.accentColor,
   });
 }

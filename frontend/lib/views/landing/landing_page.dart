@@ -239,34 +239,10 @@ class _LandingPageState extends ConsumerState<LandingPage> {
         : CrossAxisAlignment.start;
     final textPrimary = AppTheme.textPrimaryOf(context);
     final textSecondary = AppTheme.textSecondaryOf(context);
-    final accentColor = isDark ? AppTheme.brandAccent : AppTheme.brandPrimary;
 
     return Column(
       crossAxisAlignment: crossAlign,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          decoration: BoxDecoration(
-            color: accentColor.withValues(alpha: isDark ? 0.14 : 0.08),
-            borderRadius: BorderRadius.circular(AppRadius.xxl),
-            border: Border.all(
-              color: accentColor.withValues(alpha: isDark ? 0.30 : 0.20),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: AppTheme.brandTertiary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ),
-        ),
         const SizedBox(height: Spacing.lg),
         Text(
           'Temukan Beasiswa yang Benar-benar Relevan untuk Masa Depanmu.',
