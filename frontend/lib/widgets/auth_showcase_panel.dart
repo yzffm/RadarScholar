@@ -35,17 +35,15 @@ class _AuthShowcasePanelState extends State<AuthShowcasePanel> {
       indexLabel: '01',
       imagePath: 'assets/images/login and register 1.jpg',
       imageAlignment: Alignment(0.0, -0.25),
-      badge: 'EKSPLORASI & RENCANA BEASISWA',
-      topTrustTitle: 'Sumber Resmi Terkurasi',
+      badge: '',
+      topTrustTitle: '',
       topTrustSubtitle: 'Atribusi Tautan Asli & Tanggal Verifikasi',
       headline:
           'Jangan Biarkan Peluang Beasiswa Impianmu Terlewat Begitu Saja.',
       subtitle:
           'Telusuri beasiswa aktif dari portal resmi terkurasi, pahami setiap syarat dengan jernih, dan susun strategi pendaftaranmu sejak hari pertama.',
       highlights: [
-        'Atribusi Portal Resmi',
-        'Pantau Tenggat Waktu',
-        'Data Terverifikasi',
+        '',
       ],
       accentColor: AppTheme.brandAccent,
     ),
@@ -53,17 +51,15 @@ class _AuthShowcasePanelState extends State<AuthShowcasePanel> {
       indexLabel: '02',
       imagePath: 'assets/images/login and register 2.jpg',
       imageAlignment: Alignment(0.0, -0.35),
-      badge: 'KEPASTIAN KRITERIA & KECOCOKAN',
-      topTrustTitle: 'Evaluasi Syarat Objektif',
+      badge: '',
+      topTrustTitle: '',
       topTrustSubtitle: 'IPK • Jenjang • Semester • Batas Usia',
       headline:
           'Fokus pada Beasiswa yang Benar-Benar Sesuai dengan Profil Akademikmu.',
       subtitle:
           'Evaluasi kelayakan akademik secara deterministik dan transparan—tanpa tebakan atau skor persentase kecocokan yang menyesatkan.',
       highlights: [
-        'Pencocokan Objektif',
-        'Relevansi Transparan',
-        'Tanpa Skor Palsu',
+       '',
       ],
       accentColor: AppTheme.brandTertiary,
     ),
@@ -71,17 +67,15 @@ class _AuthShowcasePanelState extends State<AuthShowcasePanel> {
       indexLabel: '03',
       imagePath: 'assets/images/login and register 3.jpg',
       imageAlignment: Alignment(0.0, -0.30),
-      badge: 'PERSIAPAN DOKUMEN & ESAI TERARAH',
-      topTrustTitle: 'Pendampingan AI Berintegritas',
+      badge: '',
+      topTrustTitle: '',
       topTrustSubtitle: 'Checklist Berkas • Review CV & Esai Jujur',
       headline:
           'Siapkan Berkas & Esai Terbaikmu dengan Pendampingan yang Jujur.',
       subtitle:
           'Kelola daftar periksa dokumen pendaftaran dan perbaiki struktur CV maupun esai bersama asisten AI yang menjaga keaslian cerita prestasimu.',
       highlights: [
-        'Checklist Terstruktur',
-        'AI Tanpa Fabrikasi',
-        'Siap Daftar Tepat Waktu',
+        '',
       ],
       accentColor: Color(0xFF818CF8),
     ),

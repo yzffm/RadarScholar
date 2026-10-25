@@ -264,16 +264,6 @@ class _LandingPageState extends ConsumerState<LandingPage> {
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                'Scholarship Intelligence Platform',
-                style: TextStyle(
-                  color: accentColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
-                ),
-              ),
             ],
           ),
         ),
